@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>L&amp;T EPS — ADAS Partner Evaluation</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ── Top Navigation ──────────────────────────────────────────────────── -->
+<nav class="topnav" role="navigation">
+  <div class="topnav-brand">
+    <span>L<span class="brand-red">&amp;</span>T EPS</span>
+    <span class="topnav-divider"></span>
+    <span style="font-weight:400;font-size:.875rem;opacity:.85;">ADAS Partner Evaluation</span>
+  </div>
+  <div class="topnav-tabs" role="tablist">
+    <button class="topnav-tab active" data-tab="overview"    role="tab">Overview</button>
+    <button class="topnav-tab"        data-tab="comparison"  role="tab">Comparison</button>
+    <button class="topnav-tab"        data-tab="detail"      role="tab">Partner Detail</button>
+    <button class="topnav-tab"        data-tab="decisions"   role="tab">Decision Log</button>
+  </div>
+  <div class="topnav-actions">
+    <button class="btn btn-ghost btn-sm" id="btn-add-partner">+ Add Partner</button>
+  </div>
+</nav>
+
+<!-- ── Pages ───────────────────────────────────────────────────────────── -->
+
+<!-- Overview -->
+<div class="page active" id="page-overview">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Evaluation Pipeline</div>
+        <div class="page-subtitle">Partner status across the evaluation lifecycle</div>
+      </div>
+    </div>
+    <div class="stats-row" id="overview-stats"></div>
+    <div class="pipeline" id="pipeline-board"></div>
+  </div>
+</div>
+
+<!-- Comparison -->
+<div class="page" id="page-comparison">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Partner Comparison</div>
+        <div class="page-subtitle">Weighted scores across all evaluation sections</div>
+      </div>
+      <a class="btn btn-secondary btn-sm" href="/api/export/csv" download>Export CSV</a>
+    </div>
+    <div class="comparison-grid">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Section Score Radar</span></div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="radar-chart"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Weighted Score Bar</span></div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="bar-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Section Score Matrix</span></div>
+      <div class="card-body" style="overflow-x:auto;">
+        <table class="score-table" id="comparison-table"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Partner Detail -->
+<div class="page" id="page-detail">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Partner Detail</div>
+        <div class="page-subtitle">Full evaluation view — edit scores and responses inline</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select class="form-select" id="detail-partner-select" style="width:200px;">
+          <option value="">Select partner…</option>
+        </select>
+        <!-- Save controls — hidden until changes are made -->
+        <span id="detail-dirty-indicator" style="display:none;" class="save-status-pill unsaved">Unsaved changes</span>
+        <button class="btn btn-secondary btn-sm" id="btn-detail-discard" style="display:none;">Discard</button>
+        <button class="btn btn-primary btn-sm"   id="btn-detail-save"    style="display:none;">Save</button>
+        <button class="btn btn-secondary btn-sm" id="btn-detail-print" onclick="window.print()">Print / PDF</button>
+      </div>
+    </div>
+    <div id="detail-content">
+      <div class="select-partner-hint">Select a partner from the dropdown above to view their evaluation detail.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Decision Log -->
+<div class="page" id="page-decisions">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Decision Log</div>
+        <div class="page-subtitle">Shortlist, hold, and reject decisions with rationale</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="overflow-x:auto;">
+        <table class="decision-table" id="decision-table"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Unsaved-changes guard modal -->
+<div class="modal-overlay" id="modal-unsaved">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-unsaved-title">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-unsaved-title">Unsaved Changes</span>
+    </div>
+    <div class="modal-body">
+      <p id="modal-unsaved-msg" style="font-size:.9375rem;color:var(--gray-700);line-height:1.5;"></p>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="btn btn-secondary btn-sm" id="btn-unsaved-cancel">Cancel</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" id="btn-unsaved-discard">Discard changes</button>
+        <button class="btn btn-primary btn-sm"   id="btn-unsaved-save">Save &amp; continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add Partner Modal ────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add-partner">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-add-title">Add New Partner</span>
+      <button class="modal-close" data-close-modal="modal-add-partner">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="new-partner-name">Company Name <span class="text-red">*</span></label>
+        <input class="form-input" id="new-partner-name" type="text" placeholder="e.g. Mobileye" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-partner-short">Short Name / Code</label>
+        <input class="form-input" id="new-partner-short" type="text" placeholder="e.g. MB (auto-generated if blank)" maxlength="6" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-partner-evaluator">Evaluator Name</label>
+        <input class="form-input" id="new-partner-evaluator" type="text" placeholder="e.g. Rajan Kumar" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-partner-version">Product / Stack Version</label>
+        <input class="form-input" id="new-partner-version" type="text" placeholder="e.g. v3.2" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-partner-stage">Initial Stage</label>
+        <select class="form-select" id="new-partner-stage">
+          <option value="Under Evaluation">Under Evaluation</option>
+          <option value="Eval Complete">Eval Complete</option>
+          <option value="Shortlisted">Shortlisted</option>
+          <option value="Decision">Decision</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" data-close-modal="modal-add-partner">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="btn-confirm-add">Add Partner</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast container ──────────────────────────────────────────────────── -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ── Scripts ─────────────────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
