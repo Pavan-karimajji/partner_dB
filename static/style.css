@@ -611,6 +611,19 @@ input, textarea, select { font: inherit; }
   .page-header { border-bottom: 2px solid #2D2E88; padding-bottom: 8px; margin-bottom: 16px; }
 }
 
+
+/* ── Print-only value fallback (hidden on screen, visible in print) ─────── */
+.print-val { display: none; }
+@media print {
+  .print-val {
+    display: block;
+    font-size: .875rem;
+    color: var(--gray-900);
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+}
+
 /* ── Misc utilities ──────────────────────────────────────────────────────── */
 .text-muted { color: var(--gray-500); }
 .text-navy  { color: var(--navy); }

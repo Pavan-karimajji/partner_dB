@@ -14,23 +14,23 @@
       "evaluator": "L&T ADAS Team",
       "hardDisqualifiers": [],
       "id": "aab65255-e6e3-464c-84cb-04d03de796ce",
-      "name": "Company One",
-      "notes": "Fix test",
+      "name": "gahan",
+      "notes": "Meeting held on 12-Jun-2026 with Company One CTO and BD team.\n\nKey takeaways:\n- Willing to co-develop India-specific dataset extension under a JDA\n- ISO 21434 certification targeted by Q3 2026 — commitment letter requested\n- SOTIF gap acknowledged; they will share a closure plan by 30-Jun-2026\n\nOpen actions:\n- L&T to share test route specifications for Pune/Chennai validation runs\n- Company One to provide ASIL-D decomposition draft by 15-Jul-2026\n- Legal to review IP clauses in the NDA before any source code access",
       "perceptionResponses": [
         {
           "questions": [
             {
-              "judgement": "TBD",
-              "lntRemark": "",
+              "judgement": "Acceptable",
+              "lntRemark": "Indian road condition dataset is a differentiator — needs to be validated against our test routes in Pune and Chennai.",
               "qId": 1,
-              "response": "",
+              "response": "Our perception stack supports monocular and stereo camera inputs. Object detection runs on a custom CNN trained on KITTI and nuScenes datasets with additional internal proprietary data for Indian road conditions.",
               "sectionTag": "Stack Overview"
             },
             {
-              "judgement": "TBD",
-              "lntRemark": "",
+              "judgement": "Pass",
+              "lntRemark": "Meets our 50ms budget. Request formal latency report with percentile breakdown (P95, P99).",
               "qId": 2,
-              "response": "",
+              "response": "End-to-end latency from camera capture to object list output is under 40ms at 30fps on TDA4VM.",
               "sectionTag": "Stack Overview"
             },
             {
@@ -46,10 +46,10 @@
         {
           "questions": [
             {
-              "judgement": "TBD",
-              "lntRemark": "",
+              "judgement": "Pass",
+              "lntRemark": "Camera-only mode confirmed to work in isolation — important for our Phase 1 rollout scope.",
               "qId": 4,
-              "response": "",
+              "response": "Pipeline is camera-first with optional radar fusion. Radar fusion layer is modular and can be disabled.",
               "sectionTag": "Pipeline Architecture"
             },
             {
@@ -60,10 +60,10 @@
               "sectionTag": "Pipeline Architecture"
             },
             {
-              "judgement": "TBD",
-              "lntRemark": "",
+              "judgement": "Flag",
+              "lntRemark": "Low-light performance claims need independent validation. Schedule night-drive test at our Pune track.",
               "qId": 6,
-              "response": "",
+              "response": "Pedestrian detection operates down to 0.2 lux. False positive rate is below 2% in test conditions.",
               "sectionTag": "Object Detection"
             },
             {
@@ -249,10 +249,10 @@
               "sectionTag": "SLR/TSR"
             },
             {
-              "judgement": "TBD",
-              "lntRemark": "",
+              "judgement": "Pass",
+              "lntRemark": "Camera-only mode confirmed to work in isolation — important for our Phase 1 rollout scope.",
               "qId": 4,
-              "response": "",
+              "response": "Pipeline is camera-first with optional radar fusion. Radar fusion layer is modular and can be disabled.",
               "sectionTag": "Quantization"
             },
             {
@@ -263,10 +263,10 @@
               "sectionTag": "Temporal Stability"
             },
             {
-              "judgement": "TBD",
-              "lntRemark": "",
+              "judgement": "Flag",
+              "lntRemark": "Low-light performance claims need independent validation. Schedule night-drive test at our Pune track.",
               "qId": 6,
-              "response": "",
+              "response": "Pedestrian detection operates down to 0.2 lux. False positive rate is below 2% in test conditions.",
               "sectionTag": "Tracking Metrics"
             },
             {
@@ -608,19 +608,19 @@
             {
               "applicability": "Applicable",
               "qId": 1,
-              "remarks": "good",
+              "remarks": "Refereince check completed. Three OEM production programmes verified — two active, one in final validation. Customer satisfaction rating above industry average per independent audit.",
               "score": 1
             },
             {
               "applicability": "Applicable",
               "qId": 2,
-              "remarks": "",
+              "remarks": "iiiiiiiiiiiiiiiiiiiiiii",
               "score": 3
             },
             {
               "applicability": "Applicable",
               "qId": 3,
-              "remarks": "",
+              "remarks": "Financial health reviewed: revenue grew 18% YoY. Debt ratio is acceptable. No outstanding legal disputes that could affect supply continuity.",
               "score": 4
             },
             {
@@ -702,7 +702,7 @@
               "score": 4
             }
           ],
-          "remarks": "[Placeholder] Scored 4/5. Replace with actual assessment.",
+          "remarks": "Company has 8+ years in automotive camera supply chain with Tier-1 OEM references (BMW, Stellantis). Product roadmap is well-defined through 2028. IP ownership is clear with no third-party licensing risk identified.",
           "score": 4,
           "sectionId": 1
         },
@@ -711,7 +711,7 @@
             {
               "applicability": "Applicable",
               "qId": 17,
-              "remarks": "",
+              "remarks": "hi",
               "score": 3
             },
             {
@@ -817,7 +817,7 @@
               "score": 3
             }
           ],
-          "remarks": "[Placeholder] Scored 3/5. Replace with actual assessment.",
+          "remarks": "Multi-sensor fusion architecture is modular and well-documented. SoC selection (TDA4VM) aligns with our platform roadmap. However, dependency on a single RTOS vendor (QNX) is a risk — mitigation plan requested.",
           "score": 3,
           "sectionId": 2
         },
@@ -1162,7 +1162,7 @@
               "score": 3
             }
           ],
-          "remarks": "[Placeholder] Scored 3/5. Replace with actual assessment.",
+          "remarks": "ISO 26262 ASIL-B certification exists for the base platform. ASIL-D decomposition plan for the camera path is still a work-in-progress. SOTIF analysis (ISO 21448) has not been initiated — flagged as a mandatory gap to close before SOP.",
           "score": 3,
           "sectionId": 5
         },
@@ -1235,7 +1235,7 @@
               "score": 2
             }
           ],
-          "remarks": "[Placeholder] Scored 2/5. Replace with actual assessment.",
+          "remarks": "Cybersecurity posture is below threshold. No ISO 21434 certification or roadmap presented. TARA (Threat Analysis and Risk Assessment) document is absent. Rated 2/5 — hard requirement to close before shortlisting can be confirmed.",
           "score": 2,
           "sectionId": 6
         },
@@ -1412,7 +1412,7 @@
               "score": 4
             }
           ],
-          "remarks": "[Placeholder] Scored 4/5. Replace with actual assessment.",
+          "remarks": "HMI design is driver-centric and meets basic NCAP visual alert requirements. Haptic feedback integration is not yet supported — noted as a gap for Level 2+ use case.",
           "score": 4,
           "sectionId": 9
         },

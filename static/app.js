@@ -461,6 +461,7 @@ async function loadDetailPartner(partnerId) {
   }
 }
 
+
 function renderDetailContent(p) {
   const schema = State.schema;
   const wav = p.weightedScore;
@@ -490,6 +491,7 @@ function renderDetailContent(p) {
                 <select class="q-score-select" id="di-stage" style="width:auto;font-size:.8125rem;" data-field="stage">
                   ${STAGES.map(s => `<option value="${s}"${p.stage === s ? ' selected' : ''}>${s}</option>`).join('')}
                 </select>
+                <span class="print-val">${esc(p.stage || '')}</span>
               </span></div>
             </div>
           </div>
@@ -528,11 +530,13 @@ function renderDetailContent(p) {
                   `<option value="${s}"${(p.decision||{}).status === s ? ' selected' : ''}>${s}</option>`
                 ).join('')}
               </select>
+              <span class="print-val">${esc((p.decision||{}).status || '')}</span>
             </div>
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label">Rationale</label>
               <textarea class="form-textarea" rows="4" id="di-decision-rationale" data-decision-field="rationale"
                 placeholder="Describe the reasoning for this decision…">${esc((p.decision||{}).rationale || '')}</textarea>
+              <div class="print-val">${esc((p.decision||{}).rationale || '')}</div>
             </div>
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label">Reviewer</label>
@@ -597,9 +601,11 @@ function renderDetailContent(p) {
                       <option value="">— N/A —</option>
                       ${[1,2,3,4,5].map(n => `<option value="${n}"${ss.score == n ? ' selected' : ''}>${n} — ${schema.scoreLabels[n]}</option>`).join('')}
                     </select>
+                    <span class="print-val">${ss.score != null ? ss.score + ' / 5' : ''}</span>
                     <label style="font-size:.8125rem;font-weight:600;color:var(--navy);margin-left:12px;">Remarks:</label>
                     <input class="q-remarks-input" style="flex:1;" placeholder="Section-level remarks…"
                       data-section-remarks="${sec.id}" value="${esc(ss.remarks || '')}" />
+                    <span class="print-val">${esc(ss.remarks || '')}</span>
                   </div>
                   <div style="font-size:.75rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:grid;grid-template-columns:28px 1fr 90px 100px;gap:10px;padding:0 0 6px;border-bottom:1px solid var(--gray-200);">
                     <span>#</span><span>Question</span><span>Score</span><span>Remarks</span>
@@ -614,8 +620,10 @@ function renderDetailContent(p) {
                           <option value="">N/A</option>
                           ${[1,2,3,4,5].map(n => `<option value="${n}"${qd.score == n ? ' selected' : ''}>${n}</option>`).join('')}
                         </select>
+                        <span class="print-val">${qd.score != null ? qd.score : ''}</span>
                         <input class="q-remarks-input" placeholder="Remarks…"
                           data-q-remarks="${sec.id}:${q.id}" value="${esc(qd.remarks || '')}" />
+                        <span class="print-val">${esc(qd.remarks || '')}</span>
                       </div>
                     `;
                   }).join('')}
@@ -643,6 +651,7 @@ function renderDetailContent(p) {
                         <div class="p-question"><strong>${q.id}. ${esc(q.sectionTag ? '[' + q.sectionTag + '] ' : '')}${esc(q.text)}</strong></div>
                         <textarea class="p-response-area" placeholder="Partner response / L&T notes…"
                           data-p-response="${psec.id}:${q.id}">${esc(qd.response || '')}</textarea>
+                        <div class="print-val">${esc(qd.response || '')}</div>
                         <div class="p-judgement-row">
                           <span class="p-judgement-label">L&T Judgement:</span>
                           <select class="p-judgement-select" data-p-judgement="${psec.id}:${q.id}">
@@ -650,9 +659,11 @@ function renderDetailContent(p) {
                               `<option value="${j}"${(qd.judgement || 'TBD') === j ? ' selected' : ''}>${j}</option>`
                             ).join('')}
                           </select>
+                          <span class="print-val">${esc(qd.judgement || 'TBD')}</span>
                           <span class="p-judgement-label" style="margin-left:12px;">L&T Remark:</span>
                           <input class="q-remarks-input" style="flex:1;" placeholder="Internal remark…"
                             data-p-remark="${psec.id}:${q.id}" value="${esc(qd.lntRemark || '')}" />
+                          <span class="print-val">${esc(qd.lntRemark || '')}</span>
                         </div>
                       </div>
                     `;
@@ -670,6 +681,7 @@ function renderDetailContent(p) {
             <div class="card-body">
               <textarea class="form-textarea" style="min-height:300px;" id="di-notes"
                 placeholder="Any general notes, meeting summaries, open questions…">${esc(p.notes || '')}</textarea>
+              <div class="print-val">${esc(p.notes || '')}</div>
             </div>
           </div>
         </div>
@@ -724,15 +736,21 @@ function renderDetailContent(p) {
 
   // Decision fields
   content.querySelectorAll('[data-decision-field]').forEach(el => {
-    el.addEventListener('input', e => {
+    const syncPrintVal = () => {
+      const pv = el.nextElementSibling;
+      if (pv && pv.classList.contains('print-val')) pv.textContent = el.value;
+    };
+    el.addEventListener('input', () => {
       markDirty();
       if (!State.detailPartner.decision) State.detailPartner.decision = {};
       State.detailPartner.decision[el.dataset.decisionField] = el.value;
+      syncPrintVal();
     });
-    el.addEventListener('change', e => {
+    el.addEventListener('change', () => {
       markDirty();
       if (!State.detailPartner.decision) State.detailPartner.decision = {};
       State.detailPartner.decision[el.dataset.decisionField] = el.value;
+      syncPrintVal();
     });
   });
 
@@ -744,6 +762,10 @@ function renderDetailContent(p) {
 
 function handleDetailChange(e) {
   const el = e.target;
+
+  // Keep print-val sibling in sync so PDF reflects current value
+  const pv = el.nextElementSibling;
+  if (pv && pv.classList.contains('print-val')) pv.textContent = el.value;
 
   // Section score
   if (el.dataset.sectionScore) {
