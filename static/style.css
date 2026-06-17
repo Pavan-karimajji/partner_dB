@@ -280,6 +280,12 @@ input, textarea, select { font: inherit; }
 }
 .score-table tr:last-child td { border-bottom: none; }
 .score-table tr:hover td { background: var(--gray-50); }
+.score-table tbody tr.matrix-section-row { cursor: pointer; }
+.score-table tbody tr.drill-selected td { background: var(--light-blue) !important; }
+.score-table tbody tr.drill-selected td:first-child { color: var(--navy); font-weight: 600; }
+.score-table td.matrix-score-cell { cursor: pointer; transition: background .12s; }
+.score-table td.matrix-score-cell:hover { background: var(--light-blue) !important; }
+.score-table td.matrix-score-cell:hover .score-cell { transform: scale(1.15); }
 .score-cell {
   display: inline-flex;
   align-items: center;
@@ -288,6 +294,7 @@ input, textarea, select { font: inherit; }
   border-radius: var(--radius);
   font-weight: 700;
   font-size: .8125rem;
+  transition: transform .12s;
 }
 .score-5 { background: #d1fae5; color: #065f46; }
 .score-4 { background: #dbeafe; color: #1e40af; }

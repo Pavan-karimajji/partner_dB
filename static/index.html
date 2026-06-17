@@ -60,9 +60,17 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Weighted Score Bar</span></div>
+        <div class="card-header">
+          <span class="card-title" id="drill-card-title">Section Detail</span>
+          <button class="btn btn-secondary btn-sm" id="btn-drill-clear" style="display:none;">Clear</button>
+        </div>
         <div class="card-body">
-          <div class="chart-container"><canvas id="bar-chart"></canvas></div>
+          <div id="drill-empty" class="empty-state" style="padding:32px 0;">
+            Click a section in the radar above or a row in the matrix to see question-level scores.
+          </div>
+          <div id="drill-chart-wrap" style="display:none;position:relative;">
+            <canvas id="drill-chart"></canvas>
+          </div>
         </div>
       </div>
     </div>

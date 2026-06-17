@@ -11,7 +11,9 @@ const State = {
   detailPartner: null,   // full partner object loaded for detail view
   detailDirty: false,
   radarChart: null,
-  barChart: null,
+  drillChart: null,
+  selectedDrillSectionId: null,
+  partnersFullCache: {},
 };
 
 // ── Brand colours ─────────────────────────────────────────────────────────
@@ -252,54 +254,31 @@ function renderComparison() {
         }
       },
       plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-    }
-  });
-
-  // Bar chart — weighted scores
-  const barDataset = {
-    label: 'Weighted Score',
-    data: partners.map(p => p.weightedScore ?? 0),
-    backgroundColor: partners.map((_, i) => COLORS.chartPalette[i % COLORS.chartPalette.length]),
-    borderRadius: 4,
-  };
-  if (State.barChart) State.barChart.destroy();
-  State.barChart = new Chart(document.getElementById('bar-chart'), {
-    type: 'bar',
-    data: { labels: partners.map(p => p.name), datasets: [barDataset] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      indexAxis: 'y',
-      scales: {
-        x: { min: 0, max: 5, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,.05)' } },
-        y: { ticks: { font: { size: 11 } } },
+      onClick: (evt, elements) => {
+        if (elements.length) selectDrillSection(sections[elements[0].index].id);
       },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.parsed.x.toFixed(2)} / 5 — ${deriveVerdict(ctx.parsed.x)}`
-          }
-        }
-      }
+      onHover: (evt, elements) => {
+        evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+      },
     }
   });
 
   // Score matrix table
   const table = document.getElementById('comparison-table');
   const thead = `<thead><tr>
-    <th style="min-width:180px;">Section</th>
+    <th style="min-width:160px;">Section</th>
     <th>Weight</th>
     ${partners.map(p => `<th>${esc(p.name)}</th>`).join('')}
   </tr></thead>`;
 
   const tbody = `<tbody>
     ${sections.map(sec => `
-      <tr>
-        <td>${esc(sec.name)}</td>
+      <tr class="matrix-section-row" data-section-id="${sec.id}">
+        <td>${esc(shortSectionName(sec.name))}</td>
         <td class="text-muted">${sec.weight}%</td>
         ${partners.map(p => {
           const ss = p.sectionScores.find(x => x.sectionId === sec.id);
-          return `<td>${scoreCell(ss ? ss.score : null)}</td>`;
+          return `<td class="matrix-score-cell" data-partner-id="${p.id}" data-section-id="${sec.id}" title="Open ${esc(shortSectionName(sec.name))} · ${esc(p.name)}">${scoreCell(ss ? ss.score : null)}</td>`;
         }).join('')}
       </tr>
     `).join('')}
@@ -316,6 +295,118 @@ function renderComparison() {
   </tbody>`;
 
   table.innerHTML = thead + tbody;
+
+  // Bind matrix row clicks for drill-down (section name / weight cells)
+  table.querySelectorAll('tbody tr.matrix-section-row').forEach(row => {
+    row.addEventListener('click', () => selectDrillSection(parseInt(row.dataset.sectionId)));
+  });
+
+  // Bind score cell clicks → Partner Detail at that section (stop propagation so row drill doesn't also fire)
+  table.querySelectorAll('td.matrix-score-cell').forEach(td => {
+    td.addEventListener('click', e => {
+      e.stopPropagation();
+      openDetailAndScrollTo(td.dataset.partnerId, parseInt(td.dataset.sectionId));
+    });
+  });
+
+  // Re-apply row highlight if a section is already selected
+  if (State.selectedDrillSectionId) highlightMatrixRow(State.selectedDrillSectionId);
+}
+
+// ── Section Drill-Down ─────────────────────────────────────────────────────
+async function selectDrillSection(sectionId) {
+  State.selectedDrillSectionId = sectionId;
+  const section = State.schema.techSections.find(s => s.id === sectionId);
+  const questions = State.schema.techQuestions.filter(q => q.sectionId === sectionId);
+
+  document.getElementById('drill-card-title').textContent = `${section.name} — Question Breakdown`;
+  document.getElementById('btn-drill-clear').style.display = '';
+
+  // Fetch and cache full partner objects we don't have yet
+  const missing = State.partnersSummary.filter(p => !State.partnersFullCache[p.id]);
+  if (missing.length) {
+    try {
+      const results = await Promise.all(missing.map(p => api('GET', `/api/partners/${p.id}`)));
+      results.forEach(p => { State.partnersFullCache[p.id] = p; });
+    } catch (e) {
+      toast('Failed to load question data: ' + e.message, true);
+      return;
+    }
+  }
+
+  const labels = questions.map(q =>
+    q.text.length > 48 ? q.text.slice(0, 45) + '…' : q.text
+  );
+
+  const datasets = State.partnersSummary.map((ps, i) => {
+    const full = State.partnersFullCache[ps.id];
+    const ss = full ? full.techScores.find(x => x.sectionId === sectionId) : null;
+    return {
+      label: ps.name,
+      data: questions.map(q => {
+        const qd = ss ? (ss.questions || []).find(x => x.qId === q.id) : null;
+        return qd && qd.score != null ? qd.score : 0;
+      }),
+      backgroundColor: hexAlpha(COLORS.chartPalette[i % COLORS.chartPalette.length], 0.75),
+      borderColor: COLORS.chartPalette[i % COLORS.chartPalette.length],
+      borderWidth: 1,
+      borderRadius: 3,
+    };
+  });
+
+  // Height: enough room per question for all partner bars
+  const barGroupH = Math.max(28, State.partnersSummary.length * 16 + 8);
+  const chartH = Math.max(280, questions.length * barGroupH + 60);
+  const wrap = document.getElementById('drill-chart-wrap');
+  wrap.style.height = chartH + 'px';
+  wrap.style.display = '';
+  document.getElementById('drill-empty').style.display = 'none';
+
+  if (State.drillChart) State.drillChart.destroy();
+  State.drillChart = new Chart(document.getElementById('drill-chart'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { min: 0, max: 5, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,.05)' } },
+        y: { ticks: { font: { size: 10 } } },
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+        tooltip: {
+          callbacks: { title: ctx => questions[ctx[0].dataIndex].text },
+        },
+      },
+    },
+  });
+
+  highlightMatrixRow(sectionId);
+}
+
+function clearDrillSection() {
+  State.selectedDrillSectionId = null;
+  if (State.drillChart) { State.drillChart.destroy(); State.drillChart = null; }
+  const title = document.getElementById('drill-card-title');
+  const clearBtn = document.getElementById('btn-drill-clear');
+  if (title) title.textContent = 'Section Detail';
+  if (clearBtn) clearBtn.style.display = 'none';
+  document.getElementById('drill-empty').style.display = '';
+  document.getElementById('drill-chart-wrap').style.display = 'none';
+  clearMatrixRowHighlight();
+}
+
+function highlightMatrixRow(sectionId) {
+  document.querySelectorAll('#comparison-table tbody tr.matrix-section-row').forEach(row => {
+    row.classList.toggle('drill-selected', parseInt(row.dataset.sectionId) === sectionId);
+  });
+}
+
+function clearMatrixRowHighlight() {
+  document.querySelectorAll('#comparison-table tbody tr.drill-selected')
+    .forEach(row => row.classList.remove('drill-selected'));
 }
 
 function shortSectionName(name) {
@@ -341,6 +432,15 @@ async function openDetailFor(partnerId) {
   const sel = document.getElementById('detail-partner-select');
   sel.value = partnerId;
   await loadDetailPartner(partnerId);
+}
+
+async function openDetailAndScrollTo(partnerId, sectionId) {
+  await openDetailFor(partnerId);
+  const accordion = document.querySelector(`.accordion-item[data-section-id="${sectionId}"]`);
+  if (!accordion) return;
+  const header = accordion.querySelector('[data-accordion]');
+  if (header && !header.classList.contains('open')) header.classList.add('open');
+  setTimeout(() => accordion.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 
 async function loadDetailPartner(partnerId) {
@@ -848,6 +948,7 @@ async function saveDetail() {
   try {
     await api('PUT', `/api/partners/${State.detailPartner.id}`, State.detailPartner);
     toast('Saved');
+    delete State.partnersFullCache[State.detailPartner.id];
     await refreshPartnersSummary();
     const opt = document.querySelector(`#detail-partner-select option[value="${State.detailPartner.id}"]`);
     if (opt) opt.textContent = State.detailPartner.name;
@@ -1120,6 +1221,9 @@ async function boot() {
       e.returnValue = ''; // required for Chrome
     }
   });
+
+  // Drill-down clear button
+  document.getElementById('btn-drill-clear').addEventListener('click', clearDrillSection);
 
   // Wire add partner confirm
   bindAddPartnerConfirm();
