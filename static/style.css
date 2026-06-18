@@ -76,6 +76,20 @@ input, textarea, select { font: inherit; }
 .topnav-tab.active { background: rgba(255,255,255,.18); color: #fff; }
 .topnav-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
+.detail-subtab {
+  padding: 8px 16px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  color: var(--gray-500);
+  background: transparent;
+  font-size: .875rem;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.detail-subtab:hover { color: var(--navy); background: var(--gray-100); }
+.detail-subtab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;

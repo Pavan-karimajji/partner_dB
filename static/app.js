@@ -580,10 +580,10 @@ function renderDetailContent(p) {
       <!-- Main content: tabs for Technical / Perception -->
       <div class="detail-main">
         <div style="display:flex;gap:8px;border-bottom:2px solid var(--gray-200);padding-bottom:0;margin-bottom:20px;">
-          <button class="topnav-tab active" style="color:var(--navy);background:transparent;" data-detail-tab="technical">Technical Evaluation</button>
-          <button class="topnav-tab"        style="color:var(--navy);background:transparent;" data-detail-tab="perception">Perception & Function</button>
-          <button class="topnav-tab"        style="color:var(--navy);background:transparent;" data-detail-tab="products">Products & Portfolio</button>
-          <button class="topnav-tab"        style="color:var(--navy);background:transparent;" data-detail-tab="notes">Notes</button>
+          <button class="detail-subtab active" data-detail-tab="technical">Technical Evaluation</button>
+          <button class="detail-subtab"        data-detail-tab="perception">Perception & Function</button>
+          <button class="detail-subtab"        data-detail-tab="products">Products & Portfolio</button>
+          <button class="detail-subtab"        data-detail-tab="notes">Notes</button>
         </div>
 
         <!-- Technical Evaluation -->
