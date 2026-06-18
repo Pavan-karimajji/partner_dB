@@ -4,6 +4,17 @@
    Vanilla JS, no build step required.
    ──────────────────────────────────────────────────────────────────────── */
 
+// ── Auto-growing textareas ────────────────────────────────────────────────
+// Remarks/notes textareas grow to fit their content instead of clipping it
+// behind an internal scrollbar — so the full text is always visible at once.
+function autoGrowTextarea(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+function autoGrowAll(root) {
+  root.querySelectorAll('textarea').forEach(autoGrowTextarea);
+}
+
 // ── State ──────────────────────────────────────────────────────────────────
 const State = {
   schema: null,
@@ -713,17 +724,26 @@ function renderDetailContent(p) {
         const el = document.getElementById('detail-tab-' + t);
         if (el) el.style.display = t === btn.dataset.detailTab ? '' : 'none';
       });
+      const shown = document.getElementById('detail-tab-' + btn.dataset.detailTab);
+      if (shown) autoGrowAll(shown);
     });
   });
 
   // Accordion
   content.querySelectorAll('[data-accordion]').forEach(h => {
-    h.addEventListener('click', () => h.classList.toggle('open'));
+    h.addEventListener('click', () => {
+      h.classList.toggle('open');
+      if (h.classList.contains('open')) {
+        const body = h.nextElementSibling;
+        if (body) autoGrowAll(body);
+      }
+    });
   });
 
   // Open first accordion by default
   const firstAcc = content.querySelector('[data-accordion]');
   if (firstAcc) firstAcc.classList.add('open');
+  if (firstAcc) autoGrowAll(firstAcc.nextElementSibling || content);
 
   // Hard disqualifier toggles
   content.querySelectorAll('.hard-disqualifier-item').forEach(item => {
@@ -743,6 +763,9 @@ function renderDetailContent(p) {
   content.addEventListener('change', handleDetailChange);
   content.addEventListener('input', handleDetailChange);
   content.addEventListener('click', handleDetailClick);
+  content.addEventListener('input', e => {
+    if (e.target.tagName === 'TEXTAREA') autoGrowTextarea(e.target);
+  });
 
   // Stage dropdown
   document.getElementById('di-stage').addEventListener('change', e => {
@@ -973,7 +996,10 @@ function productCardHtml(prod, schema) {
 
 function refreshProductsTab() {
   const el = document.getElementById('detail-tab-products');
-  if (el) el.innerHTML = productsTabHtml(State.detailPartner);
+  if (el) {
+    el.innerHTML = productsTabHtml(State.detailPartner);
+    autoGrowAll(el);
+  }
 }
 
 function handleDetailClick(e) {
