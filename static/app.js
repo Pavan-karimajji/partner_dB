@@ -628,7 +628,7 @@ function renderDetailContent(p) {
                       data-section-remarks="${sec.id}">${esc(ss.remarks || '')}</textarea>
                     <span class="print-val">${esc(ss.remarks || '')}</span>
                   </div>
-                  <div style="font-size:.75rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:grid;grid-template-columns:28px 1fr 90px 100px;gap:10px;padding:0 0 6px;border-bottom:1px solid var(--gray-200);">
+                  <div class="q-row q-table-header">
                     <span>#</span><span>Question</span><span>Score</span><span>Remarks</span>
                   </div>
                   ${qList.map(q => {
