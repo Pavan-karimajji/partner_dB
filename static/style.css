@@ -376,7 +376,7 @@ input, textarea, select { font: inherit; }
 /* Question row in detail */
 .q-row {
   display: grid;
-  grid-template-columns: 28px 1fr 90px 100px;
+  grid-template-columns: 28px 1fr 90px 240px;
   gap: 10px;
   align-items: start;
   padding: 8px 0;
@@ -396,15 +396,17 @@ input, textarea, select { font: inherit; }
   width: 100%;
 }
 .q-remarks-input {
-  padding: 4px 6px;
+  padding: 5px 8px;
   border: 1px solid var(--gray-300);
   border-radius: var(--radius);
   font-size: .8125rem;
+  font-family: inherit;
+  line-height: 1.4;
   color: var(--gray-700);
   background: var(--white);
   width: 100%;
   resize: vertical;
-  min-height: 28px;
+  min-height: 48px;
 }
 .q-remarks-input:focus, .q-score-select:focus {
   outline: none;
@@ -579,10 +581,11 @@ input, textarea, select { font: inherit; }
   .topnav, .save-bar, .toast-wrap, .modal-overlay { display: none !important; }
   .btn-secondary[onclick], .btn-primary { display: none !important; }
   .page-header .btn, #detail-partner-select, .topnav-actions { display: none !important; }
+  #btn-edit-meta { display: none !important; }
   [data-accordion] .accordion-chevron { display: none !important; }
   [data-detail-tab] { display: none !important; }
   select, .q-score-select, .q-remarks-input, .p-response-area,
-  .p-judgement-select, .p-judgement-label { display: none !important; }
+  .p-judgement-select, .p-judgement-label, .form-textarea { display: none !important; }
 
   /* Show only the currently active page */
   .page { display: none !important; }
@@ -595,11 +598,14 @@ input, textarea, select { font: inherit; }
   /* Show all detail sub-tabs */
   #detail-tab-technical,
   #detail-tab-perception,
+  #detail-tab-products,
   #detail-tab-notes { display: block !important; }
 
   body { background: white; color: black; font-size: 10pt; }
   .card { box-shadow: none !important; border: 1px solid #ccc; break-inside: avoid; }
-  .detail-layout { grid-template-columns: 220px 1fr; gap: 12px; }
+  .detail-layout { display: block; }
+  .detail-sidebar { margin-bottom: 16px; }
+  .detail-sidebar .card { break-inside: avoid; }
   .pipeline { grid-template-columns: 1fr 1fr; }
 
   /* Print section/question scores as static text */
@@ -659,6 +665,39 @@ input, textarea, select { font: inherit; }
   color: #991b1b;
 }
 .hard-disqualifier-item.clear { background: #d1fae5; color: #065f46; }
+
+/* ── Toggle pills (business model / sensors / functions) ──────────────────── */
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  border: 1px solid var(--gray-300);
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.toggle-pill.on { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+.toggle-pill.readonly { cursor: default; }
+.toggle-pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ── Products tab ───────────────────────────────────────────────────────── */
+.portfolio-summary {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  row-gap: 10px;
+  column-gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.portfolio-summary-label { font-size: .75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; }
+.product-card { margin-bottom: 16px; }
+.product-toggle-label { font-size: .75rem; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.product-note-group { margin-top: 10px; }
 
 .select-partner-hint {
   background: var(--light-blue);

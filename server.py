@@ -180,6 +180,8 @@ def api_create_partner():
         "productVersion": body.get("productVersion", ""),
         "evaluationDate": body.get("evaluationDate", ""),
         "stage": body.get("stage", "Under Evaluation"),
+        "businessModel": [],
+        "products": [],
         "techScores": empty_tech_scores(),
         "perceptionResponses": empty_perception(),
         "hardDisqualifiers": [],

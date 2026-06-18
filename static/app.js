@@ -494,6 +494,15 @@ function renderDetailContent(p) {
                 <span class="print-val">${esc(p.stage || '')}</span>
               </span></div>
             </div>
+            <div class="info-block" style="margin-top:14px;">
+              <div class="label" style="font-size:.75rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Business Model</div>
+              <div class="toggle-pill-row">
+                ${schema.businessModels.map(bm => {
+                  const on = (p.businessModel || []).includes(bm);
+                  return `<span class="toggle-pill${on ? ' on' : ''}" data-business-model="${esc(bm)}">${esc(bm)}</span>`;
+                }).join('')}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -573,6 +582,7 @@ function renderDetailContent(p) {
         <div style="display:flex;gap:8px;border-bottom:2px solid var(--gray-200);padding-bottom:0;margin-bottom:20px;">
           <button class="topnav-tab active" style="color:var(--navy);background:transparent;" data-detail-tab="technical">Technical Evaluation</button>
           <button class="topnav-tab"        style="color:var(--navy);background:transparent;" data-detail-tab="perception">Perception & Function</button>
+          <button class="topnav-tab"        style="color:var(--navy);background:transparent;" data-detail-tab="products">Products & Portfolio</button>
           <button class="topnav-tab"        style="color:var(--navy);background:transparent;" data-detail-tab="notes">Notes</button>
         </div>
 
@@ -603,8 +613,8 @@ function renderDetailContent(p) {
                     </select>
                     <span class="print-val">${ss.score != null ? ss.score + ' / 5' : ''}</span>
                     <label style="font-size:.8125rem;font-weight:600;color:var(--navy);margin-left:12px;">Remarks:</label>
-                    <input class="q-remarks-input" style="flex:1;" placeholder="Section-level remarks…"
-                      data-section-remarks="${sec.id}" value="${esc(ss.remarks || '')}" />
+                    <textarea class="q-remarks-input" style="flex:1;min-height:34px;" rows="1" placeholder="Section-level remarks…"
+                      data-section-remarks="${sec.id}">${esc(ss.remarks || '')}</textarea>
                     <span class="print-val">${esc(ss.remarks || '')}</span>
                   </div>
                   <div style="font-size:.75rem;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:grid;grid-template-columns:28px 1fr 90px 100px;gap:10px;padding:0 0 6px;border-bottom:1px solid var(--gray-200);">
@@ -621,8 +631,8 @@ function renderDetailContent(p) {
                           ${[1,2,3,4,5].map(n => `<option value="${n}"${qd.score == n ? ' selected' : ''}>${n}</option>`).join('')}
                         </select>
                         <span class="print-val">${qd.score != null ? qd.score : ''}</span>
-                        <input class="q-remarks-input" placeholder="Remarks…"
-                          data-q-remarks="${sec.id}:${q.id}" value="${esc(qd.remarks || '')}" />
+                        <textarea class="q-remarks-input" rows="2" placeholder="Remarks…"
+                          data-q-remarks="${sec.id}:${q.id}">${esc(qd.remarks || '')}</textarea>
                         <span class="print-val">${esc(qd.remarks || '')}</span>
                       </div>
                     `;
@@ -652,17 +662,17 @@ function renderDetailContent(p) {
                         <textarea class="p-response-area" placeholder="Partner response / L&T notes…"
                           data-p-response="${psec.id}:${q.id}">${esc(qd.response || '')}</textarea>
                         <div class="print-val">${esc(qd.response || '')}</div>
-                        <div class="p-judgement-row">
-                          <span class="p-judgement-label">L&T Judgement:</span>
+                        <div class="p-judgement-row" style="align-items:flex-start;">
+                          <span class="p-judgement-label" style="padding-top:5px;">L&T Judgement:</span>
                           <select class="p-judgement-select" data-p-judgement="${psec.id}:${q.id}">
                             ${['TBD','Pass','Acceptable','Flag','Fail'].map(j =>
                               `<option value="${j}"${(qd.judgement || 'TBD') === j ? ' selected' : ''}>${j}</option>`
                             ).join('')}
                           </select>
                           <span class="print-val">${esc(qd.judgement || 'TBD')}</span>
-                          <span class="p-judgement-label" style="margin-left:12px;">L&T Remark:</span>
-                          <input class="q-remarks-input" style="flex:1;" placeholder="Internal remark…"
-                            data-p-remark="${psec.id}:${q.id}" value="${esc(qd.lntRemark || '')}" />
+                          <span class="p-judgement-label" style="margin-left:12px;padding-top:5px;">L&T Remark:</span>
+                          <textarea class="q-remarks-input" style="flex:1;" rows="2" placeholder="Internal remark…"
+                            data-p-remark="${psec.id}:${q.id}">${esc(qd.lntRemark || '')}</textarea>
                           <span class="print-val">${esc(qd.lntRemark || '')}</span>
                         </div>
                       </div>
@@ -672,6 +682,11 @@ function renderDetailContent(p) {
               </div>
             `;
           }).join('')}
+        </div>
+
+        <!-- Products & Portfolio -->
+        <div id="detail-tab-products" style="display:none;">
+          ${productsTabHtml(p)}
         </div>
 
         <!-- Notes -->
@@ -694,7 +709,7 @@ function renderDetailContent(p) {
     btn.addEventListener('click', () => {
       content.querySelectorAll('[data-detail-tab]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      ['technical','perception','notes'].forEach(t => {
+      ['technical','perception','products','notes'].forEach(t => {
         const el = document.getElementById('detail-tab-' + t);
         if (el) el.style.display = t === btn.dataset.detailTab ? '' : 'none';
       });
@@ -727,6 +742,7 @@ function renderDetailContent(p) {
   // Attach change listeners to all score/remarks inputs
   content.addEventListener('change', handleDetailChange);
   content.addEventListener('input', handleDetailChange);
+  content.addEventListener('click', handleDetailClick);
 
   // Stage dropdown
   document.getElementById('di-stage').addEventListener('change', e => {
@@ -832,10 +848,183 @@ function handleDetailChange(e) {
     return;
   }
 
+  // Product name
+  if (el.dataset.productName) {
+    markDirty();
+    const prod = findProduct(el.dataset.productName);
+    if (prod) prod.name = el.value;
+    return;
+  }
+
+  // Product sensor note
+  if (el.dataset.productNote) {
+    markDirty();
+    const [pid, key] = el.dataset.productNote.split(':');
+    const prod = findProduct(pid);
+    if (prod) {
+      prod.sensorNotes = prod.sensorNotes || {};
+      prod.sensorNotes[key] = el.value;
+    }
+    return;
+  }
+
   // Notes
   if (el.id === 'di-notes') {
     markDirty();
     State.detailPartner.notes = el.value;
+    return;
+  }
+}
+
+// ── Products & Portfolio tab ────────────────────────────────────────────────
+
+function findProduct(productId) {
+  return (State.detailPartner.products || []).find(pr => pr.id === productId);
+}
+
+function newProduct(schema, ordinal) {
+  const sensors = {}, functions = {}, sensorNotes = {};
+  schema.productSensors.forEach(s => { sensors[s.key] = false; sensorNotes[s.key] = ''; });
+  schema.productFunctions.forEach(f => { functions[f.key] = false; });
+  const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : 'p' + Date.now().toString(16) + Math.random().toString(16).slice(2);
+  return { id, name: 'Product ' + ordinal, sensors, functions, sensorNotes };
+}
+
+function computePortfolio(products, schema) {
+  const sensors = {}, functions = {};
+  schema.productSensors.forEach(s => sensors[s.key] = false);
+  schema.productFunctions.forEach(f => functions[f.key] = false);
+  (products || []).forEach(prod => {
+    schema.productSensors.forEach(s => { if (prod.sensors && prod.sensors[s.key]) sensors[s.key] = true; });
+    schema.productFunctions.forEach(f => { if (prod.functions && prod.functions[f.key]) functions[f.key] = true; });
+  });
+  return { sensors, functions };
+}
+
+function productsTabHtml(p) {
+  const schema = State.schema;
+  const products = p.products || [];
+  const portfolio = computePortfolio(products, schema);
+
+  return `
+    <div class="card">
+      <div class="card-header"><span class="card-title">Company Portfolio (derived from products below)</span></div>
+      <div class="card-body">
+        <div class="portfolio-summary">
+          <div class="portfolio-summary-label">Sensors</div>
+          <div class="toggle-pill-row">
+            ${schema.productSensors.map(s =>
+              `<span class="toggle-pill readonly${portfolio.sensors[s.key] ? ' on' : ''}">${esc(s.label)}</span>`
+            ).join('')}
+          </div>
+          <div class="portfolio-summary-label">Functions</div>
+          <div class="toggle-pill-row">
+            ${schema.productFunctions.map(f =>
+              `<span class="toggle-pill readonly${portfolio.functions[f.key] ? ' on' : ''}">${esc(f.label)}</span>`
+            ).join('')}
+          </div>
+        </div>
+        ${products.length === 0 ? '<div class="text-muted" style="font-size:.8125rem;">No products added yet — add one below.</div>' : ''}
+      </div>
+    </div>
+
+    ${products.map(prod => productCardHtml(prod, schema)).join('')}
+
+    <button class="btn btn-secondary" data-add-product type="button">+ Add Product</button>
+  `;
+}
+
+function productCardHtml(prod, schema) {
+  return `
+    <div class="card product-card" data-product-id="${prod.id}">
+      <div class="card-header">
+        <input class="form-input" style="font-weight:600;max-width:280px;"
+          data-product-name="${prod.id}" value="${esc(prod.name || '')}" />
+        <button class="btn btn-danger btn-sm" data-remove-product="${prod.id}" type="button">Remove</button>
+      </div>
+      <div class="card-body">
+        <div class="product-toggle-label">Sensors</div>
+        <div class="toggle-pill-row" style="margin-bottom:8px;">
+          ${schema.productSensors.map(s => {
+            const on = !!(prod.sensors && prod.sensors[s.key]);
+            return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-sensor="${prod.id}:${s.key}">${esc(s.label)}</span>`;
+          }).join('')}
+        </div>
+        ${schema.productSensors.filter(s => prod.sensors && prod.sensors[s.key]).map(s => `
+          <div class="product-note-group">
+            <label class="form-label">${esc(s.label)} notes — spec, details…</label>
+            <textarea class="form-textarea" rows="2" placeholder="${esc(s.label)} spec / notes…"
+              data-product-note="${prod.id}:${s.key}">${esc((prod.sensorNotes && prod.sensorNotes[s.key]) || '')}</textarea>
+            <div class="print-val">${esc((prod.sensorNotes && prod.sensorNotes[s.key]) || '')}</div>
+          </div>
+        `).join('')}
+        <div class="product-toggle-label" style="margin-top:14px;">Functions</div>
+        <div class="toggle-pill-row">
+          ${schema.productFunctions.map(f => {
+            const on = !!(prod.functions && prod.functions[f.key]);
+            return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-function="${prod.id}:${f.key}">${esc(f.label)}</span>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function refreshProductsTab() {
+  const el = document.getElementById('detail-tab-products');
+  if (el) el.innerHTML = productsTabHtml(State.detailPartner);
+}
+
+function handleDetailClick(e) {
+  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function]');
+  if (!el) return;
+
+  if (el.dataset.businessModel !== undefined) {
+    markDirty();
+    const list = State.detailPartner.businessModel || (State.detailPartner.businessModel = []);
+    const idx = list.indexOf(el.dataset.businessModel);
+    if (idx >= 0) list.splice(idx, 1); else list.push(el.dataset.businessModel);
+    el.classList.toggle('on', idx < 0);
+    return;
+  }
+
+  if (el.dataset.addProduct !== undefined) {
+    markDirty();
+    const products = State.detailPartner.products || (State.detailPartner.products = []);
+    products.push(newProduct(State.schema, products.length + 1));
+    refreshProductsTab();
+    return;
+  }
+
+  if (el.dataset.removeProduct) {
+    markDirty();
+    State.detailPartner.products = (State.detailPartner.products || []).filter(pr => pr.id !== el.dataset.removeProduct);
+    refreshProductsTab();
+    return;
+  }
+
+  if (el.dataset.toggleSensor) {
+    markDirty();
+    const [pid, key] = el.dataset.toggleSensor.split(':');
+    const prod = findProduct(pid);
+    if (prod) {
+      prod.sensors = prod.sensors || {};
+      prod.sensors[key] = !prod.sensors[key];
+      refreshProductsTab();
+    }
+    return;
+  }
+
+  if (el.dataset.toggleFunction) {
+    markDirty();
+    const [pid, key] = el.dataset.toggleFunction.split(':');
+    const prod = findProduct(pid);
+    if (prod) {
+      prod.functions = prod.functions || {};
+      prod.functions[key] = !prod.functions[key];
+      refreshProductsTab();
+    }
     return;
   }
 }

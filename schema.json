@@ -1682,6 +1682,27 @@
       ]
     }
   ],
+  "businessModels": [
+    "Component Supplier",
+    "Software Stack Provider",
+    "White-labelled Solution Provider"
+  ],
+  "productSensors": [
+    { "key": "radar", "label": "Radar" },
+    { "key": "camera", "label": "Camera" },
+    { "key": "fusion", "label": "Fusion" },
+    { "key": "soc", "label": "SoC" }
+  ],
+  "productFunctions": [
+    { "key": "AEB", "label": "AEB" },
+    { "key": "ACC", "label": "ACC" },
+    { "key": "LDW", "label": "LDW" },
+    { "key": "LCA", "label": "LCA" },
+    { "key": "LKA", "label": "LKA" },
+    { "key": "MOIS", "label": "MOIS" },
+    { "key": "BSD", "label": "BSD" },
+    { "key": "RCTA", "label": "RCTA" }
+  ],
   "verdictThresholds": {
     "approved": 4.0,
     "conditional": 3.0
