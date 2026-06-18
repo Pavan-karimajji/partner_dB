@@ -390,8 +390,8 @@ input, textarea, select { font: inherit; }
 /* Question row in detail */
 .q-row {
   display: grid;
-  grid-template-columns: 28px minmax(160px, 420px) 70px 1fr;
-  gap: 14px;
+  grid-template-columns: 28px minmax(140px, 280px) 60px 1fr;
+  gap: 10px;
   align-items: start;
   padding: 8px 0;
   border-bottom: 1px solid var(--gray-100);
