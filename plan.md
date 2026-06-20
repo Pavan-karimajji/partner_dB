@@ -668,6 +668,40 @@ sidebar card shows all 6 domains and persists across sub-tab switches;
 both domain and section grades + justifications save and reload
 correctly; zero console errors.
 
+## Comparison heatmap now driven by Master Category Grading — DONE
+
+Caught a real gap: the Comparison heatmap still computed % of questions
+Accomplished/Verified — it never read the new `domainGrades` at all, so
+nothing entered in the Master Category Grading sidebar card showed up
+on the management-facing Comparison page, defeating the point of
+having a holistic grade. Fixed:
+
+- `computeGroupCompletion`/`heatmapCellClass`/`heatmapCellHtml` (the old
+  %-based versions) replaced with grade-based versions: each cell now
+  shows the partner's manually-entered grade for that domain
+  (`partner.domainGrades`), colored via the same red/amber/green scale
+  (`hm-low`=Developing, `hm-mid`=Good, `hm-high`=Outstanding,
+  `hm-empty`=ungraded or NA).
+- **Explicit choice**: pure replacement, no % fallback for ungraded
+  domains — they just show "—". No blended/dual-metric view.
+- `comparisonGroups()` now also returns each group's domain `id` (not
+  just label/sectionIds) so the heatmap can look up
+  `partner.domainGrades` by domain id.
+- **Overall column removed** — there's no defined "average grade"
+  concept (grades are an independent holistic judgment per domain by
+  design, not meant to be mechanically combined), so sort falls back to
+  partner name alphabetically instead of by a computed overall score.
+- `index.html` subtitle updated to describe the new metric instead of
+  the retired % language.
+
+Verified via Playwright (`C:\tmp\pwtest\test-heatmap-grade.js`): heatmap
+shows all dashes before any grading; after grading 3 domains via the
+sidebar card and saving, the heatmap cells show exactly those grades
+with the correct color class; zero console errors. (One red herring
+during testing: an intermediate run showed stale data from a race
+during rapid server stop/restart, not a real bug — resolved by
+confirming via direct API call before re-testing.)
+
 ## Next steps
 
 1. Hero-tag toggle UI and Patents-in-heatmap UI are still explicitly
@@ -678,9 +712,6 @@ correctly; zero console errors.
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab
    clutter — low priority, easy to change later.
-3. Possible follow-up: column/row sorting controls on the Comparison
-   heatmap (currently fixed sort by Overall % descending) if the
-   partner list grows large enough to need it.
-4. Noted but not actioned: user feels the pre-refactor master-branch UX
+3. Noted but not actioned: user feels the pre-refactor master-branch UX
    was more visually polished/appealing than the current rebuild. A
    general UI-polish pass is a separate, not-yet-scoped task.

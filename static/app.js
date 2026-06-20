@@ -49,6 +49,7 @@ function comparisonGroups() {
   const schema = State.schema;
   return (schema.domains || [])
     .map(d => ({
+      id: d.id,
       label: d.label,
       sectionIds: (schema.detailSections || []).filter(s => s.domain === d.id).map(s => s.id),
     }))
@@ -178,47 +179,22 @@ function renderPartnerCard(p) {
 // (currently scope-matching, or kept via the same "sticky" rule the detail
 // page itself uses so partially-unchecked sensors/functions don't make
 // already-logged progress disappear from the comparison either).
-function computeGroupCompletion(partner, group) {
-  let done = 0, total = 0;
-  const sections = (State.schema.detailSections || []).filter(s => group.sectionIds.includes(s.id));
-  sections.forEach(section => {
-    const qIds = questionsForSection(section.id).map(q => q.id);
-    if (section.category === 'general') {
-      qIds.forEach(qId => {
-        const a = (partner.generalAnswers || []).find(x => x.qId === qId);
-        const status = a ? a.status : '';
-        if (status === 'na') return;
-        total++;
-        if (status === 'accomplished' || status === 'verified') done++;
-      });
-    } else {
-      (partner.products || []).forEach(prod => {
-        const relevant = sectionScopeMatches(section, prod) || sectionHasAnswerData(section, prod);
-        if (!relevant) return;
-        qIds.forEach(qId => {
-          const a = (prod.answers || []).find(x => x.qId === qId);
-          const status = a ? a.status : '';
-          if (status === 'na') return;
-          total++;
-          if (status === 'accomplished' || status === 'verified') done++;
-        });
-      });
-    }
-  });
-  return { done, total };
+// Heatmap shows the manually-entered domain grade (Master Category
+// Grading sidebar card), not a computed completion %. A domain not yet
+// graded for a partner shows as empty — no fallback metric, per explicit
+// choice: the grade is a holistic judgment, not something to approximate
+// mechanically from question-answer counts.
+function gradeHeatmapClass(grade) {
+  if (grade === 'outstanding') return 'hm-high';
+  if (grade === 'good') return 'hm-mid';
+  if (grade === 'developing') return 'hm-low';
+  return 'hm-empty'; // '' (ungraded) or 'na'
 }
 
-function heatmapCellClass(pct, total) {
-  if (total === 0) return 'hm-empty';
-  if (pct >= 67) return 'hm-high';
-  if (pct >= 34) return 'hm-mid';
-  return 'hm-low';
-}
-
-function heatmapCellHtml(done, total) {
-  if (total === 0) return `<td class="hm-cell hm-empty" title="No applicable questions">—</td>`;
-  const pct = Math.round((done / total) * 100);
-  return `<td class="hm-cell ${heatmapCellClass(pct, total)}" title="${done} / ${total} applicable questions">${pct}%</td>`;
+function heatmapCellHtml(grade) {
+  const cls = gradeHeatmapClass(grade);
+  const label = grade ? gradeStatusLabel(grade) : '—';
+  return `<td class="hm-cell ${cls}">${esc(label)}</td>`;
 }
 
 async function renderComparison() {
@@ -235,13 +211,10 @@ async function renderComparison() {
   const groups = comparisonGroups();
 
   const rows = fullPartners.map(p => {
-    const groupResults = groups.map(g => computeGroupCompletion(p, g));
-    const overallDone = groupResults.reduce((a, r) => a + r.done, 0);
-    const overallTotal = groupResults.reduce((a, r) => a + r.total, 0);
-    const overallPct = overallTotal === 0 ? -1 : Math.round((overallDone / overallTotal) * 100);
-    return { partner: p, groupResults, overallDone, overallTotal, overallPct };
+    const grades = groups.map(g => (p.domainGrades || []).find(x => x.domainId === g.id) || { grade: '' });
+    return { partner: p, grades };
   });
-  rows.sort((a, b) => b.overallPct - a.overallPct);
+  rows.sort((a, b) => a.partner.name.localeCompare(b.partner.name));
 
   body.innerHTML = `
     <table class="comparison-table">
@@ -249,15 +222,13 @@ async function renderComparison() {
         <tr>
           <th class="hm-partner-col">Partner</th>
           ${groups.map(g => `<th>${esc(g.label)}</th>`).join('')}
-          <th>Overall</th>
         </tr>
       </thead>
       <tbody>
         ${rows.map(r => `
           <tr>
             <td class="hm-partner-name" data-open-partner="${r.partner.id}">${esc(r.partner.name)}</td>
-            ${r.groupResults.map(gr => heatmapCellHtml(gr.done, gr.total)).join('')}
-            ${heatmapCellHtml(r.overallDone, r.overallTotal)}
+            ${r.grades.map(g => heatmapCellHtml(g.grade)).join('')}
           </tr>
         `).join('')}
       </tbody>
