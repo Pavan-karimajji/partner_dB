@@ -197,48 +197,56 @@
       "id": "gen-company-overview",
       "category": "general",
       "label": "Company Overview",
+      "domain": "company-background",
       "scope": null
     },
     {
       "id": "gen-validation-test",
       "category": "general",
       "label": "Validation & Test Infrastructure",
+      "domain": "perception-function",
       "scope": null
     },
     {
       "id": "gen-funcsafety-cyber",
       "category": "general",
       "label": "Functional Safety & Cybersecurity",
+      "domain": "safety-cyber",
       "scope": null
     },
     {
       "id": "prod-compute-hw",
       "category": "product",
       "label": "Compute & Hardware",
+      "domain": "hardware-capability",
       "scope": null
     },
     {
       "id": "prod-sw-arch",
       "category": "product",
       "label": "Software Architecture",
+      "domain": "hardware-capability",
       "scope": null
     },
     {
       "id": "prod-pipeline-runtime",
       "category": "product",
       "label": "Pipeline & Runtime",
+      "domain": "hardware-capability",
       "scope": null
     },
     {
       "id": "prod-power",
       "category": "product",
       "label": "Power & Ignition Management",
+      "domain": "hardware-capability",
       "scope": null
     },
     {
       "id": "prod-camera-sensor-optics",
       "category": "product",
       "label": "Camera: Image Sensor & Optics",
+      "domain": "hardware-capability",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -250,6 +258,7 @@
       "id": "prod-camera-isp",
       "category": "product",
       "label": "Camera: ISP & Image Quality",
+      "domain": "hardware-capability",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -261,6 +270,7 @@
       "id": "prod-camera-robustness",
       "category": "product",
       "label": "Camera: Robustness & Calibration",
+      "domain": "hardware-capability",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -272,6 +282,7 @@
       "id": "prod-radar-subsystem",
       "category": "product",
       "label": "Radar Subsystem",
+      "domain": "hardware-capability",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -283,6 +294,7 @@
       "id": "prod-fusion-subsystem",
       "category": "product",
       "label": "Fusion Subsystem",
+      "domain": "hardware-capability",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -294,12 +306,14 @@
       "id": "prod-hw-robustness",
       "category": "product",
       "label": "HW Robustness & Components",
+      "domain": "hardware-capability",
       "scope": null
     },
     {
       "id": "prod-camperc-pipeline",
       "category": "product",
       "label": "Camera Perception: Pipeline Architecture",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -311,6 +325,7 @@
       "id": "prod-camperc-objdet",
       "category": "product",
       "label": "Camera Perception: Object Detection",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -322,6 +337,7 @@
       "id": "prod-camperc-lane",
       "category": "product",
       "label": "Camera Perception: Lane Detection",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -333,6 +349,7 @@
       "id": "prod-camperc-depth",
       "category": "product",
       "label": "Camera Perception: Depth & Freespace",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -344,6 +361,7 @@
       "id": "prod-camperc-slrtsr",
       "category": "product",
       "label": "Camera Perception: Speed Limit & Traffic Sign Recognition",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -355,6 +373,7 @@
       "id": "prod-camperc-modelquality",
       "category": "product",
       "label": "Camera Perception: Model Quality & Temporal Stability",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -366,6 +385,7 @@
       "id": "prod-camperc-output",
       "category": "product",
       "label": "Camera Perception: Output Interface",
+      "domain": "perception-function",
       "scope": {
         "type": "sensor",
         "keys": [
@@ -377,6 +397,7 @@
       "id": "prod-func-aeb",
       "category": "product",
       "label": "AEB Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -388,6 +409,7 @@
       "id": "prod-func-acc",
       "category": "product",
       "label": "ACC Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -399,6 +421,7 @@
       "id": "prod-func-ldwlka",
       "category": "product",
       "label": "LDW/LKA Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -411,6 +434,7 @@
       "id": "prod-func-lca",
       "category": "product",
       "label": "LCA Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -422,6 +446,7 @@
       "id": "prod-func-bsd",
       "category": "product",
       "label": "BSD Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -433,6 +458,7 @@
       "id": "prod-func-rcta",
       "category": "product",
       "label": "RCTA Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -444,6 +470,7 @@
       "id": "prod-func-mois",
       "category": "product",
       "label": "MOIS Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -455,6 +482,7 @@
       "id": "prod-func-dms",
       "category": "product",
       "label": "DMS Function Detail",
+      "domain": "perception-function",
       "scope": {
         "type": "function",
         "keys": [
@@ -466,36 +494,42 @@
       "id": "prod-production-lifecycle",
       "category": "product",
       "label": "Production Readiness & Lifecycle",
+      "domain": "company-background",
       "scope": null
     },
     {
       "id": "prod-sw-quality",
       "category": "product",
       "label": "Software Quality",
+      "domain": "perception-function",
       "scope": null
     },
     {
       "id": "prod-hmi",
       "category": "product",
       "label": "HMI & Driver Interaction",
+      "domain": "perception-function",
       "scope": null
     },
     {
       "id": "prod-compliance",
       "category": "product",
       "label": "Regional & Regulatory Compliance",
+      "domain": "regulation-compliance",
       "scope": null
     },
     {
       "id": "prod-emc-env",
       "category": "product",
       "label": "EMC & Environmental Reliability",
+      "domain": "regulation-compliance",
       "scope": null
     },
     {
       "id": "prod-limitations-india",
       "category": "product",
       "label": "Known Limitations & India Readiness",
+      "domain": "regulation-compliance",
       "scope": null
     }
   ],
@@ -504,1513 +538,1791 @@
       "id": 1,
       "sectionId": "gen-company-overview",
       "text": "Provide your company founding year and automotive industry history.",
-      "sourceRef": "TECH#1"
+      "sourceRef": "TECH#1",
+      "priority": "high"
     },
     {
       "id": 2,
       "sectionId": "gen-company-overview",
       "text": "What is your total headcount and ADAS-specific R&D staff count?",
-      "sourceRef": "TECH#2"
+      "sourceRef": "TECH#2",
+      "priority": "medium"
     },
     {
       "id": 3,
       "sectionId": "gen-company-overview",
       "text": "Describe your geographic presence and engineering support capability in India.",
-      "sourceRef": "TECH#3"
+      "sourceRef": "TECH#3",
+      "priority": "high"
     },
     {
       "id": 4,
       "sectionId": "gen-company-overview",
       "text": "Provide key leadership and technical team credentials relevant to ADAS.",
-      "sourceRef": "TECH#4"
+      "sourceRef": "TECH#4",
+      "priority": "low"
     },
     {
       "id": 5,
       "sectionId": "gen-company-overview",
       "text": "List your current OEM production programs (named or anonymized) — vehicle program, SOP date, annual volume.",
-      "sourceRef": "TECH#5"
+      "sourceRef": "TECH#5",
+      "priority": "high"
     },
     {
       "id": 6,
       "sectionId": "gen-company-overview",
       "text": "What vehicle classes does your ADAS solution currently support — passenger cars, SUVs, LCVs?",
-      "sourceRef": "TECH#6"
+      "sourceRef": "TECH#6",
+      "priority": "medium"
     },
     {
       "id": 7,
       "sectionId": "gen-company-overview",
       "text": "What is your cumulative production volume shipped to date?",
-      "sourceRef": "TECH#7"
+      "sourceRef": "TECH#7",
+      "priority": "medium"
     },
     {
       "id": 8,
       "sectionId": "gen-company-overview",
       "text": "How many SOP program launches have you completed? Provide evidence of ramp-up.",
-      "sourceRef": "TECH#8"
+      "sourceRef": "TECH#8",
+      "priority": "medium"
     },
     {
       "id": 9,
       "sectionId": "gen-company-overview",
       "text": "Field failure rate / warranty data",
-      "sourceRef": "TECH#9"
+      "sourceRef": "TECH#9",
+      "priority": "low"
     },
     {
       "id": 10,
       "sectionId": "gen-company-overview",
       "text": "Have your customers achieved NCAP ratings using your ADAS stack? Provide details.",
-      "sourceRef": "TECH#10"
+      "sourceRef": "TECH#10",
+      "priority": "high"
     },
     {
       "id": 11,
       "sectionId": "gen-company-overview",
       "text": "What is your current ASPICE level? Has it been third-party audited?",
-      "sourceRef": "TECH#11"
+      "sourceRef": "TECH#11",
+      "priority": "medium"
     },
     {
       "id": 12,
       "sectionId": "gen-company-overview",
       "text": "Do you hold IATF 16949 certification for production parts?",
-      "sourceRef": "TECH#12"
+      "sourceRef": "TECH#12",
+      "priority": "low"
     },
     {
       "id": 13,
       "sectionId": "gen-company-overview",
       "text": "Describe your product roadmap over the next 3–5 years.",
-      "sourceRef": "TECH#13"
+      "sourceRef": "TECH#13",
+      "priority": "medium"
     },
     {
       "id": 14,
       "sectionId": "gen-company-overview",
       "text": "Which SoC platforms do you support or plan to support — TI TDA4x, Qualcomm SA8x, Renesas R-Car, NXP S32?",
-      "sourceRef": "TECH#14"
+      "sourceRef": "TECH#14",
+      "priority": "medium"
     },
     {
       "id": 15,
       "sectionId": "gen-company-overview",
       "text": "Do you support OTA software updates? Describe your OTA architecture — A/B partition, delta, rollback.",
-      "sourceRef": "TECH#15"
+      "sourceRef": "TECH#15",
+      "priority": "low"
     },
     {
       "id": 16,
       "sectionId": "gen-company-overview",
       "text": "What is your compliance roadmap for Euro NCAP 2026, GSR2, and AIS-184 India?",
-      "sourceRef": "TECH#16"
+      "sourceRef": "TECH#16",
+      "priority": "medium"
     },
     {
       "id": 17,
       "sectionId": "gen-company-overview",
       "text": "What is your primary product — a perception SDK, a full ADAS software stack, or an integrated ECU solution?",
-      "sourceRef": "PERC-S1#1"
+      "sourceRef": "PERC-S1#1",
+      "priority": "high"
     },
     {
       "id": 18,
       "sectionId": "gen-company-overview",
       "text": "What functions does your stack cover — AEB, ACC, LKA, LDW, DMS? For each: in production / validated but not shipped / in development.",
-      "sourceRef": "PERC-S1#2"
+      "sourceRef": "PERC-S1#2",
+      "priority": "high"
     },
     {
       "id": 19,
       "sectionId": "gen-company-overview",
       "text": "Does your stack include the ADAS function layer (AEB decision logic, LKA torque, ACC control) or does it output a perception SceneModel only?",
-      "sourceRef": "PERC-S1#3"
+      "sourceRef": "PERC-S1#3",
+      "priority": "high"
     },
     {
       "id": 20,
       "sectionId": "gen-validation-test",
       "text": "Do you have a SIL (Software-in-the-Loop) capability? Can the full perception stack run on a PC?",
-      "sourceRef": "TECH#57"
+      "sourceRef": "TECH#57",
+      "priority": "medium"
     },
     {
       "id": 21,
       "sectionId": "gen-validation-test",
       "text": "Do you have a HIL (Hardware-in-the-Loop) setup with real ECU and simulated sensors?",
-      "sourceRef": "TECH#58"
+      "sourceRef": "TECH#58",
+      "priority": "medium"
     },
     {
       "id": 22,
       "sectionId": "gen-validation-test",
       "text": "Which simulation tools do you integrate with — IPG CarMaker, CARLA, LGSVL, NVIDIA DriveSim?",
-      "sourceRef": "TECH#59"
+      "sourceRef": "TECH#59",
+      "priority": "low"
     },
     {
       "id": 23,
       "sectionId": "gen-validation-test",
       "text": "Do you have a synthetic data generation pipeline — weather, lighting, domain randomization?",
-      "sourceRef": "TECH#60"
+      "sourceRef": "TECH#60",
+      "priority": "low"
     },
     {
       "id": 24,
       "sectionId": "gen-validation-test",
       "text": "Do you support OpenSCENARIO/ASAM scenario generation? How large is your scenario library?",
-      "sourceRef": "TECH#61"
+      "sourceRef": "TECH#61",
+      "priority": "low"
     },
     {
       "id": 25,
       "sectionId": "gen-validation-test",
       "text": "Describe your replay validation framework. Is replay bit-exact or validated-equivalent?",
-      "sourceRef": "TECH#62"
+      "sourceRef": "TECH#62",
+      "priority": "medium"
     },
     {
       "id": 26,
       "sectionId": "gen-validation-test",
       "text": "How many total replay hours do you have available? What geographies does it cover?",
-      "sourceRef": "TECH#63"
+      "sourceRef": "TECH#63",
+      "priority": "low"
     },
     {
       "id": 27,
       "sectionId": "gen-validation-test",
       "text": "How is your dataset managed — searchable, version-controlled, metadata-tagged?",
-      "sourceRef": "TECH#64"
+      "sourceRef": "TECH#64",
+      "priority": "low"
     },
     {
       "id": 28,
       "sectionId": "gen-validation-test",
       "text": "Describe your annotation pipeline — tooling, multi-annotator consensus, QA sampling rate.",
-      "sourceRef": "TECH#65"
+      "sourceRef": "TECH#65",
+      "priority": "low"
     },
     {
       "id": 29,
       "sectionId": "gen-validation-test",
       "text": "Do you have an automated edge case data mining pipeline from fleet data?",
-      "sourceRef": "TECH#66"
+      "sourceRef": "TECH#66",
+      "priority": "low"
     },
     {
       "id": 30,
       "sectionId": "gen-validation-test",
       "text": "Do you have an automated regression framework? How frequently does it run?",
-      "sourceRef": "TECH#67"
+      "sourceRef": "TECH#67",
+      "priority": "low"
     },
     {
       "id": 31,
       "sectionId": "gen-validation-test",
       "text": "Is your CI/CD pipeline integrated with build, unit test, and SIL on every commit?",
-      "sourceRef": "TECH#68"
+      "sourceRef": "TECH#68",
+      "priority": "low"
     },
     {
       "id": 32,
       "sectionId": "gen-validation-test",
       "text": "How many automated test scenarios do you have in your regression suite?",
-      "sourceRef": "TECH#69"
+      "sourceRef": "TECH#69",
+      "priority": "low"
     },
     {
       "id": 33,
       "sectionId": "gen-validation-test",
       "text": "What is your test coverage per ADAS function against requirements?",
-      "sourceRef": "TECH#70"
+      "sourceRef": "TECH#70",
+      "priority": "medium"
     },
     {
       "id": 34,
       "sectionId": "gen-validation-test",
       "text": "How many test vehicles do you operate and across which markets?",
-      "sourceRef": "TECH#71"
+      "sourceRef": "TECH#71",
+      "priority": "medium"
     },
     {
       "id": 35,
       "sectionId": "gen-validation-test",
       "text": "What is your total accumulated real-world test mileage? Which geographies?",
-      "sourceRef": "TECH#72"
+      "sourceRef": "TECH#72",
+      "priority": "medium"
     },
     {
       "id": 36,
       "sectionId": "gen-validation-test",
       "text": "Do you have access to a dedicated test track for AEB and LKA testing?",
-      "sourceRef": "TECH#73"
+      "sourceRef": "TECH#73",
+      "priority": "low"
     },
     {
       "id": 37,
       "sectionId": "gen-funcsafety-cyber",
       "text": "What ASIL level do you target per ADAS function — AEB, LKA, DMS?",
-      "sourceRef": "TECH#74"
+      "sourceRef": "TECH#74",
+      "priority": "high"
     },
     {
       "id": 38,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Are all safety concepts available — TSC, FSC, HSC, SSC? Can these be shared under NDA?",
-      "sourceRef": "TECH#75"
+      "sourceRef": "TECH#75",
+      "priority": "medium"
     },
     {
       "id": 39,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Describe your ASIL decomposition strategy per function.",
-      "sourceRef": "TECH#76"
+      "sourceRef": "TECH#76",
+      "priority": "low"
     },
     {
       "id": 40,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Do you have FMEA and FMEDA available — hardware FMEDA with DC and SFF, SW FMEA per module?",
-      "sourceRef": "TECH#77"
+      "sourceRef": "TECH#77",
+      "priority": "medium"
     },
     {
       "id": 41,
       "sectionId": "gen-funcsafety-cyber",
       "text": "What are your diagnostic coverage (DC) metrics per ASIL level?",
-      "sourceRef": "TECH#78"
+      "sourceRef": "TECH#78",
+      "priority": "low"
     },
     {
       "id": 42,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Describe your safety monitor / supervisor architecture — is it independent from the main pipeline?",
-      "sourceRef": "TECH#79"
+      "sourceRef": "TECH#79",
+      "priority": "medium"
     },
     {
       "id": 43,
       "sectionId": "gen-funcsafety-cyber",
       "text": "What is your fallback mechanism — fail-safe or fail-operational? What is the safe state transition time?",
-      "sourceRef": "TECH#80"
+      "sourceRef": "TECH#80",
+      "priority": "high"
     },
     {
       "id": 44,
       "sectionId": "gen-funcsafety-cyber",
       "text": "How does your system detect and handle sensor faults — camera open/short/blind/blocked/degraded?",
-      "sourceRef": "TECH#81"
+      "sourceRef": "TECH#81",
+      "priority": "medium"
     },
     {
       "id": 45,
       "sectionId": "gen-funcsafety-cyber",
       "text": "What plausibility checks are applied to all AI outputs — range, rate, consistency?",
-      "sourceRef": "TECH#82"
+      "sourceRef": "TECH#82",
+      "priority": "medium"
     },
     {
       "id": 46,
       "sectionId": "gen-funcsafety-cyber",
       "text": "What is the defined safe state per function and what is the transition time?",
-      "sourceRef": "TECH#83"
+      "sourceRef": "TECH#83",
+      "priority": "medium"
     },
     {
       "id": 47,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Has a SOTIF analysis been completed? Are known and unknown triggering conditions documented?",
-      "sourceRef": "TECH#84"
+      "sourceRef": "TECH#84",
+      "priority": "high"
     },
     {
       "id": 48,
       "sectionId": "gen-funcsafety-cyber",
       "text": "How many triggering conditions have been cataloged per function?",
-      "sourceRef": "TECH#85"
+      "sourceRef": "TECH#85",
+      "priority": "low"
     },
     {
       "id": 49,
       "sectionId": "gen-funcsafety-cyber",
       "text": "What AI-specific SOTIF measures do you implement — ODD monitoring, confidence thresholding, fallback?",
-      "sourceRef": "TECH#86"
+      "sourceRef": "TECH#86",
+      "priority": "low"
     },
     {
       "id": 50,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Do you have fault injection test capability — SW and HW, automated?",
-      "sourceRef": "TECH#87"
+      "sourceRef": "TECH#87",
+      "priority": "low"
     },
     {
       "id": 51,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Has an independent third-party safety assessment been completed?",
-      "sourceRef": "TECH#88"
+      "sourceRef": "TECH#88",
+      "priority": "medium"
     },
     {
       "id": 52,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Describe your secure boot chain — root of trust, verified boot stages.",
-      "sourceRef": "TECH#89"
+      "sourceRef": "TECH#89",
+      "priority": "medium"
     },
     {
       "id": 53,
       "sectionId": "gen-funcsafety-cyber",
       "text": "How is OTA update security implemented — signed packages, encrypted transport, rollback protection?",
-      "sourceRef": "TECH#90"
+      "sourceRef": "TECH#90",
+      "priority": "low"
     },
     {
       "id": 54,
       "sectionId": "gen-funcsafety-cyber",
       "text": "How is communication secured internally and externally — TLS/DTLS, SecOC, MACsec?",
-      "sourceRef": "TECH#91"
+      "sourceRef": "TECH#91",
+      "priority": "low"
     },
     {
       "id": 55,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Describe your key management system — HSM-based, key rotation, per-vehicle keys?",
-      "sourceRef": "TECH#92"
+      "sourceRef": "TECH#92",
+      "priority": "low"
     },
     {
       "id": 56,
       "sectionId": "gen-funcsafety-cyber",
       "text": "How are debug ports protected in production builds?",
-      "sourceRef": "TECH#93"
+      "sourceRef": "TECH#93",
+      "priority": "low"
     },
     {
       "id": 57,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Has a TARA (Threat Analysis & Risk Assessment) been completed per ISO 21434?",
-      "sourceRef": "TECH#94"
+      "sourceRef": "TECH#94",
+      "priority": "high"
     },
     {
       "id": 58,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Has your system been tested against camera spoofing or adversarial attacks?",
-      "sourceRef": "TECH#95"
+      "sourceRef": "TECH#95",
+      "priority": "low"
     },
     {
       "id": 59,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Has a third-party penetration test been completed? Were findings remediated?",
-      "sourceRef": "TECH#96"
+      "sourceRef": "TECH#96",
+      "priority": "medium"
     },
     {
       "id": 60,
       "sectionId": "gen-funcsafety-cyber",
       "text": "GDPR / privacy compliance (DMS/OMS data)",
-      "sourceRef": "TECH#97"
+      "sourceRef": "TECH#97",
+      "priority": "low"
     },
     {
       "id": 61,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Data anonymization pipeline",
-      "sourceRef": "TECH#98"
+      "sourceRef": "TECH#98",
+      "priority": "low"
     },
     {
       "id": 62,
       "sectionId": "gen-funcsafety-cyber",
       "text": "Driver consent management",
-      "sourceRef": "TECH#99"
+      "sourceRef": "TECH#99",
+      "priority": "low"
     },
     {
       "id": 63,
       "sectionId": "prod-compute-hw",
       "text": "Which SoC platform(s) does your stack currently target? Provide TOPS rating and utilization.",
-      "sourceRef": "TECH#17"
+      "sourceRef": "TECH#17",
+      "priority": "high"
     },
     {
       "id": 64,
       "sectionId": "prod-compute-hw",
       "text": "Describe your CPU/GPU/NPU/DSP resource partitioning strategy.",
-      "sourceRef": "TECH#18"
+      "sourceRef": "TECH#18",
+      "priority": "low"
     },
     {
       "id": 65,
       "sectionId": "prod-compute-hw",
       "text": "Do you have a Hardware Abstraction Layer (HAL)? Has SoC swap been demonstrated or planned?",
-      "sourceRef": "TECH#19"
+      "sourceRef": "TECH#19",
+      "priority": "medium"
     },
     {
       "id": 66,
       "sectionId": "prod-compute-hw",
       "text": "What is the typical and peak power consumption? Provide thermal envelope.",
-      "sourceRef": "TECH#20"
+      "sourceRef": "TECH#20",
+      "priority": "medium"
     },
     {
       "id": 67,
       "sectionId": "prod-compute-hw",
       "text": "Describe your memory architecture — DDR bandwidth analysis, shared vs dedicated.",
-      "sourceRef": "TECH#21"
+      "sourceRef": "TECH#21",
+      "priority": "low"
     },
     {
       "id": 68,
       "sectionId": "prod-compute-hw",
       "text": "Describe tunability across four levels (supported? / tooling / partner involvement?):\n• Runtime config — thresholds via config file, no recompile\n• Platform tuning — retune per vehicle variant via calibration\n• Model fine-tuning — fine-tune on L&T data independently\n• Full retraining — full training pipeline access",
-      "sourceRef": "PERC-S2#20"
+      "sourceRef": "PERC-S2#20",
+      "priority": "medium"
     },
     {
       "id": 69,
       "sectionId": "prod-compute-hw",
       "text": "Which parameters can L&T modify via config files — without recompiling or involving your team? Provide a representative list.",
-      "sourceRef": "PERC-S2#21"
+      "sourceRef": "PERC-S2#21",
+      "priority": "medium"
     },
     {
       "id": 70,
       "sectionId": "prod-compute-hw",
       "text": "Total TOPS consumed by your full stack (perception + ADAS functions) at nominal operation?",
-      "sourceRef": "PERC-S3#2"
+      "sourceRef": "PERC-S3#2",
+      "priority": "high"
     },
     {
       "id": 71,
       "sectionId": "prod-compute-hw",
       "text": "Minimum TOPS required to run your ADAS functions at acceptable performance?",
-      "sourceRef": "PERC-S3#3"
+      "sourceRef": "PERC-S3#3",
+      "priority": "medium"
     },
     {
       "id": 72,
       "sectionId": "prod-compute-hw",
       "text": "Can perception + ADAS functions fit within 2 TOPS? If yes, evidence. If no, what is the minimum?",
-      "sourceRef": "PERC-S3#4"
+      "sourceRef": "PERC-S3#4",
+      "priority": "medium"
     },
     {
       "id": 73,
       "sectionId": "prod-compute-hw",
       "text": "Have you ported to any TI SoC (TDA4VM, AM62A, or equivalent)? Performance data or estimated effort?",
-      "sourceRef": "PERC-S3#5"
+      "sourceRef": "PERC-S3#5",
+      "priority": "medium"
     },
     {
       "id": 74,
       "sectionId": "prod-compute-hw",
       "text": "Is your inference pipeline optimized for TIDL? If not, what runtime do you use?",
-      "sourceRef": "PERC-S3#6"
+      "sourceRef": "PERC-S3#6",
+      "priority": "low"
     },
     {
       "id": 75,
       "sectionId": "prod-compute-hw",
       "text": "Quantization level — FP32, FP16, INT8? Accuracy delta from FP32 baseline to deployment precision?",
-      "sourceRef": "PERC-S3#7"
+      "sourceRef": "PERC-S3#7",
+      "priority": "low"
     },
     {
       "id": 76,
       "sectionId": "prod-compute-hw",
       "text": "Memory footprint — model weights + runtime memory?",
-      "sourceRef": "PERC-S3#8"
+      "sourceRef": "PERC-S3#8",
+      "priority": "low"
     },
     {
       "id": 77,
       "sectionId": "prod-compute-hw",
       "text": "Minimum camera specification your stack is validated on — resolution, FPS, sensor type?",
-      "sourceRef": "PERC-S3#9"
+      "sourceRef": "PERC-S3#9",
+      "priority": "medium"
     },
     {
       "id": 78,
       "sectionId": "prod-sw-arch",
       "text": "Do you support AUTOSAR Adaptive and/or Classic? Describe integration status.",
-      "sourceRef": "TECH#22"
+      "sourceRef": "TECH#22",
+      "priority": "high"
     },
     {
       "id": 79,
       "sectionId": "prod-sw-arch",
       "text": "What OS/RTOS does your stack run on — QNX, Linux, SafeRTOS, or other?",
-      "sourceRef": "TECH#23"
+      "sourceRef": "TECH#23",
+      "priority": "medium"
     },
     {
       "id": 80,
       "sectionId": "prod-sw-arch",
       "text": "Describe your middleware architecture. Do you support SOME/IP, DDS, or other IPC?",
-      "sourceRef": "TECH#24"
+      "sourceRef": "TECH#24",
+      "priority": "low"
     },
     {
       "id": 81,
       "sectionId": "prod-sw-arch",
       "text": "Do you support CAN, CAN-FD, and Automotive Ethernet? Is signal mapping documented?",
-      "sourceRef": "TECH#25"
+      "sourceRef": "TECH#25",
+      "priority": "medium"
     },
     {
       "id": 82,
       "sectionId": "prod-sw-arch",
       "text": "Describe your data logging and replay framework — capacity, format, lossless capability.",
-      "sourceRef": "TECH#26"
+      "sourceRef": "TECH#26",
+      "priority": "low"
     },
     {
       "id": 83,
       "sectionId": "prod-sw-arch",
       "text": "Describe your calibration architecture. Do you support XCP/CCP and provide A2L files?",
-      "sourceRef": "TECH#27"
+      "sourceRef": "TECH#27",
+      "priority": "low"
     },
     {
       "id": 84,
       "sectionId": "prod-pipeline-runtime",
       "text": "What is your end-to-end pipeline latency from camera input to actuation output? Provide measured data.",
-      "sourceRef": "TECH#28"
+      "sourceRef": "TECH#28",
+      "priority": "high"
     },
     {
       "id": 85,
       "sectionId": "prod-pipeline-runtime",
       "text": "What is your cold boot time to first valid output and full pipeline availability?",
-      "sourceRef": "TECH#29"
+      "sourceRef": "TECH#29",
+      "priority": "medium"
     },
     {
       "id": 86,
       "sectionId": "prod-pipeline-runtime",
       "text": "What is your warm restart / recovery time after a watchdog reset?",
-      "sourceRef": "TECH#30"
+      "sourceRef": "TECH#30",
+      "priority": "low"
     },
     {
       "id": 87,
       "sectionId": "prod-pipeline-runtime",
       "text": "Describe your watchdog implementation — hardware and software levels, escalation logic.",
-      "sourceRef": "TECH#31"
+      "sourceRef": "TECH#31",
+      "priority": "low"
     },
     {
       "id": 88,
       "sectionId": "prod-pipeline-runtime",
       "text": "How does your system handle errors and exceptions — graceful degradation, logging?",
-      "sourceRef": "TECH#32"
+      "sourceRef": "TECH#32",
+      "priority": "medium"
     },
     {
       "id": 89,
       "sectionId": "prod-power",
       "text": "Describe your sleep/wake behavior and ignition cycle state machine. What is parasitic draw in sleep?",
-      "sourceRef": "TECH#33"
+      "sourceRef": "TECH#33",
+      "priority": "low"
     },
     {
       "id": 90,
       "sectionId": "prod-power",
       "text": "Describe your graceful shutdown sequence — safe state before power loss, NVM write protection.",
-      "sourceRef": "TECH#34"
+      "sourceRef": "TECH#34",
+      "priority": "low"
     },
     {
       "id": 91,
       "sectionId": "prod-camera-sensor-optics",
       "text": "Which image sensor do you use? Is it AEC-Q100 automotive grade? Provide supplier and model.",
-      "sourceRef": "TECH#35"
+      "sourceRef": "TECH#35",
+      "priority": "high"
     },
     {
       "id": 92,
       "sectionId": "prod-camera-sensor-optics",
       "text": "What sensor type do you use for forward camera and DMS — RGB, RGB-IR, or NIR? Explain the selection rationale.",
-      "sourceRef": "TECH#36"
+      "sourceRef": "TECH#36",
+      "priority": "medium"
     },
     {
       "id": 93,
       "sectionId": "prod-camera-sensor-optics",
       "text": "What is the sensor resolution and pixel size for each camera?",
-      "sourceRef": "TECH#37"
+      "sourceRef": "TECH#37",
+      "priority": "medium"
     },
     {
       "id": 94,
       "sectionId": "prod-camera-sensor-optics",
       "text": "What is the dynamic range (HDR capability) of your sensor? Provide measured performance.",
-      "sourceRef": "TECH#38"
+      "sourceRef": "TECH#38",
+      "priority": "medium"
     },
     {
       "id": 95,
       "sectionId": "prod-camera-sensor-optics",
       "text": "What is the minimum lux level your system operates at — for forward camera and DMS separately?",
-      "sourceRef": "TECH#39"
+      "sourceRef": "TECH#39",
+      "priority": "medium"
     },
     {
       "id": 96,
       "sectionId": "prod-camera-sensor-optics",
       "text": "Does your sensor support LED Flicker Mitigation (LFM)? Has it been tested against LED traffic signals?",
-      "sourceRef": "TECH#40"
+      "sourceRef": "TECH#40",
+      "priority": "low"
     },
     {
       "id": 97,
       "sectionId": "prod-camera-sensor-optics",
       "text": "What is the field of view (H × V × D) for each camera?",
-      "sourceRef": "TECH#41"
+      "sourceRef": "TECH#41",
+      "priority": "medium"
     },
     {
       "id": 98,
       "sectionId": "prod-camera-sensor-optics",
       "text": "How do you handle rolling shutter artifacts — global shutter or RS compensation algorithm?",
-      "sourceRef": "TECH#42"
+      "sourceRef": "TECH#42",
+      "priority": "low"
     },
     {
       "id": 99,
       "sectionId": "prod-camera-isp",
       "text": "Describe your ISP pipeline — on-chip or external? Is it tunable per environment?",
-      "sourceRef": "TECH#43"
+      "sourceRef": "TECH#43",
+      "priority": "low"
     },
     {
       "id": 100,
       "sectionId": "prod-camera-isp",
       "text": "How does your auto exposure and auto white balance perform? What is convergence time in frames?",
-      "sourceRef": "TECH#44"
+      "sourceRef": "TECH#44",
+      "priority": "low"
     },
     {
       "id": 101,
       "sectionId": "prod-camera-isp",
       "text": "How does your system handle tunnel entry and exit — adaptation time and behavior?",
-      "sourceRef": "TECH#45"
+      "sourceRef": "TECH#45",
+      "priority": "low"
     },
     {
       "id": 102,
       "sectionId": "prod-camera-isp",
       "text": "How does your system handle sun glare and strong backlight conditions?",
-      "sourceRef": "TECH#46"
+      "sourceRef": "TECH#46",
+      "priority": "medium"
     },
     {
       "id": 103,
       "sectionId": "prod-camera-isp",
       "text": "For DMS: how does your IR cut filter / day-night switching work? What is transition time?",
-      "sourceRef": "TECH#47"
+      "sourceRef": "TECH#47",
+      "priority": "low"
     },
     {
       "id": 104,
       "sectionId": "prod-camera-robustness",
       "text": "What is the IP rating for your camera modules — exterior and cabin?",
-      "sourceRef": "TECH#49"
+      "sourceRef": "TECH#49",
+      "priority": "medium"
     },
     {
       "id": 105,
       "sectionId": "prod-camera-robustness",
       "text": "Does your stack include lens contamination/blockage detection? What is coverage estimation accuracy?",
-      "sourceRef": "TECH#52"
+      "sourceRef": "TECH#52",
+      "priority": "medium"
     },
     {
       "id": 106,
       "sectionId": "prod-camera-robustness",
       "text": "What is the calibration drift over the product lifetime? Do you have a self-calibration algorithm?",
-      "sourceRef": "TECH#53"
+      "sourceRef": "TECH#53",
+      "priority": "low"
     },
     {
       "id": 107,
       "sectionId": "prod-camera-robustness",
       "text": "What is your spare parts strategy for camera modules — supply period, drop-in replacement?",
-      "sourceRef": "TECH#109"
+      "sourceRef": "TECH#109",
+      "priority": "low"
     },
     {
       "id": 108,
       "sectionId": "prod-camera-robustness",
       "text": "Any ISP dependency — specific ISP or camera module required? If yes, which ones?",
-      "sourceRef": "PERC-S3#11"
+      "sourceRef": "PERC-S3#11",
+      "priority": "low"
     },
     {
       "id": 109,
       "sectionId": "prod-camera-robustness",
       "text": "Do you provide calibration tooling (intrinsic, extrinsic, homography)? Process and time per vehicle variant?",
-      "sourceRef": "PERC-S3#12"
+      "sourceRef": "PERC-S3#12",
+      "priority": "low"
     },
     {
       "id": 110,
       "sectionId": "prod-radar-subsystem",
       "text": "What radar frequency band(s) do you use — 24GHz, 77GHz, 79GHz? Justify the choice for your target use case.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 111,
       "sectionId": "prod-radar-subsystem",
       "text": "What radar type(s) are deployed — long-range (LRR), mid-range (MRR), short-range (SRR)? How many units and where are they mounted (front/rear/corner)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 112,
       "sectionId": "prod-radar-subsystem",
       "text": "What is the detection range, azimuth FoV, and elevation FoV for each radar unit?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 113,
       "sectionId": "prod-radar-subsystem",
       "text": "What is the angular resolution and ability to separate closely-spaced targets (e.g. two pedestrians side by side)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 114,
       "sectionId": "prod-radar-subsystem",
       "text": "What object classes can your radar reliably classify (vehicle, pedestrian, cyclist, static clutter), and what is the classification accuracy?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 115,
       "sectionId": "prod-radar-subsystem",
       "text": "How do you handle radar-to-radar interference in dense traffic or multi-vehicle scenarios?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 116,
       "sectionId": "prod-radar-subsystem",
       "text": "What is your radar's performance in adverse weather (rain, fog, dust) compared to clear conditions — provide measured data.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 117,
       "sectionId": "prod-radar-subsystem",
       "text": "Is the radar hardware AEC-Q100 qualified? What automotive radar chipset/MMIC do you use?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 118,
       "sectionId": "prod-radar-subsystem",
       "text": "Describe your radar calibration process — boresight alignment, mounting tolerance, recalibration triggers.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 119,
       "sectionId": "prod-radar-subsystem",
       "text": "What is the radar's update rate (frame rate) and end-to-end latency from detection to output?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 120,
       "sectionId": "prod-fusion-subsystem",
       "text": "What is your sensor fusion architecture — low-level (raw data), mid-level (feature), or high-level (object/track) fusion?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 121,
       "sectionId": "prod-fusion-subsystem",
       "text": "Which sensor combinations does your fusion stack support — camera+radar, camera+radar+lidar, other?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 122,
       "sectionId": "prod-fusion-subsystem",
       "text": "What fusion algorithm do you use — Kalman filter variant, particle filter, learned/deep fusion model, rule-based?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 123,
       "sectionId": "prod-fusion-subsystem",
       "text": "How do you time-synchronize data from different sensors? What is the maximum tolerated time skew?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 124,
       "sectionId": "prod-fusion-subsystem",
       "text": "How does the fusion stack handle conflicting detections between sensors (e.g. radar detects an object camera doesn't, or vice versa)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 125,
       "sectionId": "prod-fusion-subsystem",
       "text": "What is your fallback behavior when one sensor degrades or fails (e.g. camera blocked, radar occluded)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 126,
       "sectionId": "prod-fusion-subsystem",
       "text": "How is per-sensor confidence/uncertainty represented and propagated through the fusion output?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 127,
       "sectionId": "prod-fusion-subsystem",
       "text": "Describe your track management — how object IDs are maintained, merged, or split across sensor inputs over time.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 128,
       "sectionId": "prod-hw-robustness",
       "text": "What is the operating temperature range for the sensor and ECU?",
-      "sourceRef": "TECH#48"
+      "sourceRef": "TECH#48",
+      "priority": "medium"
     },
     {
       "id": 129,
       "sectionId": "prod-hw-robustness",
       "text": "What EMC/EMI compliance standards have been met? Provide test reports.",
-      "sourceRef": "TECH#50"
+      "sourceRef": "TECH#50",
+      "priority": "low"
     },
     {
       "id": 130,
       "sectionId": "prod-hw-robustness",
       "text": "What vibration and shock resistance testing has been completed?",
-      "sourceRef": "TECH#51"
+      "sourceRef": "TECH#51",
+      "priority": "low"
     },
     {
       "id": 131,
       "sectionId": "prod-hw-robustness",
       "text": "Is your BOM transparent? Do you have a second-source strategy for key components?",
-      "sourceRef": "TECH#54"
+      "sourceRef": "TECH#54",
+      "priority": "low"
     },
     {
       "id": 132,
       "sectionId": "prod-hw-robustness",
       "text": "Are all components AEC-Q100/Q104 qualified? Are full qualification reports available?",
-      "sourceRef": "TECH#55"
+      "sourceRef": "TECH#55",
+      "priority": "low"
     },
     {
       "id": 133,
       "sectionId": "prod-hw-robustness",
       "text": "What is your chip shortage contingency plan — buffer stock, multi-fab sourcing?",
-      "sourceRef": "TECH#56"
+      "sourceRef": "TECH#56",
+      "priority": "low"
     },
     {
       "id": 134,
       "sectionId": "prod-camperc-pipeline",
       "text": "Describe your full perception pipeline end-to-end. For each perception task confirm: dedicated model / head on shared backbone / not present — and DL/ML or classical. State whether single multitask or separate models per task, and explain rationale:\n• Object detection  • Semantic segmentation  • Lane detection  • Monocular depth  • Freespace/drivable area  • Object tracking",
-      "sourceRef": "PERC-S1#4"
+      "sourceRef": "PERC-S1#4",
+      "priority": "high"
     },
     {
       "id": 135,
       "sectionId": "prod-camperc-pipeline",
       "text": "What model backbone do you use — ResNet, EfficientNet, custom, other? Design rationale at your target TOPS budget?",
-      "sourceRef": "PERC-S1#5"
+      "sourceRef": "PERC-S1#5",
+      "priority": "low"
     },
     {
       "id": 136,
       "sectionId": "prod-camperc-objdet",
       "text": "What object classes does your detector support? Confirm: auto-rickshaws, two-wheelers, pedestrians, cattle/animals, overloaded/non-standard vehicles.",
-      "sourceRef": "PERC-S1#6"
+      "sourceRef": "PERC-S1#6",
+      "priority": "high"
     },
     {
       "id": 137,
       "sectionId": "prod-camperc-objdet",
       "text": "Detection range per class under daylight — provide: class → min detection range → reliable tracking range.",
-      "sourceRef": "PERC-S1#7"
+      "sourceRef": "PERC-S1#7",
+      "priority": "medium"
     },
     {
       "id": 138,
       "sectionId": "prod-camperc-objdet",
       "text": "Detection performance (precision / recall / mAP) on: internal test dataset / public benchmark (KITTI, nuScenes) / Indian road scenarios.",
-      "sourceRef": "PERC-S1#8"
+      "sourceRef": "PERC-S1#8",
+      "priority": "high"
     },
     {
       "id": 139,
       "sectionId": "prod-camperc-objdet",
       "text": "How does detection degrade under: night/low light / rain/glare / dust/haze / partial occlusion?",
-      "sourceRef": "PERC-S1#9"
+      "sourceRef": "PERC-S1#9",
+      "priority": "high"
     },
     {
       "id": 140,
       "sectionId": "prod-camperc-objdet",
       "text": "False positive rate on static roadside objects — walls, signboards, parked vehicles, speed bumps.",
-      "sourceRef": "PERC-S1#10"
+      "sourceRef": "PERC-S1#10",
+      "priority": "medium"
     },
     {
       "id": 141,
       "sectionId": "prod-camperc-objdet",
       "text": "What training datasets were used? Were India-specific datasets (IDD or equivalent) included? Describe geographic and demographic diversity.",
-      "sourceRef": "PERC-S1#11"
+      "sourceRef": "PERC-S1#11",
+      "priority": "high"
     },
     {
       "id": 142,
       "sectionId": "prod-camperc-objdet",
       "text": "What is your ODD for object detection? Be explicit about what the stack does NOT handle.",
-      "sourceRef": "PERC-S1#12"
+      "sourceRef": "PERC-S1#12",
+      "priority": "medium"
     },
     {
       "id": 143,
       "sectionId": "prod-camperc-objdet",
       "text": "What software-side techniques does your stack use for camera ghost suppression — lens flare, windshield reflections, wet surface reflections? Describe approach and false positive rate.",
-      "sourceRef": "PERC-S1#13"
+      "sourceRef": "PERC-S1#13",
+      "priority": "low"
     },
     {
       "id": 144,
       "sectionId": "prod-camperc-objdet",
       "text": "For tracked objects that disappear due to occlusion — what is your re-identification strategy? Maximum occlusion duration after which re-ID is still reliable?",
-      "sourceRef": "PERC-S1#14"
+      "sourceRef": "PERC-S1#14",
+      "priority": "low"
     },
     {
       "id": 145,
       "sectionId": "prod-camperc-objdet",
       "text": "Does your stack estimate heading angle for detected objects? Heading estimation error at 50m?",
-      "sourceRef": "PERC-S1#15"
+      "sourceRef": "PERC-S1#15",
+      "priority": "low"
     },
     {
       "id": 146,
       "sectionId": "prod-camperc-objdet",
       "text": "What is your relative velocity estimation accuracy for moving objects? Error in km/h at 50m and 80m.",
-      "sourceRef": "PERC-S1#16"
+      "sourceRef": "PERC-S1#16",
+      "priority": "medium"
     },
     {
       "id": 147,
       "sectionId": "prod-camperc-objdet",
       "text": "Provide your structured false positive catalog for object detection — rain drops, sun flare, tunnel entry, shadows, road reflections. For each: mitigation and residual false positive rate.",
-      "sourceRef": "PERC-S1#17"
+      "sourceRef": "PERC-S1#17",
+      "priority": "low"
     },
     {
       "id": 148,
       "sectionId": "prod-camperc-lane",
       "text": "Lane types supported? Confirm: solid/dashed / faded/worn / temporary construction markings including orange/yellow and cone/barrier / unmarked roads / dirt/gravel.",
-      "sourceRef": "PERC-S1#18"
+      "sourceRef": "PERC-S1#18",
+      "priority": "medium"
     },
     {
       "id": 149,
       "sectionId": "prod-camperc-lane",
       "text": "Lane detection F1 score under: clear markings / faded markings / night/wet roads / intersections and merges.",
-      "sourceRef": "PERC-S1#19"
+      "sourceRef": "PERC-S1#19",
+      "priority": "medium"
     },
     {
       "id": 150,
       "sectionId": "prod-camperc-lane",
       "text": "How does the system behave when lane detection fails or confidence drops? Does it fail safe?",
-      "sourceRef": "PERC-S1#20"
+      "sourceRef": "PERC-S1#20",
+      "priority": "medium"
     },
     {
       "id": 151,
       "sectionId": "prod-camperc-lane",
       "text": "Does lane detection include lane type classification (solid vs dashed, single vs double)? If yes, accuracy metrics.",
-      "sourceRef": "PERC-S1#21"
+      "sourceRef": "PERC-S1#21",
+      "priority": "low"
     },
     {
       "id": 152,
       "sectionId": "prod-camperc-lane",
       "text": "Minimum road curvature radius your lane detection reliably supports. At your minimum radius, lateral position accuracy at 80m lookahead?",
-      "sourceRef": "PERC-S1#22"
+      "sourceRef": "PERC-S1#22",
+      "priority": "low"
     },
     {
       "id": 153,
       "sectionId": "prod-camperc-lane",
       "text": "Does your stack detect lane topology changes — merges, splits, forks — ahead of the vehicle? Lookahead distance?",
-      "sourceRef": "PERC-S1#23"
+      "sourceRef": "PERC-S1#23",
+      "priority": "low"
     },
     {
       "id": 154,
       "sectionId": "prod-camperc-lane",
       "text": "Structured false positive catalog for lane detection — phantom lane scenarios: road cracks, tar strips, curb shadows, guard rails, wet reflections. Mitigation and residual rate.",
-      "sourceRef": "PERC-S1#24"
+      "sourceRef": "PERC-S1#24",
+      "priority": "low"
     },
     {
       "id": 155,
       "sectionId": "prod-camperc-depth",
       "text": "What method do you use for depth/distance estimation from a monocular camera?",
-      "sourceRef": "PERC-S1#25"
+      "sourceRef": "PERC-S1#25",
+      "priority": "medium"
     },
     {
       "id": 156,
       "sectionId": "prod-camperc-depth",
       "text": "Longitudinal distance accuracy at 10m, 20m, 40m, 80m — at daylight, night, and rain.",
-      "sourceRef": "PERC-S1#26"
+      "sourceRef": "PERC-S1#26",
+      "priority": "high"
     },
     {
       "id": 157,
       "sectionId": "prod-camperc-depth",
       "text": "Do you use ground plane assumptions (IPM/homography)? How does accuracy degrade on uneven roads, speed bumps, slopes?",
-      "sourceRef": "PERC-S1#27"
+      "sourceRef": "PERC-S1#27",
+      "priority": "low"
     },
     {
       "id": 158,
       "sectionId": "prod-camperc-depth",
       "text": "Does your stack output a freespace/drivable area map? Describe representation — grid, polygon, other.",
-      "sourceRef": "PERC-S1#28"
+      "sourceRef": "PERC-S1#28",
+      "priority": "medium"
     },
     {
       "id": 159,
       "sectionId": "prod-camperc-depth",
       "text": "Update rate and latency of the freespace output?",
-      "sourceRef": "PERC-S1#29"
+      "sourceRef": "PERC-S1#29",
+      "priority": "low"
     },
     {
       "id": 160,
       "sectionId": "prod-camperc-slrtsr",
       "text": "Does your perception stack include Speed Limit Recognition (SLR)? If yes:\n• Sign types — numeric, variable message/LED VMS, end-of-limit\n• Detection accuracy and false positive rate\n• India-specific sign database / formats supported?",
-      "sourceRef": "PERC-S2#1"
+      "sourceRef": "PERC-S2#1",
+      "priority": "medium"
     },
     {
       "id": 161,
       "sectionId": "prod-camperc-slrtsr",
       "text": "Does your perception stack include Traffic Signal Recognition (TSR)? If yes:\n• Signal states — red, amber, green, flashing, arrow\n• Detection range and accuracy\n• Perception output only, or feeds into function layer?",
-      "sourceRef": "PERC-S2#2"
+      "sourceRef": "PERC-S2#2",
+      "priority": "medium"
     },
     {
       "id": 162,
       "sectionId": "prod-camperc-slrtsr",
       "text": "Are SLR and TSR dedicated models, heads on shared backbone, or separate pipeline? TOPS budget impact?",
-      "sourceRef": "PERC-S2#3"
+      "sourceRef": "PERC-S2#3",
+      "priority": "low"
     },
     {
       "id": 163,
       "sectionId": "prod-camperc-modelquality",
       "text": "What is your mAP at FP32 vs INT8? QAT or PTQ used for quantization? Accuracy recovery method?",
-      "sourceRef": "PERC-S2#4"
+      "sourceRef": "PERC-S2#4",
+      "priority": "low"
     },
     {
       "id": 164,
       "sectionId": "prod-camperc-modelquality",
       "text": "Temporal detection stability — class consistency % across consecutive frames? How is flicker/bbox jitter measured?",
-      "sourceRef": "PERC-S2#5"
+      "sourceRef": "PERC-S2#5",
+      "priority": "low"
     },
     {
       "id": 165,
       "sectionId": "prod-camperc-modelquality",
       "text": "Tracking algorithm used (ByteTrack, DeepSORT, other)? MOTA score and tracking ID switch rate (IDSW %)?",
-      "sourceRef": "PERC-S2#6"
+      "sourceRef": "PERC-S2#6",
+      "priority": "low"
     },
     {
       "id": 166,
       "sectionId": "prod-camperc-modelquality",
       "text": "Describe your multi-frame confidence fusion strategy — temporal voting or N-of-M frame confirmation. How is this tuned?",
-      "sourceRef": "PERC-S2#7"
+      "sourceRef": "PERC-S2#7",
+      "priority": "low"
     },
     {
       "id": 167,
       "sectionId": "prod-camperc-output",
       "text": "What is the output of your perception stack? Describe: object list, lane boundaries, freespace, confidence scores, heading estimates, velocity estimates.",
-      "sourceRef": "PERC-S2#8"
+      "sourceRef": "PERC-S2#8",
+      "priority": "medium"
     },
     {
       "id": 168,
       "sectionId": "prod-camperc-output",
       "text": "At what rate (Hz) is the perception output produced? Frame drop rate under normal and peak load?",
-      "sourceRef": "PERC-S2#9"
+      "sourceRef": "PERC-S2#9",
+      "priority": "medium"
     },
     {
       "id": 169,
       "sectionId": "prod-camperc-output",
       "text": "End-to-end latency from image capture to perception output?",
-      "sourceRef": "PERC-S2#10"
+      "sourceRef": "PERC-S2#10",
+      "priority": "medium"
     },
     {
       "id": 170,
       "sectionId": "prod-camperc-output",
       "text": "Which ADAS functions do you own beyond perception — AEB decision logic, LDW alert, LKA torque command, ACC set-speed control? For each: owned / must be implemented by integrator.",
-      "sourceRef": "PERC-S2#11"
+      "sourceRef": "PERC-S2#11",
+      "priority": "high"
     },
     {
       "id": 171,
       "sectionId": "prod-func-aeb",
       "text": "For each AEB scenario provide: max ego speed / max target speed / detection-to-brake latency / validation status:\n• CCRs (Stationary)  • CCRm (Decelerating)  • CCRb (Moving)\n• CPNCO (Ped crossing)  • CPFA (Ped ahead)\n• Lateral Cut-in  • Lateral Cut-out\n• Oncoming Car (CCFTAP)  • Oncoming Ped\n• Ego Turn into Car  • Ego Turn into Ped",
-      "sourceRef": "PERC-S2#12"
+      "sourceRef": "PERC-S2#12",
+      "priority": "high"
     },
     {
       "id": 172,
       "sectionId": "prod-func-aeb",
       "text": "TTC estimation accuracy — error in seconds at TTC = 2.0s (critical intervention window).",
-      "sourceRef": "PERC-S2#16"
+      "sourceRef": "PERC-S2#16",
+      "priority": "medium"
     },
     {
       "id": 173,
       "sectionId": "prod-func-aeb",
       "text": "False braking rate in field conditions — unintended AEB events per 10,000 km of normal driving.",
-      "sourceRef": "PERC-S2#17"
+      "sourceRef": "PERC-S2#17",
+      "priority": "high"
     },
     {
       "id": 174,
       "sectionId": "prod-func-aeb",
       "text": "Does your stack detect / warn for: road debris / fallen cargo / stationary obstacles? Emergency vehicle detection (flashing lights)?",
-      "sourceRef": "PERC-S2#18"
+      "sourceRef": "PERC-S2#18",
+      "priority": "medium"
     },
     {
       "id": 175,
       "sectionId": "prod-func-aeb",
       "text": "Have your AEB/LDW functions been tested against any NCAP or AEBS protocol? If yes, which protocol, year, and results?",
-      "sourceRef": "PERC-S2#19"
+      "sourceRef": "PERC-S2#19",
+      "priority": "high"
     },
     {
       "id": 176,
       "sectionId": "prod-func-acc",
       "text": "For ACC cut-in handling:\n• Min cut-in TLC your system reacts to\n• Distinguishes intentional lane change from gradual drift\n• Response latency to ACC deceleration command\n• Strategy: highway vs urban low-speed cut-ins",
-      "sourceRef": "PERC-S2#13"
+      "sourceRef": "PERC-S2#13",
+      "priority": "high"
     },
     {
       "id": 177,
       "sectionId": "prod-func-acc",
       "text": "Cut-in occlusion strategy — when cut-in vehicle is partially occluded before entering ego lane. How early can the system anticipate the cut-in?",
-      "sourceRef": "PERC-S2#14"
+      "sourceRef": "PERC-S2#14",
+      "priority": "medium"
     },
     {
       "id": 178,
       "sectionId": "prod-func-ldwlka",
       "text": "For LDW/LKA — max ego speed at which function is active? Minimum speed below which it deactivates?",
-      "sourceRef": "PERC-S2#15"
+      "sourceRef": "PERC-S2#15",
+      "priority": "medium"
     },
     {
       "id": 179,
       "sectionId": "prod-func-lca",
       "text": "What sensors does your LCA function use — rear/side radar only, or camera+radar fusion?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 180,
       "sectionId": "prod-func-lca",
       "text": "What is the detection range and field of view covered for adjacent-lane traffic, front and rear of the ego vehicle?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 181,
       "sectionId": "prod-func-lca",
       "text": "What is the minimum relative closing speed your system reliably detects for an approaching vehicle in the target lane?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 182,
       "sectionId": "prod-func-lca",
       "text": "What is your false alert rate in field conditions (alerts per X km)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 183,
       "sectionId": "prod-func-lca",
       "text": "Describe your warning strategy and timing — visual/audio/haptic, and at what time-to-collision threshold?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 184,
       "sectionId": "prod-func-bsd",
       "text": "What sensors and how many units cover the blind spot detection zones (per side)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 185,
       "sectionId": "prod-func-bsd",
       "text": "Does your blind spot zone definition meet a specific standard (e.g. Euro NCAP, ISO)? Describe the covered zone dimensions.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 186,
       "sectionId": "prod-func-bsd",
       "text": "What object classes are detected in the blind spot (vehicle, motorcycle/two-wheeler, cyclist)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 187,
       "sectionId": "prod-func-bsd",
       "text": "How does the system behave when towing a trailer or in multi-axle configurations?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 188,
       "sectionId": "prod-func-bsd",
       "text": "What is your false positive / false negative rate in field testing?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 189,
       "sectionId": "prod-func-rcta",
       "text": "What sensors and detection range/FoV are used for rear cross-traffic detection?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 190,
       "sectionId": "prod-func-rcta",
       "text": "What time-to-collision threshold triggers an alert while reversing?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 191,
       "sectionId": "prod-func-rcta",
       "text": "Is RCTA integrated with automatic braking (RCTB), or warning-only? Describe the response strategy.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 192,
       "sectionId": "prod-func-rcta",
       "text": "How does the system perform in typical parking/reversing scenarios — obstructed views, perpendicular vs. angled parking?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 193,
       "sectionId": "prod-func-mois",
       "text": "What sensors detect moving objects in the close-range blind zone around/beneath the vehicle (front-low, side-low) that the driver cannot see directly?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "high"
     },
     {
       "id": 194,
       "sectionId": "prod-func-mois",
       "text": "What is the minimum detectable object size and height — can it detect a two-wheeler or pedestrian very close to or partially under the vehicle body?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 195,
       "sectionId": "prod-func-mois",
       "text": "What is the detection range and coverage zone for this near-vehicle blind area — front, sides, or both?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 196,
       "sectionId": "prod-func-mois",
       "text": "How does the system alert or intervene when a moving object is detected in this zone, while stationary vs. while starting to move?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 197,
       "sectionId": "prod-func-mois",
       "text": "Is this function specifically designed for large/commercial vehicles (trucks, buses) where driver sightlines are most limited? Describe the target vehicle classes.",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "medium"
     },
     {
       "id": 198,
       "sectionId": "prod-func-mois",
       "text": "What is your false alert rate, and what validation evidence exists for this scenario (test tracks, replicated real-world incidents)?",
-      "sourceRef": null
+      "sourceRef": null,
+      "priority": "low"
     },
     {
       "id": 199,
       "sectionId": "prod-func-dms",
       "text": "Do you have a DMS stack? Developed in-house or sourced from a sub-vendor?",
-      "sourceRef": "PERC-S2#22"
+      "sourceRef": "PERC-S2#22",
+      "priority": "high"
     },
     {
       "id": 200,
       "sectionId": "prod-func-dms",
       "text": "What sensor does your DMS require — RGB, IR, or either? Recommended spec: resolution, FPS, wavelength.",
-      "sourceRef": "PERC-S2#23"
+      "sourceRef": "PERC-S2#23",
+      "priority": "medium"
     },
     {
       "id": 201,
       "sectionId": "prod-func-dms",
       "text": "Driver states detected? Confirm:\n• Eye closure / blink rate / drowsiness (PERCLOS)\n• Gaze direction / distraction  • Yawning  • Head pose\n• Phone usage  • Smoking  • Eating/drinking\n• Driver presence / absence\n• Child presence in vehicle (OMS)",
-      "sourceRef": "PERC-S2#24"
+      "sourceRef": "PERC-S2#24",
+      "priority": "high"
     },
     {
       "id": 202,
       "sectionId": "prod-func-dms",
       "text": "Response latency from driver state change to DMS alert output?",
-      "sourceRef": "PERC-S2#25"
+      "sourceRef": "PERC-S2#25",
+      "priority": "medium"
     },
     {
       "id": 203,
       "sectionId": "prod-func-dms",
       "text": "False positive rate for drowsiness detection in normal driving — target: less than 1 per hour?",
-      "sourceRef": "PERC-S2#26"
+      "sourceRef": "PERC-S2#26",
+      "priority": "medium"
     },
     {
       "id": 204,
       "sectionId": "prod-func-dms",
       "text": "Does DMS run independently or is it architecturally integrated with the front safety perception stack?",
-      "sourceRef": "PERC-S2#27"
+      "sourceRef": "PERC-S2#27",
+      "priority": "medium"
     },
     {
       "id": 205,
       "sectionId": "prod-func-dms",
       "text": "If integrated: combined TOPS budget for front safety + DMS simultaneously on the same SoC?",
-      "sourceRef": "PERC-S2#28"
+      "sourceRef": "PERC-S2#28",
+      "priority": "low"
     },
     {
       "id": 206,
       "sectionId": "prod-func-dms",
       "text": "If separate: DMS TOPS budget in isolation, and minimum SoC spec it has run on?",
-      "sourceRef": "PERC-S2#29"
+      "sourceRef": "PERC-S2#29",
+      "priority": "low"
     },
     {
       "id": 207,
       "sectionId": "prod-func-dms",
       "text": "How robust is your DMS to accessories — sunglasses (various tint levels), face masks, hats, scarves?",
-      "sourceRef": "PERC-S2#30"
+      "sourceRef": "PERC-S2#30",
+      "priority": "medium"
     },
     {
       "id": 208,
       "sectionId": "prod-func-dms",
       "text": "Has your DMS been tested for demographic robustness — equal performance across skin tones and facial structures?",
-      "sourceRef": "PERC-S2#31"
+      "sourceRef": "PERC-S2#31",
+      "priority": "medium"
     },
     {
       "id": 209,
       "sectionId": "prod-production-lifecycle",
       "text": "Describe your SOP readiness — have all production gates been passed (PPAP equivalent)?",
-      "sourceRef": "TECH#100"
+      "sourceRef": "TECH#100",
+      "priority": "high"
     },
     {
       "id": 210,
       "sectionId": "prod-production-lifecycle",
       "text": "Describe your end-of-line calibration process — automation, time per camera, tolerance.",
-      "sourceRef": "TECH#101"
+      "sourceRef": "TECH#101",
+      "priority": "low"
     },
     {
       "id": 211,
       "sectionId": "prod-production-lifecycle",
       "text": "Describe your ECU flashing process for factory and field — reprogramming time?",
-      "sourceRef": "TECH#102"
+      "sourceRef": "TECH#102",
+      "priority": "low"
     },
     {
       "id": 212,
       "sectionId": "prod-production-lifecycle",
       "text": "How do you manage vehicle configuration variants — feature flags, variant coding, ODX-based?",
-      "sourceRef": "TECH#103"
+      "sourceRef": "TECH#103",
+      "priority": "low"
     },
     {
       "id": 213,
       "sectionId": "prod-production-lifecycle",
       "text": "Has your stack been demonstrated on more than one SoC platform? Quantify porting effort.",
-      "sourceRef": "TECH#104"
+      "sourceRef": "TECH#104",
+      "priority": "medium"
     },
     {
       "id": 214,
       "sectionId": "prod-production-lifecycle",
       "text": "Describe your OTA update architecture — A/B partition, delta updates, rollback strategy.",
-      "sourceRef": "TECH#105"
+      "sourceRef": "TECH#105",
+      "priority": "low"
     },
     {
       "id": 215,
       "sectionId": "prod-production-lifecycle",
       "text": "Fleet monitoring dashboard",
-      "sourceRef": "TECH#106"
+      "sourceRef": "TECH#106",
+      "priority": "low"
     },
     {
       "id": 216,
       "sectionId": "prod-production-lifecycle",
       "text": "Describe your field log collection and upload strategy — event-triggered, periodic, bandwidth-aware.",
-      "sourceRef": "TECH#107"
+      "sourceRef": "TECH#107",
+      "priority": "low"
     },
     {
       "id": 217,
       "sectionId": "prod-production-lifecycle",
       "text": "What remote diagnostics capability do you offer — DTCs, sensor status, SW version?",
-      "sourceRef": "TECH#108"
+      "sourceRef": "TECH#108",
+      "priority": "low"
     },
     {
       "id": 218,
       "sectionId": "prod-production-lifecycle",
       "text": "How do you manage end-of-life and component obsolescence — last-buy notification, migration path?",
-      "sourceRef": "TECH#110"
+      "sourceRef": "TECH#110",
+      "priority": "low"
     },
     {
       "id": 219,
       "sectionId": "prod-production-lifecycle",
       "text": "What are your warranty terms and ADAS-specific liability framework?",
-      "sourceRef": "TECH#111"
+      "sourceRef": "TECH#111",
+      "priority": "medium"
     },
     {
       "id": 220,
       "sectionId": "prod-production-lifecycle",
       "text": "What is the IP and model ownership arrangement — source code escrow, trained model rights?",
-      "sourceRef": "TECH#112"
+      "sourceRef": "TECH#112",
+      "priority": "high"
     },
     {
       "id": 221,
       "sectionId": "prod-sw-quality",
       "text": "Are you MISRA-C/C++ compliant for safety code? Is a deviation log maintained?",
-      "sourceRef": "TECH#113"
+      "sourceRef": "TECH#113",
+      "priority": "medium"
     },
     {
       "id": 222,
       "sectionId": "prod-sw-quality",
       "text": "Which static analysis tool do you use? What are the current critical findings?",
-      "sourceRef": "TECH#114"
+      "sourceRef": "TECH#114",
+      "priority": "low"
     },
     {
       "id": 223,
       "sectionId": "prod-sw-quality",
       "text": "How do you prevent memory leaks — Valgrind/ASan testing, no dynamic allocation at runtime?",
-      "sourceRef": "TECH#115"
+      "sourceRef": "TECH#115",
+      "priority": "low"
     },
     {
       "id": 224,
       "sectionId": "prod-sw-quality",
       "text": "What is your unit test line and branch coverage percentage?",
-      "sourceRef": "TECH#116"
+      "sourceRef": "TECH#116",
+      "priority": "low"
     },
     {
       "id": 225,
       "sectionId": "prod-sw-quality",
       "text": "Do you have MC/DC coverage for safety-critical modules as required for ASIL-B+?",
-      "sourceRef": "TECH#117"
+      "sourceRef": "TECH#117",
+      "priority": "low"
     },
     {
       "id": 226,
       "sectionId": "prod-sw-quality",
       "text": "Has your system been validated in a long-duration stability test (>72h continuous run)?",
-      "sourceRef": "TECH#118"
+      "sourceRef": "TECH#118",
+      "priority": "medium"
     },
     {
       "id": 227,
       "sectionId": "prod-sw-quality",
       "text": "How does your system handle CPU overload — graceful frame skip, priority preserved, no crash?",
-      "sourceRef": "TECH#119"
+      "sourceRef": "TECH#119",
+      "priority": "low"
     },
     {
       "id": 228,
       "sectionId": "prod-sw-quality",
       "text": "Describe your crash recovery process — auto-restart, crash log, core dump preservation.",
-      "sourceRef": "TECH#120"
+      "sourceRef": "TECH#120",
+      "priority": "low"
     },
     {
       "id": 229,
       "sectionId": "prod-hmi",
       "text": "Describe your multi-modal alert design — visual, audio, haptic escalation ladder. Is it OEM-configurable?",
-      "sourceRef": "TECH#121"
+      "sourceRef": "TECH#121",
+      "priority": "medium"
     },
     {
       "id": 230,
       "sectionId": "prod-hmi",
       "text": "How is the driver takeover request (TOR) strategy implemented?",
-      "sourceRef": "TECH#122"
+      "sourceRef": "TECH#122",
+      "priority": "medium"
     },
     {
       "id": 231,
       "sectionId": "prod-hmi",
       "text": "How does your warning suppression logic work to avoid nuisance alerts?",
-      "sourceRef": "TECH#123"
+      "sourceRef": "TECH#123",
+      "priority": "low"
     },
     {
       "id": 232,
       "sectionId": "prod-hmi",
       "text": "Provide your HMI integration API / interface specification — cluster, HUD, audio interfaces.",
-      "sourceRef": "TECH#124"
+      "sourceRef": "TECH#124",
+      "priority": "low"
     },
     {
       "id": 233,
       "sectionId": "prod-hmi",
       "text": "Does your alert content support multiple languages and regions — icons, text, audio?",
-      "sourceRef": "TECH#125"
+      "sourceRef": "TECH#125",
+      "priority": "low"
     },
     {
       "id": 234,
       "sectionId": "prod-compliance",
       "text": "What is your readiness for Euro NCAP 2025/2026 protocols — AEB VRU, LSS, OMS, DMS?",
-      "sourceRef": "TECH#126"
+      "sourceRef": "TECH#126",
+      "priority": "high"
     },
     {
       "id": 235,
       "sectionId": "prod-compliance",
       "text": "What is your readiness for Bharat NCAP / GNCAP — AEB car-to-car and VRU?",
-      "sourceRef": "TECH#127"
+      "sourceRef": "TECH#127",
+      "priority": "high"
     },
     {
       "id": 236,
       "sectionId": "prod-compliance",
       "text": "What is your AIS-184 (India ADAS regulation) compliance status — AEBS, LDWS?",
-      "sourceRef": "TECH#128"
+      "sourceRef": "TECH#128",
+      "priority": "high"
     },
     {
       "id": 237,
       "sectionId": "prod-compliance",
       "text": "What is your UN R79 (steering) and UN R131 (AEBS) type approval readiness?",
-      "sourceRef": "TECH#129"
+      "sourceRef": "TECH#129",
+      "priority": "medium"
     },
     {
       "id": 238,
       "sectionId": "prod-compliance",
       "text": "What is your EU General Safety Regulation (GSR2) readiness — ISA, DMS, EDR, AEB?",
-      "sourceRef": "TECH#130"
+      "sourceRef": "TECH#130",
+      "priority": "medium"
     },
     {
       "id": 239,
       "sectionId": "prod-compliance",
       "text": "Which type approval test labs do you partner with? Has pre-approval testing been completed?",
-      "sourceRef": "TECH#131"
+      "sourceRef": "TECH#131",
+      "priority": "low"
     },
     {
       "id": 240,
       "sectionId": "prod-compliance",
       "text": "How do you handle market-specific adaptation — speed units, sign database, driving-side?",
-      "sourceRef": "TECH#132"
+      "sourceRef": "TECH#132",
+      "priority": "low"
     },
     {
       "id": 241,
       "sectionId": "prod-emc-env",
       "text": "Has HALT/HASS testing been completed? What are the stress margins?",
-      "sourceRef": "TECH#133"
+      "sourceRef": "TECH#133",
+      "priority": "low"
     },
     {
       "id": 242,
       "sectionId": "prod-emc-env",
       "text": "Has thermal cycling testing been completed per AEC-Q100 — temperature range and cycle count?",
-      "sourceRef": "TECH#134"
+      "sourceRef": "TECH#134",
+      "priority": "low"
     },
     {
       "id": 243,
       "sectionId": "prod-emc-env",
       "text": "Has humidity and salt spray corrosion testing been completed?",
-      "sourceRef": "TECH#135"
+      "sourceRef": "TECH#135",
+      "priority": "low"
     },
     {
       "id": 244,
       "sectionId": "prod-emc-env",
       "text": "Has mechanical shock and vibration testing been completed per ISO 16750?",
-      "sourceRef": "TECH#136"
+      "sourceRef": "TECH#136",
+      "priority": "low"
     },
     {
       "id": 245,
       "sectionId": "prod-emc-env",
       "text": "Has radiated emissions testing been completed to CISPR 25 Class 5? Provide test report.",
-      "sourceRef": "TECH#137"
+      "sourceRef": "TECH#137",
+      "priority": "low"
     },
     {
       "id": 246,
       "sectionId": "prod-emc-env",
       "text": "What is your radiated immunity rating per ISO 11452?",
-      "sourceRef": "TECH#138"
+      "sourceRef": "TECH#138",
+      "priority": "low"
     },
     {
       "id": 247,
       "sectionId": "prod-emc-env",
       "text": "What is your ESD immunity rating per ISO 10605?",
-      "sourceRef": "TECH#139"
+      "sourceRef": "TECH#139",
+      "priority": "low"
     },
     {
       "id": 248,
       "sectionId": "prod-limitations-india",
       "text": "Known limitations of your current stack that you are actively working to resolve?",
-      "sourceRef": "PERC-S3#14"
+      "sourceRef": "PERC-S3#14",
+      "priority": "high"
     },
     {
       "id": 249,
       "sectionId": "prod-limitations-india",
       "text": "Are there scenarios validated only in limited conditions — highway only, specific weather, specific geographies?",
-      "sourceRef": "PERC-S3#15"
+      "sourceRef": "PERC-S3#15",
+      "priority": "medium"
     },
     {
       "id": 250,
       "sectionId": "prod-limitations-india",
       "text": "Validated on Indian roads? If yes: cities/road types / India-specific scenarios including speed breakers / performance data?",
-      "sourceRef": "PERC-S3#16"
+      "sourceRef": "PERC-S3#16",
+      "priority": "high"
     },
     {
       "id": 251,
       "sectionId": "prod-limitations-india",
       "text": "What India-specific edge cases has your stack been optimized for? Be specific — not marketing language.",
-      "sourceRef": "PERC-S3#17"
+      "sourceRef": "PERC-S3#17",
+      "priority": "medium"
     },
     {
       "id": 252,
       "sectionId": "prod-limitations-india",
       "text": "What challenging perception problems has your stack solved that are typically unsolved at your price/TOPS point?",
-      "sourceRef": "PERC-S3#18"
+      "sourceRef": "PERC-S3#18",
+      "priority": "medium"
+    }
+  ],
+  "domains": [
+    {
+      "id": "company-background",
+      "label": "Company Background"
+    },
+    {
+      "id": "perception-function",
+      "label": "Perception Stack & Function Maturity"
+    },
+    {
+      "id": "regulation-compliance",
+      "label": "Regulation & Compliance"
+    },
+    {
+      "id": "safety-cyber",
+      "label": "Safety & Cyber Security"
+    },
+    {
+      "id": "hardware-capability",
+      "label": "Hardware Capability"
+    },
+    {
+      "id": "patents-innovation",
+      "label": "Patents & Innovation"
     }
   ]
 }

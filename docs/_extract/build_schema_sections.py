@@ -205,14 +205,110 @@ questions.sort(key=lambda q: sec_index[q['sectionId']])
 for i, q in enumerate(questions, start=1):
     q['id'] = i
 
+# Management-facing domains -- a coarser grouping than the 34 detailSections,
+# used for the Comparison heatmap and any future management rollup. Every
+# section maps to exactly one domain. "Patents & Innovation" deliberately has
+# no sections mapped to it -- it's derived from partner.patents[] instead.
+DOMAINS = [
+    {'id': 'company-background',   'label': 'Company Background'},
+    {'id': 'perception-function',  'label': 'Perception Stack & Function Maturity'},
+    {'id': 'regulation-compliance','label': 'Regulation & Compliance'},
+    {'id': 'safety-cyber',          'label': 'Safety & Cyber Security'},
+    {'id': 'hardware-capability',  'label': 'Hardware Capability'},
+    {'id': 'patents-innovation',   'label': 'Patents & Innovation'},
+]
+
+SECTION_DOMAIN = {
+    'gen-company-overview': 'company-background',
+    'prod-production-lifecycle': 'company-background',
+    'gen-validation-test': 'perception-function',
+    'prod-camperc-pipeline': 'perception-function', 'prod-camperc-objdet': 'perception-function',
+    'prod-camperc-lane': 'perception-function', 'prod-camperc-depth': 'perception-function',
+    'prod-camperc-slrtsr': 'perception-function', 'prod-camperc-modelquality': 'perception-function',
+    'prod-camperc-output': 'perception-function',
+    'prod-func-aeb': 'perception-function', 'prod-func-acc': 'perception-function',
+    'prod-func-ldwlka': 'perception-function', 'prod-func-lca': 'perception-function',
+    'prod-func-bsd': 'perception-function', 'prod-func-rcta': 'perception-function',
+    'prod-func-mois': 'perception-function', 'prod-func-dms': 'perception-function',
+    'prod-sw-quality': 'perception-function',
+    'prod-hmi': 'perception-function',
+    'prod-compliance': 'regulation-compliance', 'prod-emc-env': 'regulation-compliance',
+    'prod-limitations-india': 'regulation-compliance',
+    'gen-funcsafety-cyber': 'safety-cyber',
+    'prod-compute-hw': 'hardware-capability', 'prod-sw-arch': 'hardware-capability',
+    'prod-pipeline-runtime': 'hardware-capability', 'prod-power': 'hardware-capability',
+    'prod-camera-sensor-optics': 'hardware-capability', 'prod-camera-isp': 'hardware-capability',
+    'prod-camera-robustness': 'hardware-capability', 'prod-radar-subsystem': 'hardware-capability',
+    'prod-fusion-subsystem': 'hardware-capability', 'prod-hw-robustness': 'hardware-capability',
+}
+assert set(SECTION_DOMAIN.keys()) == set(SECTION_ORDER)
+
+# Per-question priority for customer-meeting prep: 'high' = cover live in the
+# first technical meeting, 'medium' = cover if time allows, 'low' = fine as a
+# written follow-up. Assigned by reading each question's content, not by
+# keyword heuristic. Keyed by the question's final id (1-252) -- stable as
+# long as SECTION_ORDER / tech / perc / NEW_QUESTIONS content above doesn't
+# change order.
+QUESTION_PRIORITY = {
+    1: 'high', 2: 'medium', 3: 'high', 4: 'low', 5: 'high', 6: 'medium', 7: 'medium', 8: 'medium',
+    9: 'low', 10: 'high', 11: 'medium', 12: 'low', 13: 'medium', 14: 'medium', 15: 'low', 16: 'medium',
+    17: 'high', 18: 'high', 19: 'high',
+    20: 'medium', 21: 'medium', 22: 'low', 23: 'low', 24: 'low', 25: 'medium', 26: 'low', 27: 'low',
+    28: 'low', 29: 'low', 30: 'low', 31: 'low', 32: 'low', 33: 'medium', 34: 'medium', 35: 'medium', 36: 'low',
+    37: 'high', 38: 'medium', 39: 'low', 40: 'medium', 41: 'low', 42: 'medium', 43: 'high', 44: 'medium',
+    45: 'medium', 46: 'medium', 47: 'high', 48: 'low', 49: 'low', 50: 'low', 51: 'medium', 52: 'medium',
+    53: 'low', 54: 'low', 55: 'low', 56: 'low', 57: 'high', 58: 'low', 59: 'medium', 60: 'low', 61: 'low', 62: 'low',
+    63: 'high', 64: 'low', 65: 'medium', 66: 'medium', 67: 'low', 68: 'medium', 69: 'medium', 70: 'high',
+    71: 'medium', 72: 'medium', 73: 'medium', 74: 'low', 75: 'low', 76: 'low', 77: 'medium',
+    78: 'high', 79: 'medium', 80: 'low', 81: 'medium', 82: 'low', 83: 'low',
+    84: 'high', 85: 'medium', 86: 'low', 87: 'low', 88: 'medium',
+    89: 'low', 90: 'low',
+    91: 'high', 92: 'medium', 93: 'medium', 94: 'medium', 95: 'medium', 96: 'low', 97: 'medium', 98: 'low',
+    99: 'low', 100: 'low', 101: 'low', 102: 'medium', 103: 'low',
+    104: 'medium', 105: 'medium', 106: 'low', 107: 'low', 108: 'low', 109: 'low',
+    110: 'high', 111: 'high', 112: 'medium', 113: 'low', 114: 'medium', 115: 'low', 116: 'medium',
+    117: 'low', 118: 'low', 119: 'low',
+    120: 'high', 121: 'high', 122: 'medium', 123: 'low', 124: 'medium', 125: 'medium', 126: 'low', 127: 'low',
+    128: 'medium', 129: 'low', 130: 'low', 131: 'low', 132: 'low', 133: 'low',
+    134: 'high', 135: 'low',
+    136: 'high', 137: 'medium', 138: 'high', 139: 'high', 140: 'medium', 141: 'high', 142: 'medium',
+    143: 'low', 144: 'low', 145: 'low', 146: 'medium', 147: 'low',
+    148: 'medium', 149: 'medium', 150: 'medium', 151: 'low', 152: 'low', 153: 'low', 154: 'low',
+    155: 'medium', 156: 'high', 157: 'low', 158: 'medium', 159: 'low',
+    160: 'medium', 161: 'medium', 162: 'low',
+    163: 'low', 164: 'low', 165: 'low', 166: 'low',
+    167: 'medium', 168: 'medium', 169: 'medium', 170: 'high',
+    171: 'high', 172: 'medium', 173: 'high', 174: 'medium', 175: 'high',
+    176: 'high', 177: 'medium',
+    178: 'medium',
+    179: 'high', 180: 'medium', 181: 'medium', 182: 'medium', 183: 'medium',
+    184: 'high', 185: 'medium', 186: 'medium', 187: 'low', 188: 'medium',
+    189: 'high', 190: 'medium', 191: 'medium', 192: 'low',
+    193: 'high', 194: 'medium', 195: 'medium', 196: 'medium', 197: 'medium', 198: 'low',
+    199: 'high', 200: 'medium', 201: 'high', 202: 'medium', 203: 'medium', 204: 'medium',
+    205: 'low', 206: 'low', 207: 'medium', 208: 'medium',
+    209: 'high', 210: 'low', 211: 'low', 212: 'low', 213: 'medium', 214: 'low', 215: 'low',
+    216: 'low', 217: 'low', 218: 'low', 219: 'medium', 220: 'high',
+    221: 'medium', 222: 'low', 223: 'low', 224: 'low', 225: 'low', 226: 'medium', 227: 'low', 228: 'low',
+    229: 'medium', 230: 'medium', 231: 'low', 232: 'low', 233: 'low',
+    234: 'high', 235: 'high', 236: 'high', 237: 'medium', 238: 'medium', 239: 'low', 240: 'low',
+    241: 'low', 242: 'low', 243: 'low', 244: 'low', 245: 'low', 246: 'low', 247: 'low',
+    248: 'high', 249: 'medium', 250: 'high', 251: 'medium', 252: 'medium',
+}
+assert set(QUESTION_PRIORITY.keys()) == set(range(1, len(questions) + 1)), \
+    f"QUESTION_PRIORITY must cover exactly questions 1..{len(questions)}"
+for q in questions:
+    q['priority'] = QUESTION_PRIORITY[q['id']]
+
 detail_sections = []
 for sid in SECTION_ORDER:
     label, target, scope = SECTIONS[sid]
-    entry = {'id': sid, 'category': target, 'label': label}
+    entry = {'id': sid, 'category': target, 'label': label, 'domain': SECTION_DOMAIN[sid]}
     entry['scope'] = None if scope is None else {'type': scope[0], 'keys': scope[1]}
     detail_sections.append(entry)
 
 schema = json.load(open('schema.json', encoding='utf-8'))
+schema['domains'] = DOMAINS
 schema['detailSections'] = detail_sections
 schema['detailQuestions'] = questions
 

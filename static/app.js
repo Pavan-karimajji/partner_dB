@@ -38,22 +38,22 @@ const COLORS = {
 
 const STAGES = ['Under Evaluation', 'Eval Complete', 'Shortlisted', 'Decision'];
 
-// Groups the 34 detailSections into broader buckets for the Comparison
-// heatmap columns — one column per group rather than one per section,
-// since 34 columns would be unreadable. Every section id appears in
-// exactly one group.
-const COMPARISON_GROUPS = [
-  { label: 'Company Overview', sectionIds: ['gen-company-overview'] },
-  { label: 'Validation & Test', sectionIds: ['gen-validation-test'] },
-  { label: 'Functional Safety & Cybersecurity', sectionIds: ['gen-funcsafety-cyber'] },
-  { label: 'Architecture & Platform', sectionIds: ['prod-compute-hw', 'prod-sw-arch', 'prod-pipeline-runtime', 'prod-power'] },
-  { label: 'Camera Subsystem', sectionIds: ['prod-camera-sensor-optics', 'prod-camera-isp', 'prod-camera-robustness'] },
-  { label: 'Camera Perception', sectionIds: ['prod-camperc-pipeline', 'prod-camperc-objdet', 'prod-camperc-lane', 'prod-camperc-depth', 'prod-camperc-slrtsr', 'prod-camperc-modelquality', 'prod-camperc-output'] },
-  { label: 'Radar & Fusion', sectionIds: ['prod-radar-subsystem', 'prod-fusion-subsystem'] },
-  { label: 'ADAS Functions', sectionIds: ['prod-func-aeb', 'prod-func-acc', 'prod-func-ldwlka', 'prod-func-lca', 'prod-func-bsd', 'prod-func-rcta', 'prod-func-mois', 'prod-func-dms'] },
-  { label: 'HW Robustness & Quality', sectionIds: ['prod-hw-robustness', 'prod-sw-quality'] },
-  { label: 'Production & Compliance', sectionIds: ['prod-production-lifecycle', 'prod-hmi', 'prod-compliance', 'prod-emc-env', 'prod-limitations-india'] },
-];
+// Groups the 34 detailSections into the 6 management-facing domains defined
+// in schema.json (schema.domains + each detailSection's domain field) for
+// the Comparison heatmap columns — one column per domain rather than one
+// per section, since 34 columns would be unreadable. Domains with zero
+// sections (currently "Patents & Innovation", which rolls up from
+// partner.patents[] instead) are skipped — that needs different rollup
+// logic and isn't in the heatmap yet.
+function comparisonGroups() {
+  const schema = State.schema;
+  return (schema.domains || [])
+    .map(d => ({
+      label: d.label,
+      sectionIds: (schema.detailSections || []).filter(s => s.domain === d.id).map(s => s.id),
+    }))
+    .filter(g => g.sectionIds.length > 0);
+}
 
 // ── API helpers ────────────────────────────────────────────────────────────
 async function api(method, path, body) {
@@ -232,9 +232,10 @@ async function renderComparison() {
   body.innerHTML = `<div class="loading-wrap"><div class="spinner"></div></div>`;
 
   const fullPartners = await Promise.all(summary.map(p => api('GET', `/api/partners/${p.id}`)));
+  const groups = comparisonGroups();
 
   const rows = fullPartners.map(p => {
-    const groupResults = COMPARISON_GROUPS.map(g => computeGroupCompletion(p, g));
+    const groupResults = groups.map(g => computeGroupCompletion(p, g));
     const overallDone = groupResults.reduce((a, r) => a + r.done, 0);
     const overallTotal = groupResults.reduce((a, r) => a + r.total, 0);
     const overallPct = overallTotal === 0 ? -1 : Math.round((overallDone / overallTotal) * 100);
@@ -247,7 +248,7 @@ async function renderComparison() {
       <thead>
         <tr>
           <th class="hm-partner-col">Partner</th>
-          ${COMPARISON_GROUPS.map(g => `<th>${esc(g.label)}</th>`).join('')}
+          ${groups.map(g => `<th>${esc(g.label)}</th>`).join('')}
           <th>Overall</th>
         </tr>
       </thead>
@@ -567,7 +568,11 @@ function newProduct(schema, ordinal) {
   (schema.productSocs || []).forEach(c => { socs[c.key] = false; });
   const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
     : 'p' + Date.now().toString(16) + Math.random().toString(16).slice(2);
-  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes };
+  // heroSensors/heroFunctions: subset of checked sensors/functions marked as
+  // this product's differentiating capabilities (there can be more than
+  // one) -- used by the customer-meeting-prep view to elevate priority
+  // regardless of a question's static tag. No UI to set these yet.
+  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, heroSensors: [], heroFunctions: [] };
 }
 
 function computePortfolio(products, schema) {

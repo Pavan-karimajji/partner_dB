@@ -49,7 +49,9 @@
             "fusion": false,
             "radar": true,
             "soc": true
-          }
+          },
+          "heroSensors": [],
+          "heroFunctions": []
         },
         {
           "answers": [],
@@ -76,7 +78,9 @@
             "fusion": false,
             "radar": false,
             "soc": false
-          }
+          },
+          "heroSensors": [],
+          "heroFunctions": []
         }
       ],
       "shortName": "CO",

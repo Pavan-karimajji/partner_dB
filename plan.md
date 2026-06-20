@@ -494,12 +494,83 @@ all 19 Company Overview questions as Verified → cell shows exactly
 shows exactly 50%; partner-name click navigates to Partner Detail; zero
 console errors.
 
+## Domains + per-question priority + hero tagging — DONE
+
+User feedback: the old master-branch UX was visually more polished than
+the current rebuild — noted, not yet acted on (separate from this
+work). The concrete ask was a 2-axis metadata layer on top of the 34
+sections / 252 questions, with UI deliberately deferred ("we'll decide
+later"):
+
+1. **6 management-facing domains** — coarser than the 34 sections, for
+   rolling up to leadership without showing 34 categories. All 34
+   sections map to exactly one domain (`schema.domains` +
+   `detailSection.domain`):
+   - Company Background (2 sections: Company Overview, Production
+     Readiness & Lifecycle)
+   - Perception Stack & Function Maturity (18: all 7 Camera Perception
+     + all 8 Function Detail + Validation & Test + Software Quality +
+     HMI & Driver Interaction)
+   - Regulation & Compliance (3: Compliance, EMC & Env, Limitations &
+     India Readiness)
+   - Safety & Cyber Security (1: Functional Safety & Cybersecurity)
+   - Hardware Capability (10: Compute/SW-Arch/Pipeline/Power, 3 Camera
+     Subsystem sections, Radar, Fusion, HW Robustness & Components)
+   - Patents & Innovation (0 sections — rolls up from `partner.patents[]`
+     instead, not yet wired into any rollup view)
+2. **Per-question priority** (`high`/`medium`/`low`) on all 252
+   questions — for customer-meeting prep: High = cover live in the
+   first technical meeting, Medium = cover if time allows, Low = fine
+   as written follow-up. Corrected from an earlier draft that tagged
+   whole *sections* — user pointed out every section has some
+   genuinely important questions mixed with deep-dive detail, so
+   priority needed to be per-question. Assigned by reading each
+   question's content (not keyword heuristics), distribution: 44 high /
+   98 medium / 110 low.
+3. **Hero tagging on products** — `heroSensors`/`heroFunctions` arrays
+   on each product (subset of whichever sensors/functions are checked
+   true), for marking *this specific partner's* differentiating
+   capability (e.g. ACC Function Detail becomes effectively high-priority
+   for a partner whose hero product is ACC-based fusion, even though its
+   static priority tag is lower). Explicitly NOT auto-detected — multiple
+   heroes per product are allowed. Data model only; no toggle UI yet
+   (`newProduct()` in app.js initializes both to `[]`; existing products
+   in `data/partners.json` got the fields added additively).
+
+**Comparison heatmap updated** to group by the new `domain` field
+instead of its own hardcoded grouping (the hand-rolled
+`COMPARISON_GROUPS` was functionally the same idea at finer granularity
+— replaced with `comparisonGroups()`, computed from `schema.domains` +
+`detailSection.domain` at render time, so there's one source of truth).
+Patents & Innovation is skipped in the heatmap for now since it has no
+sections to roll up — would need different metric logic (patent
+counts/status, not question completion %) to show as a column.
+
+Implementation: `docs/_extract/build_schema_sections.py`
+(`DOMAINS`/`SECTION_DOMAIN`/`QUESTION_PRIORITY` dicts, with asserts
+guaranteeing every section has a domain and every question has a
+priority), `app.js` (`comparisonGroups()`, `newProduct()` hero fields),
+`data/partners.json` (additive `heroSensors`/`heroFunctions` on existing
+products). Verified via Playwright
+(`C:\tmp\pwtest\test-domains.js`): every question has a valid
+high/medium/low priority, every section has a valid domain, heatmap
+shows exactly the 5 populated domains as columns, Partner Detail
+unaffected, zero console errors.
+
 ## Next steps
 
-1. Possible follow-up: revisit whether some of the very small sections
+1. UI for all of the above is explicitly deferred per the user — no
+   priority filter, hero-tag toggle, or Patents-in-heatmap UI exists
+   yet. Revisit once there's a concrete view in mind (e.g. a
+   "meeting prep" filtered view of just High-priority + hero-elevated
+   sections for a given product).
+2. Possible follow-up: revisit whether some of the very small sections
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab
    clutter — low priority, easy to change later.
-2. Possible follow-up: column/row sorting controls on the Comparison
+3. Possible follow-up: column/row sorting controls on the Comparison
    heatmap (currently fixed sort by Overall % descending) if the
    partner list grows large enough to need it.
+4. Noted but not actioned: user feels the pre-refactor master-branch UX
+   was more visually polished/appealing than the current rebuild. A
+   general UI-polish pass is a separate, not-yet-scoped task.
