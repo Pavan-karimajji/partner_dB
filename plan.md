@@ -406,15 +406,47 @@ on header click and doesn't trigger on clicks inside the body; zero
 console errors. New section/question totals: **34 sections, 214
 questions** (6 sections still at 0 questions — the placeholders above).
 
+## Follow-up phase — DONE: authored Radar/Fusion/LCA/BSD/RCTA/MOIS content
+
+The 6 placeholder sections now have real, manually-authored questions
+(no source spreadsheet covers these — drafted to mirror the phrasing
+style of the migrated questions, reviewed and approved by the user
+before being written in):
+
+- **Radar Subsystem** (10 questions) — frequency band, LRR/MRR/SRR type
+  & mounting, range/FoV, angular resolution, object classification,
+  interference handling, weather performance, AEC-Q100/chipset,
+  calibration, update rate/latency.
+- **Fusion Subsystem** (8 questions) — fusion architecture level,
+  sensor combinations supported, fusion algorithm, time sync, conflict
+  resolution between sensors, degraded-sensor fallback, confidence
+  propagation, track management.
+- **LCA Function Detail** (5), **BSD Function Detail** (5), **RCTA
+  Function Detail** (4) — sensors used, range/FoV, false alert rate,
+  warning/response strategy, standard compliance (BSD), trailer
+  handling (BSD), RCTB integration (RCTA).
+- **MOIS Function Detail** (6) — defined per user clarification as
+  detection of moving objects in the close-range blind zone
+  around/beneath large vehicles (trucks/buses) that the driver cannot
+  see directly due to seating height/sightlines — distinct from BSD
+  (rear-side) and RCTA (rear-reversing). Covers sensors, minimum
+  detectable object size, coverage zone, stationary-vs-moving alert
+  behavior, target vehicle class, validation evidence.
+
+`sourceRef` is `null` for all of these (vs. `"TECH#47"` etc. for
+migrated questions) — marks them as originated in-app, not traced to a
+spreadsheet item.
+
+**New totals: 34 sections, 252 questions** (was 214 before this round).
+Verified via Playwright (`C:\tmp\pwtest\test-new-questions.js`): each
+section's question count matches exactly what was authored; full
+save/reload round trip confirmed on a MOIS answer; zero console errors.
+
 ## Next steps
 
-1. **Follow-up phase (explicitly deferred, not blocking the above)**:
-   author the real Radar Subsystem / Fusion Subsystem / LCA / BSD / RCTA
-   / MOIS questions — only the headings exist so far, since the source
-   material has zero coverage for them.
-2. Redesign the Comparison page around the new status-tag answers
+1. Redesign the Comparison page around the new status-tag answers
    (currently a placeholder — see Stage 1 addendum to index.html).
-3. Possible follow-up: revisit whether some of the very small sections
+2. Possible follow-up: revisit whether some of the very small sections
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab
    clutter — low priority, easy to change later.

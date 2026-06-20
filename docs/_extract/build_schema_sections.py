@@ -138,6 +138,66 @@ for item in perc:
     questions.append({'id': qid, 'sectionId': sec, 'text': item['text'], 'sourceRef': item['ref']})
     qid += 1
 
+# Manually-authored questions for sections the source spreadsheets never
+# covered (radar/fusion/LCA/BSD/RCTA/MOIS). Drafted to mirror the phrasing
+# style of the migrated questions, reviewed and approved by the user.
+NEW_QUESTIONS = {
+    'prod-radar-subsystem': [
+        "What radar frequency band(s) do you use — 24GHz, 77GHz, 79GHz? Justify the choice for your target use case.",
+        "What radar type(s) are deployed — long-range (LRR), mid-range (MRR), short-range (SRR)? How many units and where are they mounted (front/rear/corner)?",
+        "What is the detection range, azimuth FoV, and elevation FoV for each radar unit?",
+        "What is the angular resolution and ability to separate closely-spaced targets (e.g. two pedestrians side by side)?",
+        "What object classes can your radar reliably classify (vehicle, pedestrian, cyclist, static clutter), and what is the classification accuracy?",
+        "How do you handle radar-to-radar interference in dense traffic or multi-vehicle scenarios?",
+        "What is your radar's performance in adverse weather (rain, fog, dust) compared to clear conditions — provide measured data.",
+        "Is the radar hardware AEC-Q100 qualified? What automotive radar chipset/MMIC do you use?",
+        "Describe your radar calibration process — boresight alignment, mounting tolerance, recalibration triggers.",
+        "What is the radar's update rate (frame rate) and end-to-end latency from detection to output?",
+    ],
+    'prod-fusion-subsystem': [
+        "What is your sensor fusion architecture — low-level (raw data), mid-level (feature), or high-level (object/track) fusion?",
+        "Which sensor combinations does your fusion stack support — camera+radar, camera+radar+lidar, other?",
+        "What fusion algorithm do you use — Kalman filter variant, particle filter, learned/deep fusion model, rule-based?",
+        "How do you time-synchronize data from different sensors? What is the maximum tolerated time skew?",
+        "How does the fusion stack handle conflicting detections between sensors (e.g. radar detects an object camera doesn't, or vice versa)?",
+        "What is your fallback behavior when one sensor degrades or fails (e.g. camera blocked, radar occluded)?",
+        "How is per-sensor confidence/uncertainty represented and propagated through the fusion output?",
+        "Describe your track management — how object IDs are maintained, merged, or split across sensor inputs over time.",
+    ],
+    'prod-func-lca': [
+        "What sensors does your LCA function use — rear/side radar only, or camera+radar fusion?",
+        "What is the detection range and field of view covered for adjacent-lane traffic, front and rear of the ego vehicle?",
+        "What is the minimum relative closing speed your system reliably detects for an approaching vehicle in the target lane?",
+        "What is your false alert rate in field conditions (alerts per X km)?",
+        "Describe your warning strategy and timing — visual/audio/haptic, and at what time-to-collision threshold?",
+    ],
+    'prod-func-bsd': [
+        "What sensors and how many units cover the blind spot detection zones (per side)?",
+        "Does your blind spot zone definition meet a specific standard (e.g. Euro NCAP, ISO)? Describe the covered zone dimensions.",
+        "What object classes are detected in the blind spot (vehicle, motorcycle/two-wheeler, cyclist)?",
+        "How does the system behave when towing a trailer or in multi-axle configurations?",
+        "What is your false positive / false negative rate in field testing?",
+    ],
+    'prod-func-rcta': [
+        "What sensors and detection range/FoV are used for rear cross-traffic detection?",
+        "What time-to-collision threshold triggers an alert while reversing?",
+        "Is RCTA integrated with automatic braking (RCTB), or warning-only? Describe the response strategy.",
+        "How does the system perform in typical parking/reversing scenarios — obstructed views, perpendicular vs. angled parking?",
+    ],
+    'prod-func-mois': [
+        "What sensors detect moving objects in the close-range blind zone around/beneath the vehicle (front-low, side-low) that the driver cannot see directly?",
+        "What is the minimum detectable object size and height — can it detect a two-wheeler or pedestrian very close to or partially under the vehicle body?",
+        "What is the detection range and coverage zone for this near-vehicle blind area — front, sides, or both?",
+        "How does the system alert or intervene when a moving object is detected in this zone, while stationary vs. while starting to move?",
+        "Is this function specifically designed for large/commercial vehicles (trucks, buses) where driver sightlines are most limited? Describe the target vehicle classes.",
+        "What is your false alert rate, and what validation evidence exists for this scenario (test tracks, replicated real-world incidents)?",
+    ],
+}
+for sec_id, texts in NEW_QUESTIONS.items():
+    for text in texts:
+        questions.append({'id': qid, 'sectionId': sec_id, 'text': text, 'sourceRef': None})
+        qid += 1
+
 # Sort questions so they're grouped by section in SECTION_ORDER, preserving
 # original relative order within each section, then reassign sequential ids.
 sec_index = {sid: i for i, sid in enumerate(SECTION_ORDER)}
