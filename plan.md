@@ -588,6 +588,40 @@ Low 5 = 15 total); clicking each tab swaps the visible panel correctly;
 section collapse still works independently of which priority tab is
 selected; zero console errors.
 
+## Domain grouping on General/Product tabs — DONE
+
+User clarified the domain field also wasn't meant to stay data-only —
+it should visually group the section cards on the actual Partner Detail
+page, not just power the Comparison heatmap. Implemented:
+
+- `domainGroupedSectionsHtml(sectionEntries, renderSectionFn)` — shared
+  helper used by both `generalTabHtml` and `productTabHtml`, groups a
+  tab's sections under their `schema.domains` heading (in domain order),
+  skipping any domain with nothing to show in that tab.
+- General tab now shows 3 domain headings (Company Background,
+  Perception Stack & Function Maturity, Safety & Cyber Security), one
+  section each, since the 3 General sections happen to land in 3
+  different domains.
+- Product tab shows up to 5 domain headings depending on which
+  sensors/functions are checked (Company Background, Perception Stack &
+  Function Maturity, Regulation & Compliance, Hardware Capability — and
+  notably **not** Safety & Cyber Security, since that domain's only
+  member, Functional Safety & Cybersecurity, is a General section and
+  therefore never appears on a Product tab; correct, not a bug).
+- CSS: `.domain-group`/`.domain-group-heading` — bold uppercase heading
+  with a navy underline, visually distinct from the section
+  card-titles nested under it.
+
+So the page now reads as: **Domain → Section → High/Med/Low tab →
+Questions**, all three layers of categorization visible at once.
+
+Verified via Playwright (`C:\tmp\pwtest\test-domain-grouping.js`) plus a
+full-page screenshot: domain headings appear in the correct order on
+both tabs, each containing exactly the right sections; total section
+card count across all domain groups on the Product tab (31, with every
+sensor/function checked) matches the full product-section count
+exactly; zero console errors.
+
 ## Next steps
 
 1. Hero-tag toggle UI and Patents-in-heatmap UI are still explicitly

@@ -817,6 +817,28 @@ function tryToggleScopedField(prod, type, key) {
   return true;
 }
 
+// Groups a tab's sections under their master domain heading (schema.domains
+// + detailSection.domain), in domain order, skipping domains with nothing
+// to show. Shared by General and Product tabs — each calls this with its
+// own per-section render function since they bind answers differently
+// (partner.generalAnswers vs product.answers).
+function domainGroupedSectionsHtml(sectionEntries, renderSectionFn) {
+  const domains = State.schema.domains || [];
+  const byDomain = {};
+  sectionEntries.forEach(entry => {
+    const domId = entry.section.domain;
+    (byDomain[domId] = byDomain[domId] || []).push(entry);
+  });
+  return domains
+    .filter(d => byDomain[d.id] && byDomain[d.id].length > 0)
+    .map(d => `
+      <div class="domain-group">
+        <div class="domain-group-heading">${esc(d.label)}</div>
+        ${byDomain[d.id].map(renderSectionFn).join('')}
+      </div>
+    `).join('');
+}
+
 function generalTabHtml(p) {
   const schema = State.schema;
   const products = p.products || [];
@@ -850,9 +872,12 @@ function generalTabHtml(p) {
         ${products.length === 0 ? '<div class="text-muted" style="font-size:.8125rem;margin-top:8px;">No products added yet — use "+ Add Product" above.</div>' : ''}
       </div>
     </div>
-    ${sections.map(sec => answerQuestionsTableHtml(sec.label, questionsForSection(sec.id),
-      qId => (p.generalAnswers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
-      qId => `general:${qId}`)).join('')}
+    ${domainGroupedSectionsHtml(
+      sections.map(sec => ({ section: sec })),
+      ({ section }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
+        qId => (p.generalAnswers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
+        qId => `general:${qId}`)
+    )}
   `;
 }
 
@@ -861,10 +886,13 @@ function productTabHtml(prod) {
   const sections = sectionsForProduct(prod);
   return `
     ${productCardHtml(prod, schema)}
-    ${sections.map(({ section, active }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
-      qId => (prod.answers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
-      qId => `product:${prod.id}:${qId}`,
-      active ? null : 'Sensor unchecked — kept visible because it has saved answers')).join('')}
+    ${domainGroupedSectionsHtml(
+      sections.map(({ section, active }) => ({ section, active })),
+      ({ section, active }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
+        qId => (prod.answers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
+        qId => `product:${prod.id}:${qId}`,
+        active ? null : 'Sensor unchecked — kept visible because it has saved answers')
+    )}
   `;
 }
 

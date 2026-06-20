@@ -314,6 +314,21 @@ input, textarea, select { font: inherit; }
 .priority-tab.active.priority-tab-medium { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
 .priority-tab.active.priority-tab-low    { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
 
+/* Master-domain group headings on General/Product tabs — groups the
+   section cards under the 6 management-facing domains (schema.domains) */
+.domain-group { margin-top: 24px; }
+.domain-group:first-of-type { margin-top: 16px; }
+.domain-group-heading {
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--navy);
+}
+
 /* Question row in detail */
 .q-row {
   display: grid;
