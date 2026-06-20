@@ -702,12 +702,64 @@ during testing: an intermediate run showed stale data from a race
 during rapid server stop/restart, not a real bug — resolved by
 confirming via direct API call before re-testing.)
 
-## Next steps
+## Next steps — PLANNED for next session (not yet implemented)
 
-1. Hero-tag toggle UI and Patents-in-heatmap UI are still explicitly
-   deferred per the user — no UI exists yet for marking a product's
-   hero sensors/functions, or for showing Patents & Innovation as a
-   heatmap column. Revisit once there's a concrete view in mind.
+User gave 3 concrete asks to pick up next time:
+
+1. **Radar chart on Comparison, instead of the heatmap** — mirror how
+   the pre-refactor master branch had a radar/spider chart for
+   cross-partner comparison (removed in the scoring-system cleanup,
+   commit `c7a8522`). Needs design decisions before implementation:
+   - Grades are qualitative (NA/Developing/Good/Outstanding) — need a
+     numeric mapping to plot on radar axes, e.g. Developing=1, Good=2,
+     Outstanding=3, NA/ungraded=0 or excluded from that axis entirely
+     (open question: does an axis with NA still draw to the center, or
+     get visually omitted for that partner?).
+   - One radar axis per domain (5 populated domains, same set the
+     heatmap uses) — manageable axis count.
+   - Multi-partner overlay UX: a radar with many partners overlaid
+     becomes unreadable. Likely needs a partner picker (select 2-4 to
+     compare) rather than plotting every partner at once like the
+     heatmap currently does.
+   - Library: Chart.js was removed entirely in the scoring cleanup
+     (`<script src=".../chart.js">` tag deleted from index.html) — would
+     need to either re-add it (radar chart type is built in and was
+     already used pre-refactor, low risk) or build a custom SVG radar.
+     Re-adding Chart.js is probably the pragmatic choice given it
+     already worked here once.
+   - Decide: replace the heatmap entirely, or keep both (radar for
+     visual at-a-glance comparison, heatmap/table for precise per-domain
+     lookup)?
+2. **Hero product marking UI is still missing** — `heroSensors`/
+   `heroFunctions` data fields exist on each product (added earlier,
+   data-model only) but there's never been a UI to actually toggle them.
+   User wants it added "on the left side like how we added master
+   grading" — i.e. a dedicated sidebar card (page-agnostic, like
+   `domainGradingCardHtml`/`#domain-grading-card`), NOT inline per
+   product tab. Likely design: one card listing every product by name,
+   each with its checked sensors/functions shown as toggleable
+   "hero" pills (only pills for sensors/functions already checked true
+   make sense to offer as hero candidates — can't be a hero of a
+   capability the product doesn't have). Mirrors the
+   domain-grading-card precedent: render once in `renderDetailContent`,
+   independent of which Product tab is currently active.
+3. **Overview page should surface hero products and their count** —
+   the Overview page (pipeline board + stat cards) currently shows
+   Partners / Shortlisted / Products stats only. Add visibility into
+   hero-tagged capabilities — likely a new stat card (e.g. "Hero
+   Products" with a count of hero-tagged sensor/function instances
+   across all partners' products) and/or surfacing hero tags on each
+   partner card in the pipeline board. Exact metric/placement to be
+   decided next session — depends on what "their number" should count
+   (total hero tags? partners with at least one hero-tagged product?
+   distinct hero capabilities across the portfolio?).
+
+## Other open items (lower priority, no urgency)
+
+1. Patents-in-heatmap UI still deferred — no mechanism yet for showing
+   Patents & Innovation as a heatmap/radar dimension (would need
+   different rollup logic than question-based domains, since patents
+   don't have a grade taxonomy the same way).
 2. Possible follow-up: revisit whether some of the very small sections
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab
