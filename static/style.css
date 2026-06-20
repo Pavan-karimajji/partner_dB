@@ -417,6 +417,43 @@ input, textarea, select { font: inherit; }
 .decision-table tr:hover td { background: var(--gray-50); }
 .rationale-text { color: var(--gray-600); font-size: .8125rem; line-height: 1.4; }
 
+/* ── Comparison heatmap ──────────────────────────────────────────────────── */
+.comparison-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.comparison-table th, .comparison-table td {
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: .8125rem;
+}
+.comparison-table th {
+  background: var(--light-blue);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: .6875rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.comparison-table th.hm-partner-col, .comparison-table td.hm-partner-name {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--white);
+  z-index: 1;
+}
+.comparison-table th.hm-partner-col { background: var(--light-blue); z-index: 2; }
+.comparison-table td.hm-partner-name {
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+}
+.comparison-table td.hm-partner-name:hover { text-decoration: underline; }
+.comparison-table tr:last-child td { border-bottom: none; }
+.hm-cell { font-weight: 600; }
+.hm-empty { color: var(--gray-500); background: var(--gray-50); font-weight: 400; }
+.hm-low   { background: #fee2e2; color: #991b1b; }
+.hm-mid   { background: #fef3c7; color: #92400e; }
+.hm-high  { background: #d1fae5; color: #065f46; }
+
 /* ── Modal ───────────────────────────────────────────────────────────────── */
 .modal-overlay {
   display: none;

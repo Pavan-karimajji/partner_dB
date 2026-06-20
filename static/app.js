@@ -38,6 +38,23 @@ const COLORS = {
 
 const STAGES = ['Under Evaluation', 'Eval Complete', 'Shortlisted', 'Decision'];
 
+// Groups the 34 detailSections into broader buckets for the Comparison
+// heatmap columns — one column per group rather than one per section,
+// since 34 columns would be unreadable. Every section id appears in
+// exactly one group.
+const COMPARISON_GROUPS = [
+  { label: 'Company Overview', sectionIds: ['gen-company-overview'] },
+  { label: 'Validation & Test', sectionIds: ['gen-validation-test'] },
+  { label: 'Functional Safety & Cybersecurity', sectionIds: ['gen-funcsafety-cyber'] },
+  { label: 'Architecture & Platform', sectionIds: ['prod-compute-hw', 'prod-sw-arch', 'prod-pipeline-runtime', 'prod-power'] },
+  { label: 'Camera Subsystem', sectionIds: ['prod-camera-sensor-optics', 'prod-camera-isp', 'prod-camera-robustness'] },
+  { label: 'Camera Perception', sectionIds: ['prod-camperc-pipeline', 'prod-camperc-objdet', 'prod-camperc-lane', 'prod-camperc-depth', 'prod-camperc-slrtsr', 'prod-camperc-modelquality', 'prod-camperc-output'] },
+  { label: 'Radar & Fusion', sectionIds: ['prod-radar-subsystem', 'prod-fusion-subsystem'] },
+  { label: 'ADAS Functions', sectionIds: ['prod-func-aeb', 'prod-func-acc', 'prod-func-ldwlka', 'prod-func-lca', 'prod-func-bsd', 'prod-func-rcta', 'prod-func-mois', 'prod-func-dms'] },
+  { label: 'HW Robustness & Quality', sectionIds: ['prod-hw-robustness', 'prod-sw-quality'] },
+  { label: 'Production & Compliance', sectionIds: ['prod-production-lifecycle', 'prod-hmi', 'prod-compliance', 'prod-emc-env', 'prod-limitations-india'] },
+];
+
 // ── API helpers ────────────────────────────────────────────────────────────
 async function api(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
@@ -154,10 +171,102 @@ function renderPartnerCard(p) {
 }
 
 // ── Comparison ─────────────────────────────────────────────────────────────
-// Placeholder — the old radar/drill/matrix charts were built entirely on the
-// retired 1-5 techScores system. A status-tag-based comparison view is a
-// Stage 2 design task; see plan.md.
-function renderComparison() {}
+// Section-completion heatmap: for each partner x section-group, what % of
+// applicable questions (NA excluded) are Accomplished or Verified. General
+// sections are answered once per partner; Product sections are rolled up
+// across every product of that partner where the section is relevant
+// (currently scope-matching, or kept via the same "sticky" rule the detail
+// page itself uses so partially-unchecked sensors/functions don't make
+// already-logged progress disappear from the comparison either).
+function computeGroupCompletion(partner, group) {
+  let done = 0, total = 0;
+  const sections = (State.schema.detailSections || []).filter(s => group.sectionIds.includes(s.id));
+  sections.forEach(section => {
+    const qIds = questionsForSection(section.id).map(q => q.id);
+    if (section.category === 'general') {
+      qIds.forEach(qId => {
+        const a = (partner.generalAnswers || []).find(x => x.qId === qId);
+        const status = a ? a.status : '';
+        if (status === 'na') return;
+        total++;
+        if (status === 'accomplished' || status === 'verified') done++;
+      });
+    } else {
+      (partner.products || []).forEach(prod => {
+        const relevant = sectionScopeMatches(section, prod) || sectionHasAnswerData(section, prod);
+        if (!relevant) return;
+        qIds.forEach(qId => {
+          const a = (prod.answers || []).find(x => x.qId === qId);
+          const status = a ? a.status : '';
+          if (status === 'na') return;
+          total++;
+          if (status === 'accomplished' || status === 'verified') done++;
+        });
+      });
+    }
+  });
+  return { done, total };
+}
+
+function heatmapCellClass(pct, total) {
+  if (total === 0) return 'hm-empty';
+  if (pct >= 67) return 'hm-high';
+  if (pct >= 34) return 'hm-mid';
+  return 'hm-low';
+}
+
+function heatmapCellHtml(done, total) {
+  if (total === 0) return `<td class="hm-cell hm-empty" title="No applicable questions">—</td>`;
+  const pct = Math.round((done / total) * 100);
+  return `<td class="hm-cell ${heatmapCellClass(pct, total)}" title="${done} / ${total} applicable questions">${pct}%</td>`;
+}
+
+async function renderComparison() {
+  const body = document.getElementById('comparison-body');
+  if (!body) return;
+  const summary = State.partnersSummary;
+  if (summary.length === 0) {
+    body.innerHTML = `<div class="empty-state">No partners yet.</div>`;
+    return;
+  }
+  body.innerHTML = `<div class="loading-wrap"><div class="spinner"></div></div>`;
+
+  const fullPartners = await Promise.all(summary.map(p => api('GET', `/api/partners/${p.id}`)));
+
+  const rows = fullPartners.map(p => {
+    const groupResults = COMPARISON_GROUPS.map(g => computeGroupCompletion(p, g));
+    const overallDone = groupResults.reduce((a, r) => a + r.done, 0);
+    const overallTotal = groupResults.reduce((a, r) => a + r.total, 0);
+    const overallPct = overallTotal === 0 ? -1 : Math.round((overallDone / overallTotal) * 100);
+    return { partner: p, groupResults, overallDone, overallTotal, overallPct };
+  });
+  rows.sort((a, b) => b.overallPct - a.overallPct);
+
+  body.innerHTML = `
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th class="hm-partner-col">Partner</th>
+          ${COMPARISON_GROUPS.map(g => `<th>${esc(g.label)}</th>`).join('')}
+          <th>Overall</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr>
+            <td class="hm-partner-name" data-open-partner="${r.partner.id}">${esc(r.partner.name)}</td>
+            ${r.groupResults.map(gr => heatmapCellHtml(gr.done, gr.total)).join('')}
+            ${heatmapCellHtml(r.overallDone, r.overallTotal)}
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+
+  body.querySelectorAll('[data-open-partner]').forEach(el => {
+    el.addEventListener('click', () => openDetailFor(el.dataset.openPartner));
+  });
+}
 
 // ── Partner Detail ─────────────────────────────────────────────────────────
 async function openDetailFor(partnerId) {

@@ -442,11 +442,64 @@ Verified via Playwright (`C:\tmp\pwtest\test-new-questions.js`): each
 section's question count matches exactly what was authored; full
 save/reload round trip confirmed on a MOIS answer; zero console errors.
 
+## Comparison page — DONE: section-completion heatmap
+
+Replaced the placeholder with a **partner × section-group completion
+heatmap**: rows = partners, columns = 10 broader groups (the 34
+`detailSections` collapsed so the table stays readable), each cell shows
+`% of applicable questions (status != 'na') that are accomplished or
+verified`, color-coded red (<34%) / yellow (34-66%) / green (≥67%) /
+gray (no applicable questions yet). Rightmost column = overall % across
+all groups. Rows sort by overall % descending. Clicking a partner name
+jumps to their Partner Detail page.
+
+**Why a heatmap, not a single number**: the user was unsure what
+"compare partners" should even mean now that there's no 1-5 score to
+average. Recommended this because the Overview and Decision Log pages
+already cover pipeline stage and final decisions — Comparison's unique
+job is showing *where* each partner is strong/weak, which a flat
+overall-% number can't do.
+
+**Rollup rule for Product-category groups**: aggregated across *all* of
+a partner's products that have that section relevant — relevant means
+either currently scope-matching (`sectionScopeMatches`) or having
+already-logged answer data (`sectionHasAnswerData`, the same "sticky"
+rule the detail page itself uses) — so a partner with 2 products both
+touching Camera Subsystem gets one combined number, and unchecking a
+sensor after answering its questions doesn't make that progress
+disappear from the comparison either.
+
+**Group definitions** (`COMPARISON_GROUPS` in `app.js`, every section id
+appears in exactly one group): Company Overview, Validation & Test,
+Functional Safety & Cybersecurity (each 1:1 with their General section);
+Architecture & Platform (compute/sw-arch/pipeline/power); Camera
+Subsystem (sensor-optics/isp/robustness); Camera Perception (all 7
+camperc-* sections); Radar & Fusion; ADAS Functions (all 8 function-
+scoped sections); HW Robustness & Quality (hw-robustness + sw-quality);
+Production & Compliance (production-lifecycle/hmi/compliance/emc-env/
+limitations-india).
+
+Implementation: `index.html` (Comparison page body replaced with a
+`#comparison-body` container), `app.js` (`COMPARISON_GROUPS`,
+`computeGroupCompletion`, `heatmapCellClass`/`heatmapCellHtml`,
+`renderComparison` — fetches full partner data via the same
+`Promise.all` pattern `renderDecisionsFull` already used, computes
+client-side, no backend changes needed), `style.css`
+(`.comparison-table`, `.hm-cell`/`.hm-empty`/`.hm-low`/`.hm-mid`/
+`.hm-high`, sticky partner-name column for horizontal scroll).
+
+Verified via Playwright (`C:\tmp\pwtest\test-comparison.js`): answered
+all 19 Company Overview questions as Verified → cell shows exactly
+100%; answered 13/26 Functional Safety questions as Accomplished → cell
+shows exactly 50%; partner-name click navigates to Partner Detail; zero
+console errors.
+
 ## Next steps
 
-1. Redesign the Comparison page around the new status-tag answers
-   (currently a placeholder — see Stage 1 addendum to index.html).
-2. Possible follow-up: revisit whether some of the very small sections
+1. Possible follow-up: revisit whether some of the very small sections
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab
    clutter — low priority, easy to change later.
+2. Possible follow-up: column/row sorting controls on the Comparison
+   heatmap (currently fixed sort by Overall % descending) if the
+   partner list grows large enough to need it.

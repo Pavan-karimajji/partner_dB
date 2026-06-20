@@ -48,13 +48,13 @@
     <div class="page-header">
       <div>
         <div class="page-title">Partner Comparison</div>
-        <div class="page-subtitle">Cross-partner comparison views</div>
+        <div class="page-subtitle">Section completion heatmap — % of applicable questions Accomplished or Verified</div>
       </div>
       <a class="btn btn-secondary btn-sm" href="/api/export/csv" download>Export CSV</a>
     </div>
     <div class="card">
-      <div class="card-body">
-        <div class="empty-state" style="padding:48px 0;">Comparison views are being redesigned around the new General/Product question structure — coming in Stage 2.</div>
+      <div class="card-body" style="overflow-x:auto;" id="comparison-body">
+        <div class="loading-wrap"><div class="spinner"></div></div>
       </div>
     </div>
   </div>
