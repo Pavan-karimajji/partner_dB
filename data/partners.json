@@ -51,7 +51,8 @@
             "soc": true
           },
           "heroSensors": [],
-          "heroFunctions": []
+          "heroFunctions": [],
+          "sectionGrades": []
         },
         {
           "answers": [],
@@ -80,11 +81,14 @@
             "soc": false
           },
           "heroSensors": [],
-          "heroFunctions": []
+          "heroFunctions": [],
+          "sectionGrades": []
         }
       ],
       "shortName": "CO",
-      "stage": "Under Evaluation"
+      "stage": "Under Evaluation",
+      "sectionGrades": [],
+      "domainGrades": []
     },
     {
       "addedDate": "2026-06-17",
@@ -104,7 +108,9 @@
       "notes": "",
       "productVersion": "",
       "shortName": "temp",
-      "stage": "Under Evaluation"
+      "stage": "Under Evaluation",
+      "sectionGrades": [],
+      "domainGrades": []
     }
   ]
 }

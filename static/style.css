@@ -329,6 +329,40 @@ input, textarea, select { font: inherit; }
   border-bottom: 2px solid var(--navy);
 }
 
+/* Master Category Grading sidebar card — one grade+justification row per
+   domain, page-agnostic (rendered once, not duplicated per sub-tab) */
+.domain-grade-sidebar-row { margin-bottom: 14px; }
+.domain-grade-sidebar-row:last-child { margin-bottom: 0; }
+.domain-grade-sidebar-label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  margin-bottom: 4px;
+}
+.domain-grade-sidebar-row .form-select { margin-bottom: 6px; }
+.domain-grade-sidebar-row .form-textarea { min-height: 44px; font-size: .8125rem; }
+
+/* Per-section grade row inside an expanded section's card-body */
+.section-grade-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--gray-200);
+}
+.section-grade-row .form-label {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+.section-grade-row .section-grade-select { width: auto; flex-shrink: 0; }
+.section-grade-row .q-remarks-input { flex: 1; min-height: 36px; }
+
 /* Question row in detail */
 .q-row {
   display: grid;

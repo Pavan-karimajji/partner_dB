@@ -160,6 +160,24 @@
       "label": "Custom"
     }
   ],
+  "gradeStatuses": [
+    {
+      "key": "na",
+      "label": "NA"
+    },
+    {
+      "key": "developing",
+      "label": "Developing"
+    },
+    {
+      "key": "good",
+      "label": "Good"
+    },
+    {
+      "key": "outstanding",
+      "label": "Outstanding"
+    }
+  ],
   "answerStatuses": [
     {
       "key": "na",

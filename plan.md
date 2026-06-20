@@ -622,6 +622,52 @@ card count across all domain groups on the Product tab (31, with every
 sensor/function checked) matches the full product-section count
 exactly; zero console errors.
 
+## Section + domain grading — DONE (NA/Developing/Good/Outstanding + justification)
+
+New, orthogonal to per-question completion status: a section/domain can
+be fully "Verified" question-by-question yet still graded "Developing"
+in quality, or vice versa. Resolved decisions:
+- Taxonomy: 4 tiers, NA/Developing/Good/Outstanding (`schema.gradeStatuses`)
+  — renamed from the user's initial "Premature/Budding" combined term to
+  the single word "Developing".
+- Subsection grading follows the same General-vs-Product split as
+  answers: General sections graded once per partner
+  (`partner.sectionGrades`), Product sections graded once per product
+  (`product.sectionGrades`) — verified independent per product.
+- Domain grading is an independent holistic judgment, not auto-computed
+  from subsections (`partner.domainGrades`), always partner-level.
+
+**Mid-implementation correction**: my first pass put the domain
+grade+justification controls inline in each `.domain-group-heading`
+inside the General/Product tabs. User caught the flaw immediately: a
+domain like "Company Background" has members in *both* General
+(Company Overview) and Product (Production Readiness & Lifecycle)
+categories, so its heading — and the same underlying partner-level
+grade value — would render redundantly on the General tab AND on every
+Product tab. Fixed by moving domain grading out of the tab content
+entirely into a **dedicated sidebar card** (`domainGradingCardHtml`,
+`#domain-grading-card`) placed next to the Decision card in
+`renderDetailContent` — rendered once, page-agnostic, visible
+regardless of which sub-tab (General/Product N/Patents/Notes) is
+active. `domainGroupedSectionsHtml` reverted to a plain-text heading.
+
+Implementation: `schema.json` (`gradeStatuses`), `server.py`
+(`sectionGrades`/`domainGrades` on new-partner template),
+`data/partners.json` (additive `sectionGrades` on partners+products,
+`domainGrades` on partners), `app.js` (`gradeStatusLabel`, read-only
+`getGeneralSectionGrade`/`getProductSectionGrade`/`getDomainGrade` for
+rendering, mutating `ensureGeneralSectionGrade`/
+`ensureProductSectionGrade`/`ensureDomainGrade` for
+`handleDetailChange`, `sectionGradeRowHtml` inside each section card,
+`domainGradingCardHtml` sidebar card), `style.css`
+(`.section-grade-row`, `.domain-grade-sidebar-row`).
+
+Verified via Playwright (`C:\tmp\pwtest\test-grading-v2.js`): zero
+inline grade controls remain in domain headings on either tab; the
+sidebar card shows all 6 domains and persists across sub-tab switches;
+both domain and section grades + justifications save and reload
+correctly; zero console errors.
+
 ## Next steps
 
 1. Hero-tag toggle UI and Patents-in-heatmap UI are still explicitly

@@ -366,6 +366,8 @@ function renderDetailContent(p) {
           </div>
         </div>
 
+        ${domainGradingCardHtml(p)}
+
         <!-- Hard Disqualifiers -->
         <div class="card">
           <div class="card-header"><span class="card-title">Hard Disqualifiers</span></div>
@@ -499,6 +501,49 @@ function handleDetailChange(e) {
     return;
   }
 
+  // Section grade (general or product section) — key is "general:<sectionId>"
+  // or "product:<prodId>:<sectionId>"; sectionId never contains ':'.
+  if (el.dataset.sectionGrade) {
+    markDirty();
+    const [scope, a, b] = el.dataset.sectionGrade.split(':');
+    if (scope === 'general') {
+      ensureGeneralSectionGrade(a).grade = el.value;
+    } else if (scope === 'product') {
+      const g = ensureProductSectionGrade(a, b);
+      if (g) g.grade = el.value;
+    }
+    if (pv && pv.classList.contains('print-val')) pv.textContent = gradeStatusLabel(el.value);
+    return;
+  }
+
+  // Section grade justification
+  if (el.dataset.sectionGradeJustification) {
+    markDirty();
+    const [scope, a, b] = el.dataset.sectionGradeJustification.split(':');
+    if (scope === 'general') {
+      ensureGeneralSectionGrade(a).justification = el.value;
+    } else if (scope === 'product') {
+      const g = ensureProductSectionGrade(a, b);
+      if (g) g.justification = el.value;
+    }
+    return;
+  }
+
+  // Domain grade (always partner-level)
+  if (el.dataset.domainGrade) {
+    markDirty();
+    ensureDomainGrade(el.dataset.domainGrade).grade = el.value;
+    if (pv && pv.classList.contains('print-val')) pv.textContent = gradeStatusLabel(el.value);
+    return;
+  }
+
+  // Domain grade justification
+  if (el.dataset.domainGradeJustification) {
+    markDirty();
+    ensureDomainGrade(el.dataset.domainGradeJustification).justification = el.value;
+    return;
+  }
+
   // Product name
   if (el.dataset.productName) {
     markDirty();
@@ -572,7 +617,7 @@ function newProduct(schema, ordinal) {
   // this product's differentiating capabilities (there can be more than
   // one) -- used by the customer-meeting-prep view to elevate priority
   // regardless of a question's static tag. No UI to set these yet.
-  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, heroSensors: [], heroFunctions: [] };
+  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, heroSensors: [], heroFunctions: [], sectionGrades: [] };
 }
 
 function computePortfolio(products, schema) {
@@ -699,7 +744,24 @@ function priorityPanelHtml(priorityKey, questions, getAnswer, keyFor) {
 // follow-up (see schema.detailQuestions[].priority). Defaults to the
 // first non-empty tab so a section with no High questions doesn't open
 // on an empty panel.
-function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveNote) {
+function sectionGradeRowHtml(sectionGrade, gradeKey) {
+  const schema = State.schema;
+  return `
+    <div class="section-grade-row">
+      <label class="form-label">Section Grade</label>
+      <select class="q-score-select section-grade-select" data-section-grade="${gradeKey}">
+        <option value="">— select —</option>
+        ${schema.gradeStatuses.map(g => `<option value="${g.key}"${sectionGrade.grade === g.key ? ' selected' : ''}>${esc(g.label)}</option>`).join('')}
+      </select>
+      <span class="print-val">${esc(gradeStatusLabel(sectionGrade.grade))}</span>
+      <textarea class="q-remarks-input" rows="2" placeholder="Justification for this grade…" data-section-grade-justification="${gradeKey}">${esc(sectionGrade.justification || '')}</textarea>
+      <span class="print-val">${esc(sectionGrade.justification || '')}</span>
+    </div>
+  `;
+}
+
+function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveNote, sectionGrade, gradeKey) {
+  sectionGrade = sectionGrade || { grade: '', justification: '' };
   const byPriority = { high: [], medium: [], low: [] };
   questions.forEach(q => { (byPriority[q.priority] || byPriority.medium).push(q); });
   const firstNonEmpty = PRIORITY_TABS.find(p => byPriority[p.key].length > 0) || PRIORITY_TABS[0];
@@ -727,6 +789,7 @@ function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveN
         ${inactiveNote ? `<span class="text-muted" style="font-size:.75rem;">${esc(inactiveNote)}</span>` : ''}
       </div>
       <div class="card-body">
+        ${gradeKey ? sectionGradeRowHtml(sectionGrade, gradeKey) : ''}
         ${tabsHtml}
         ${panelsHtml}
       </div>
@@ -822,6 +885,13 @@ function tryToggleScopedField(prod, type, key) {
 // to show. Shared by General and Product tabs — each calls this with its
 // own per-section render function since they bind answers differently
 // (partner.generalAnswers vs product.answers).
+// Domain grading deliberately does NOT live here. A domain (e.g. "Company
+// Background") can have members in BOTH General and Product sections, so
+// its heading would otherwise repeat once per sub-tab (General + every
+// Product tab) — same underlying partner-level value, shown redundantly
+// and confusingly in multiple places. Domain grading instead lives in a
+// single page-agnostic sidebar card (domainGradingCardHtml, in
+// renderDetailContent) that's visible no matter which sub-tab is active.
 function domainGroupedSectionsHtml(sectionEntries, renderSectionFn) {
   const domains = State.schema.domains || [];
   const byDomain = {};
@@ -837,6 +907,34 @@ function domainGroupedSectionsHtml(sectionEntries, renderSectionFn) {
         ${byDomain[d.id].map(renderSectionFn).join('')}
       </div>
     `).join('');
+}
+
+// Sidebar card for grading the 6 master domains — rendered once per partner,
+// independent of which sub-tab (General/Product N/Patents/Notes) is active.
+function domainGradingCardHtml(p) {
+  const schema = State.schema;
+  return `
+    <div class="card" id="domain-grading-card">
+      <div class="card-header"><span class="card-title">Master Category Grading</span></div>
+      <div class="card-body">
+        ${(schema.domains || []).map(d => {
+          const dg = getDomainGrade(d.id);
+          return `
+            <div class="domain-grade-sidebar-row">
+              <div class="domain-grade-sidebar-label">${esc(d.label)}</div>
+              <select class="form-select" data-domain-grade="${d.id}">
+                <option value="">— select —</option>
+                ${schema.gradeStatuses.map(g => `<option value="${g.key}"${dg.grade === g.key ? ' selected' : ''}>${esc(g.label)}</option>`).join('')}
+              </select>
+              <span class="print-val">${esc(gradeStatusLabel(dg.grade))}</span>
+              <textarea class="form-textarea" rows="2" placeholder="Justification…" data-domain-grade-justification="${d.id}">${esc(dg.justification || '')}</textarea>
+              <div class="print-val">${esc(dg.justification || '')}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function generalTabHtml(p) {
@@ -876,7 +974,10 @@ function generalTabHtml(p) {
       sections.map(sec => ({ section: sec })),
       ({ section }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
         qId => (p.generalAnswers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
-        qId => `general:${qId}`)
+        qId => `general:${qId}`,
+        null,
+        getGeneralSectionGrade(section.id),
+        `general:${section.id}`)
     )}
   `;
 }
@@ -891,7 +992,9 @@ function productTabHtml(prod) {
       ({ section, active }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
         qId => (prod.answers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
         qId => `product:${prod.id}:${qId}`,
-        active ? null : 'Sensor unchecked — kept visible because it has saved answers')
+        active ? null : 'Sensor unchecked — kept visible because it has saved answers',
+        getProductSectionGrade(prod, section.id),
+        `product:${prod.id}:${section.id}`)
     )}
   `;
 }
@@ -1034,6 +1137,51 @@ function ensureProductAnswer(productId, qId) {
   let a = list.find(x => x.qId === qId);
   if (!a) { a = { qId, status: '', partnerResponse: '', remarks: '' }; list.push(a); }
   return a;
+}
+
+// ── Section/domain grading (NA/Developing/Good/Outstanding + justification) ──
+// Orthogonal to per-question completion status: a section can be fully
+// "Verified" question-by-question yet still graded "Developing" in quality,
+// or vice versa. Section grades follow the same General-vs-Product split as
+// answers (General sections graded once per partner, Product sections once
+// per product); domain grades are always partner-level holistic judgments,
+// independent of their subsections' grades.
+function gradeStatusLabel(key) {
+  const s = (State.schema.gradeStatuses || []).find(x => x.key === key);
+  return s ? s.label : '';
+}
+
+// Read-only lookups — used during render, never mutate.
+function getGeneralSectionGrade(sectionId) {
+  return (State.detailPartner.sectionGrades || []).find(x => x.sectionId === sectionId) || { grade: '', justification: '' };
+}
+function getProductSectionGrade(prod, sectionId) {
+  return (prod.sectionGrades || []).find(x => x.sectionId === sectionId) || { grade: '', justification: '' };
+}
+function getDomainGrade(domainId) {
+  return (State.detailPartner.domainGrades || []).find(x => x.domainId === domainId) || { grade: '', justification: '' };
+}
+
+// Mutating "ensure" helpers — only called from handleDetailChange.
+function ensureGeneralSectionGrade(sectionId) {
+  const list = State.detailPartner.sectionGrades || (State.detailPartner.sectionGrades = []);
+  let g = list.find(x => x.sectionId === sectionId);
+  if (!g) { g = { sectionId, grade: '', justification: '' }; list.push(g); }
+  return g;
+}
+function ensureProductSectionGrade(productId, sectionId) {
+  const prod = findProduct(productId);
+  if (!prod) return null;
+  const list = prod.sectionGrades || (prod.sectionGrades = []);
+  let g = list.find(x => x.sectionId === sectionId);
+  if (!g) { g = { sectionId, grade: '', justification: '' }; list.push(g); }
+  return g;
+}
+function ensureDomainGrade(domainId) {
+  const list = State.detailPartner.domainGrades || (State.detailPartner.domainGrades = []);
+  let g = list.find(x => x.domainId === domainId);
+  if (!g) { g = { domainId, grade: '', justification: '' }; list.push(g); }
+  return g;
 }
 
 function productCardHtml(prod, schema) {
