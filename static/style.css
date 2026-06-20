@@ -438,6 +438,18 @@ input, textarea, select { font: inherit; }
   box-shadow: 0 0 0 2px rgba(91,93,181,.2);
 }
 
+/* General / Product answer rows — wider status column for status labels */
+.ans-row {
+  display: grid;
+  grid-template-columns: 28px minmax(140px, 320px) 140px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: .8125rem;
+}
+.ans-row:last-child { border-bottom: none; }
+
 /* Perception questions */
 .p-row {
   padding: 10px 0;
@@ -620,10 +632,7 @@ input, textarea, select { font: inherit; }
   .accordion-header { border-radius: var(--radius) !important; }
 
   /* Show all detail sub-tabs */
-  #detail-tab-technical,
-  #detail-tab-perception,
-  #detail-tab-products,
-  #detail-tab-notes { display: block !important; }
+  .detail-tab-panel { display: block !important; }
 
   body { background: white; color: black; font-size: 10pt; }
   .card { box-shadow: none !important; border: 1px solid #ccc; break-inside: avoid; }
@@ -634,6 +643,7 @@ input, textarea, select { font: inherit; }
 
   /* Print section/question scores as static text */
   .q-row { break-inside: avoid; }
+  .ans-row { break-inside: avoid; }
   .p-row { break-inside: avoid; }
   a[href]:after { content: ""; }
 

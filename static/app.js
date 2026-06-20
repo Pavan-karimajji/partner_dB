@@ -25,6 +25,7 @@ const State = {
   drillChart: null,
   selectedDrillSectionId: null,
   partnersFullCache: {},
+  activeDetailTab: 'general',
 };
 
 // ── Brand colours ─────────────────────────────────────────────────────────
@@ -465,6 +466,7 @@ async function loadDetailPartner(partnerId) {
   try {
     const partner = await api('GET', `/api/partners/${partnerId}`);
     State.detailPartner = JSON.parse(JSON.stringify(partner));
+    State.activeDetailTab = 'general';
     clearDirty();
     renderDetailContent(partner);
   } catch (e) {
@@ -588,162 +590,20 @@ function renderDetailContent(p) {
         </div>
       </div>
 
-      <!-- Main content: tabs for Technical / Perception -->
+      <!-- Main content: General / Product / Notes tabs -->
       <div class="detail-main">
-        <div style="display:flex;gap:8px;border-bottom:2px solid var(--gray-200);padding-bottom:0;margin-bottom:20px;">
-          <button class="detail-subtab active" data-detail-tab="technical">Technical Evaluation</button>
-          <button class="detail-subtab"        data-detail-tab="perception">Perception & Function</button>
-          <button class="detail-subtab"        data-detail-tab="products">Products & Portfolio</button>
-          <button class="detail-subtab"        data-detail-tab="notes">Notes</button>
+        <div class="detail-subtab-row" id="detail-subtab-row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:2px solid var(--gray-200);padding-bottom:0;margin-bottom:20px;">
+          ${detailTabButtonsHtml(p, normalizeActiveDetailTab(p))}
         </div>
-
-        <!-- Technical Evaluation -->
-        <div id="detail-tab-technical">
-          ${schema.techSections.map(sec => {
-            const ss = p.techScores.find(x => x.sectionId === sec.id) || {score: null, remarks: '', questions: []};
-            const qList = schema.techQuestions.filter(q => q.sectionId === sec.id);
-            return `
-              <div class="accordion-item" data-section-id="${sec.id}">
-                <div class="accordion-header" data-accordion>
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <span class="accordion-title">${esc(sec.name)}</span>
-                    <span class="text-muted" style="font-size:.75rem;">${sec.weight}% weight</span>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    ${scoreCell(ss.score)}
-                    <span class="accordion-chevron">▾</span>
-                  </div>
-                </div>
-                <div class="accordion-body">
-                  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;padding:10px;background:var(--light-blue);border-radius:var(--radius);">
-                    <label style="font-size:.8125rem;font-weight:600;color:var(--navy);">Section Score:</label>
-                    <select class="q-score-select" style="width:auto;"
-                      data-section-score="${sec.id}">
-                      <option value="">— N/A —</option>
-                      ${[1,2,3,4,5].map(n => `<option value="${n}"${ss.score == n ? ' selected' : ''}>${n} — ${schema.scoreLabels[n]}</option>`).join('')}
-                    </select>
-                    <span class="print-val">${ss.score != null ? ss.score + ' / 5' : ''}</span>
-                    <label style="font-size:.8125rem;font-weight:600;color:var(--navy);margin-left:12px;">Remarks:</label>
-                    <textarea class="q-remarks-input" style="flex:1;min-height:34px;" rows="1" placeholder="Section-level remarks…"
-                      data-section-remarks="${sec.id}">${esc(ss.remarks || '')}</textarea>
-                    <span class="print-val">${esc(ss.remarks || '')}</span>
-                  </div>
-                  <div class="q-row q-table-header">
-                    <span>#</span><span>Question</span><span>Score</span><span>Remarks</span>
-                  </div>
-                  ${qList.map(q => {
-                    const qd = (ss.questions || []).find(x => x.qId === q.id) || {};
-                    return `
-                      <div class="q-row">
-                        <span class="q-num">${q.id}</span>
-                        <div class="q-text" title="${esc(q.criteria || '')}">${esc(q.text)}${q.criteria ? `<div class="text-muted" style="font-size:.73rem;margin-top:2px;">${esc(q.criteria)}</div>` : ''}</div>
-                        <select class="q-score-select" data-q-score="${sec.id}:${q.id}">
-                          <option value="">N/A</option>
-                          ${[1,2,3,4,5].map(n => `<option value="${n}"${qd.score == n ? ' selected' : ''}>${n}</option>`).join('')}
-                        </select>
-                        <span class="print-val">${qd.score != null ? qd.score : ''}</span>
-                        <textarea class="q-remarks-input" rows="2" placeholder="Remarks…"
-                          data-q-remarks="${sec.id}:${q.id}">${esc(qd.remarks || '')}</textarea>
-                        <span class="print-val">${esc(qd.remarks || '')}</span>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-
-        <!-- Perception & Function -->
-        <div id="detail-tab-perception" style="display:none;">
-          ${schema.perceptionSections.map(psec => {
-            const pr = p.perceptionResponses.find(x => x.sectionId === psec.id) || {questions: []};
-            return `
-              <div class="accordion-item" data-psection-id="${psec.id}">
-                <div class="accordion-header" data-accordion>
-                  <span class="accordion-title">${esc(psec.name)}</span>
-                  <span class="accordion-chevron">▾</span>
-                </div>
-                <div class="accordion-body">
-                  ${psec.questions.map(q => {
-                    const qd = (pr.questions || []).find(x => x.qId === q.id) || {};
-                    return `
-                      <div class="p-row">
-                        <div class="p-question"><strong>${q.id}. ${esc(q.sectionTag ? '[' + q.sectionTag + '] ' : '')}${esc(q.text)}</strong></div>
-                        <textarea class="p-response-area" placeholder="Partner response / L&T notes…"
-                          data-p-response="${psec.id}:${q.id}">${esc(qd.response || '')}</textarea>
-                        <div class="print-val">${esc(qd.response || '')}</div>
-                        <div class="p-judgement-row" style="align-items:flex-start;">
-                          <span class="p-judgement-label" style="padding-top:5px;">L&T Judgement:</span>
-                          <select class="p-judgement-select" data-p-judgement="${psec.id}:${q.id}">
-                            ${['TBD','Pass','Acceptable','Flag','Fail'].map(j =>
-                              `<option value="${j}"${(qd.judgement || 'TBD') === j ? ' selected' : ''}>${j}</option>`
-                            ).join('')}
-                          </select>
-                          <span class="print-val">${esc(qd.judgement || 'TBD')}</span>
-                          <span class="p-judgement-label" style="margin-left:12px;padding-top:5px;">L&T Remark:</span>
-                          <textarea class="q-remarks-input" style="flex:1;" rows="2" placeholder="Internal remark…"
-                            data-p-remark="${psec.id}:${q.id}">${esc(qd.lntRemark || '')}</textarea>
-                          <span class="print-val">${esc(qd.lntRemark || '')}</span>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-
-        <!-- Products & Portfolio -->
-        <div id="detail-tab-products" style="display:none;">
-          ${productsTabHtml(p)}
-        </div>
-
-        <!-- Notes -->
-        <div id="detail-tab-notes" style="display:none;">
-          <div class="card">
-            <div class="card-header"><span class="card-title">General Notes</span></div>
-            <div class="card-body">
-              <textarea class="form-textarea" style="min-height:300px;" id="di-notes"
-                placeholder="Any general notes, meeting summaries, open questions…">${esc(p.notes || '')}</textarea>
-              <div class="print-val">${esc(p.notes || '')}</div>
-            </div>
-          </div>
+        <div id="detail-tab-panels">
+          ${detailPanelsHtml(p, normalizeActiveDetailTab(p))}
         </div>
       </div>
     </div>
   `;
 
-  // Bind detail tab switching
-  content.querySelectorAll('[data-detail-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      content.querySelectorAll('[data-detail-tab]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      ['technical','perception','products','notes'].forEach(t => {
-        const el = document.getElementById('detail-tab-' + t);
-        if (el) el.style.display = t === btn.dataset.detailTab ? '' : 'none';
-      });
-      const shown = document.getElementById('detail-tab-' + btn.dataset.detailTab);
-      if (shown) autoGrowAll(shown);
-    });
-  });
-
-  // Accordion
-  content.querySelectorAll('[data-accordion]').forEach(h => {
-    h.addEventListener('click', () => {
-      h.classList.toggle('open');
-      if (h.classList.contains('open')) {
-        const body = h.nextElementSibling;
-        if (body) autoGrowAll(body);
-      }
-    });
-  });
-
-  // Open first accordion by default
-  const firstAcc = content.querySelector('[data-accordion]');
-  if (firstAcc) firstAcc.classList.add('open');
-  if (firstAcc) autoGrowAll(firstAcc.nextElementSibling || content);
+  bindDetailTabSwitching();
+  autoGrowAll(document.getElementById('detail-tab-panels'));
 
   // Hard disqualifier toggles
   content.querySelectorAll('.hard-disqualifier-item').forEach(item => {
@@ -806,68 +666,30 @@ function handleDetailChange(e) {
   const pv = el.nextElementSibling;
   if (pv && pv.classList.contains('print-val')) pv.textContent = el.value;
 
-  // Section score
-  if (el.dataset.sectionScore) {
+  // Answer status (general or product question)
+  if (el.dataset.ansStatus) {
     markDirty();
-    const sid = parseInt(el.dataset.sectionScore);
-    const ss = ensureSectionScore(sid);
-    ss.score = el.value ? parseInt(el.value) : null;
-    // Update sidebar score cell
-    refreshSidebarScores();
+    const [scope, a, b] = el.dataset.ansStatus.split(':');
+    if (scope === 'general') {
+      ensureGeneralAnswer(parseInt(a)).status = el.value;
+    } else if (scope === 'product') {
+      const ans = ensureProductAnswer(a, parseInt(b));
+      if (ans) ans.status = el.value;
+    }
+    if (pv && pv.classList.contains('print-val')) pv.textContent = answerStatusLabel(el.value);
     return;
   }
 
-  // Section remarks
-  if (el.dataset.sectionRemarks) {
+  // Answer remarks (general or product question)
+  if (el.dataset.ansRemarks) {
     markDirty();
-    const sid = parseInt(el.dataset.sectionRemarks);
-    ensureSectionScore(sid).remarks = el.value;
-    return;
-  }
-
-  // Question score
-  if (el.dataset.qScore) {
-    markDirty();
-    const [sidStr, qidStr] = el.dataset.qScore.split(':');
-    const sid = parseInt(sidStr), qid = parseInt(qidStr);
-    const ss = ensureSectionScore(sid);
-    const qd = ensureQuestion(ss, qid);
-    qd.score = el.value ? parseInt(el.value) : null;
-    return;
-  }
-
-  // Question remarks
-  if (el.dataset.qRemarks) {
-    markDirty();
-    const [sidStr, qidStr] = el.dataset.qRemarks.split(':');
-    const sid = parseInt(sidStr), qid = parseInt(qidStr);
-    const ss = ensureSectionScore(sid);
-    ensureQuestion(ss, qid).remarks = el.value;
-    return;
-  }
-
-  // Perception response
-  if (el.dataset.pResponse) {
-    markDirty();
-    const [psid, qidStr] = el.dataset.pResponse.split(':');
-    const qid = parseInt(qidStr);
-    ensurePerceptionResponse(psid, qid).response = el.value;
-    return;
-  }
-
-  // Perception judgement
-  if (el.dataset.pJudgement) {
-    markDirty();
-    const [psid, qidStr] = el.dataset.pJudgement.split(':');
-    ensurePerceptionResponse(psid, parseInt(qidStr)).judgement = el.value;
-    return;
-  }
-
-  // Perception remark
-  if (el.dataset.pRemark) {
-    markDirty();
-    const [psid, qidStr] = el.dataset.pRemark.split(':');
-    ensurePerceptionResponse(psid, parseInt(qidStr)).lntRemark = el.value;
+    const [scope, a, b] = el.dataset.ansRemarks.split(':');
+    if (scope === 'general') {
+      ensureGeneralAnswer(parseInt(a)).remarks = el.value;
+    } else if (scope === 'product') {
+      const ans = ensureProductAnswer(a, parseInt(b));
+      if (ans) ans.remarks = el.value;
+    }
     return;
   }
 
@@ -906,33 +728,223 @@ function findProduct(productId) {
 }
 
 function newProduct(schema, ordinal) {
-  const sensors = {}, functions = {}, sensorNotes = {};
+  const sensors = {}, functions = {}, socs = {}, sensorNotes = {};
   schema.productSensors.forEach(s => { sensors[s.key] = false; sensorNotes[s.key] = ''; });
   schema.productFunctions.forEach(f => { functions[f.key] = false; });
+  (schema.productSocs || []).forEach(c => { socs[c.key] = false; });
   const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
     : 'p' + Date.now().toString(16) + Math.random().toString(16).slice(2);
-  return { id, name: 'Product ' + ordinal, sensors, functions, sensorNotes };
+  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes };
 }
 
 function computePortfolio(products, schema) {
-  const sensors = {}, functions = {};
+  const sensors = {}, functions = {}, socs = {};
   schema.productSensors.forEach(s => sensors[s.key] = false);
   schema.productFunctions.forEach(f => functions[f.key] = false);
+  (schema.productSocs || []).forEach(c => socs[c.key] = false);
   (products || []).forEach(prod => {
     schema.productSensors.forEach(s => { if (prod.sensors && prod.sensors[s.key]) sensors[s.key] = true; });
     schema.productFunctions.forEach(f => { if (prod.functions && prod.functions[f.key]) functions[f.key] = true; });
+    (schema.productSocs || []).forEach(c => { if (prod.socs && prod.socs[c.key]) socs[c.key] = true; });
   });
-  return { sensors, functions };
+  return { sensors, functions, socs };
 }
 
-function productsTabHtml(p) {
+// ── General / Product / Notes tabs ──────────────────────────────────────────
+
+function panelIdForTab(tabKey) {
+  if (tabKey === 'general' || tabKey === 'notes') return 'detail-tab-' + tabKey;
+  if (tabKey.indexOf('product:') === 0) return 'detail-tab-product-' + tabKey.split(':')[1];
+  return 'detail-tab-general';
+}
+
+function normalizeActiveDetailTab(p) {
+  const products = p.products || [];
+  const validKeys = ['general', 'notes'].concat(products.map(pr => 'product:' + pr.id));
+  if (!validKeys.includes(State.activeDetailTab)) State.activeDetailTab = 'general';
+  return State.activeDetailTab;
+}
+
+function detailTabButtonsHtml(p, activeTab) {
+  const products = p.products || [];
+  let html = `<button class="detail-subtab${activeTab === 'general' ? ' active' : ''}" data-detail-tab="general">General</button>`;
+  products.forEach(prod => {
+    const key = 'product:' + prod.id;
+    html += `<button class="detail-subtab${activeTab === key ? ' active' : ''}" data-detail-tab="${key}">${esc(prod.name || 'Product')}</button>`;
+  });
+  html += `<button class="btn btn-secondary btn-sm" data-add-product type="button">+ Add Product</button>`;
+  html += `<button class="detail-subtab${activeTab === 'notes' ? ' active' : ''}" data-detail-tab="notes">Notes</button>`;
+  return html;
+}
+
+function detailPanelsHtml(p, activeTab) {
+  const products = p.products || [];
+  const mk = (key, inner) => `<div class="detail-tab-panel" id="${panelIdForTab(key)}"${key === activeTab ? '' : ' style="display:none;"'}>${inner}</div>`;
+  let html = mk('general', generalTabHtml(p));
+  products.forEach(prod => { html += mk('product:' + prod.id, productTabHtml(prod)); });
+  html += mk('notes', notesTabHtml(p));
+  return html;
+}
+
+function bindDetailTabSwitching() {
+  document.querySelectorAll('[data-detail-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabKey = btn.dataset.detailTab;
+      State.activeDetailTab = tabKey;
+      document.querySelectorAll('[data-detail-tab]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.detail-tab-panel').forEach(panel => {
+        panel.style.display = panel.id === panelIdForTab(tabKey) ? '' : 'none';
+      });
+      const shown = document.getElementById(panelIdForTab(tabKey));
+      if (shown) autoGrowAll(shown);
+    });
+  });
+}
+
+function refreshDetailTabsAndPanels() {
+  const p = State.detailPartner;
+  const activeTab = normalizeActiveDetailTab(p);
+  const tabRow = document.getElementById('detail-subtab-row');
+  const panels = document.getElementById('detail-tab-panels');
+  if (!tabRow || !panels) return;
+  tabRow.innerHTML = detailTabButtonsHtml(p, activeTab);
+  panels.innerHTML = detailPanelsHtml(p, activeTab);
+  bindDetailTabSwitching();
+  autoGrowAll(panels);
+}
+
+function answerStatusLabel(key) {
+  const s = (State.schema.answerStatuses || []).find(x => x.key === key);
+  return s ? s.label : '';
+}
+
+function answerRowHtml(q, ans, key) {
+  const schema = State.schema;
+  return `
+    <div class="ans-row">
+      <span class="q-num">${q.id}</span>
+      <div class="q-text">${esc(q.text)}</div>
+      <select class="q-score-select" data-ans-status="${key}">
+        <option value="">— Select —</option>
+        ${schema.answerStatuses.map(s => `<option value="${s.key}"${ans.status === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
+      </select>
+      <span class="print-val">${esc(answerStatusLabel(ans.status))}</span>
+      <textarea class="q-remarks-input" rows="2" placeholder="Remarks…" data-ans-remarks="${key}">${esc(ans.remarks || '')}</textarea>
+      <span class="print-val">${esc(ans.remarks || '')}</span>
+    </div>
+  `;
+}
+
+function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveNote) {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">${esc(title)}</span>
+        ${inactiveNote ? `<span class="text-muted" style="font-size:.75rem;">${esc(inactiveNote)}</span>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Remarks</span></div>
+        ${questions.length === 0
+          ? `<div class="text-muted" style="font-size:.8125rem;">No questions defined for this section yet.</div>`
+          : questions.map(q => answerRowHtml(q, getAnswer(q.id), keyFor(q.id))).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Sections group questions within a category. A section's `scope` is either
+// null (common — always shown) or { type: 'sensor'|'function'|'soc', keys: [...] },
+// meaning it only appears on a product tab while that product has at least
+// one of those sensors/functions/SoCs checked. This is the single mechanism
+// behind Camera/Radar (sensor), AEB/ACC (function), and TDA4/Qualcomm (soc)
+// scoped sections — adding a new scoped section never needs new code, just
+// a new schema.detailSections entry.
+function sectionsForCategory(category) {
+  return (State.schema.detailSections || []).filter(s => s.category === category);
+}
+
+function questionsForSection(sectionId) {
+  return (State.schema.detailQuestions || []).filter(q => q.sectionId === sectionId);
+}
+
+// Maps a scope type to the product field it reads/writes.
+function scopeField(type) {
+  return { sensor: 'sensors', function: 'functions', soc: 'socs' }[type];
+}
+
+function scopeLabel(type, key) {
+  const list = { sensor: State.schema.productSensors, function: State.schema.productFunctions, soc: State.schema.productSocs }[type] || [];
+  const found = list.find(x => x.key === key);
+  return found ? found.label : key;
+}
+
+function sectionScopeMatches(section, prod) {
+  if (!section.scope || !section.scope.keys || section.scope.keys.length === 0) return true;
+  const field = scopeField(section.scope.type);
+  return section.scope.keys.some(key => prod[field] && prod[field][key]);
+}
+
+// A scoped section has answered data if any of its questions have a status
+// or remarks recorded for this product — unchecking the underlying
+// sensor/function/SoC must never make that data silently disappear.
+function sectionHasAnswerData(section, prod) {
+  return questionsForSection(section.id).some(q => {
+    const a = (prod.answers || []).find(x => x.qId === q.id);
+    return !!(a && (a.status || (a.remarks && a.remarks.trim())));
+  });
+}
+
+// Returns sections to render for a product, each flagged whether its
+// scope currently matches ("active") or only kept visible because it has
+// saved answers from before the sensor/function/SoC was unchecked.
+function sectionsForProduct(prod) {
+  return sectionsForCategory('product')
+    .map(section => ({ section, active: sectionScopeMatches(section, prod) }))
+    .filter(({ section, active }) => active || sectionHasAnswerData(section, prod));
+}
+
+// Toggling a sensor/function/SoC checkbox off can hide a whole scoped
+// section. If that section (or, for sensors, the per-sensor notes field)
+// already has saved data, this gates the uncheck behind a double
+// confirmation and only then actually clears the data — so an accidental
+// click can never silently lose anything. Returns true if the toggle
+// should proceed (and applies the clear-on-confirm side effect itself).
+function tryToggleScopedField(prod, type, key) {
+  const field = scopeField(type);
+  prod[field] = prod[field] || {};
+  const turningOff = !!prod[field][key];
+
+  if (turningOff) {
+    const section = sectionsForCategory('product').find(s => s.scope && s.scope.type === type && s.scope.keys.includes(key));
+    const hasAnswers = section && sectionHasAnswerData(section, prod);
+    const hasNotes = type === 'sensor' && !!(prod.sensorNotes && prod.sensorNotes[key] && prod.sensorNotes[key].trim());
+    if (hasAnswers || hasNotes) {
+      const label = scopeLabel(type, key);
+      const what = hasNotes && hasAnswers ? 'answers/notes' : (hasNotes ? 'notes' : 'answers');
+      if (!confirm(`${label} data has already been filled in for "${prod.name || 'this product'}". Unchecking ${label} will remove the ${label} section and its saved ${what}.\n\nContinue?`)) return false;
+      if (!confirm(`Are you sure? This cannot be undone once you Save.`)) return false;
+      if (section) {
+        const qIds = questionsForSection(section.id).map(q => q.id);
+        prod.answers = (prod.answers || []).filter(a => !qIds.includes(a.qId));
+      }
+      if (hasNotes) prod.sensorNotes[key] = '';
+    }
+  }
+
+  prod[field][key] = !prod[field][key];
+  return true;
+}
+
+function generalTabHtml(p) {
   const schema = State.schema;
   const products = p.products || [];
   const portfolio = computePortfolio(products, schema);
+  const sections = sectionsForCategory('general');
 
   return `
     <div class="card">
-      <div class="card-header"><span class="card-title">Company Portfolio (derived from products below)</span></div>
+      <div class="card-header"><span class="card-title">Company Portfolio (derived from products)</span></div>
       <div class="card-body">
         <div class="portfolio-summary">
           <div class="portfolio-summary-label">Sensors</div>
@@ -947,15 +959,61 @@ function productsTabHtml(p) {
               `<span class="toggle-pill readonly${portfolio.functions[f.key] ? ' on' : ''}">${esc(f.label)}</span>`
             ).join('')}
           </div>
+          <div class="portfolio-summary-label">SoCs</div>
+          <div class="toggle-pill-row">
+            ${(schema.productSocs || []).map(c =>
+              `<span class="toggle-pill readonly${portfolio.socs[c.key] ? ' on' : ''}">${esc(c.label)}</span>`
+            ).join('')}
+          </div>
         </div>
-        ${products.length === 0 ? '<div class="text-muted" style="font-size:.8125rem;">No products added yet — add one below.</div>' : ''}
+        ${products.length === 0 ? '<div class="text-muted" style="font-size:.8125rem;margin-top:8px;">No products added yet — use "+ Add Product" above.</div>' : ''}
       </div>
     </div>
-
-    ${products.map(prod => productCardHtml(prod, schema)).join('')}
-
-    <button class="btn btn-secondary" data-add-product type="button">+ Add Product</button>
+    ${sections.map(sec => answerQuestionsTableHtml(sec.label, questionsForSection(sec.id),
+      qId => (p.generalAnswers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
+      qId => `general:${qId}`)).join('')}
   `;
+}
+
+function productTabHtml(prod) {
+  const schema = State.schema;
+  const sections = sectionsForProduct(prod);
+  return `
+    ${productCardHtml(prod, schema)}
+    ${sections.map(({ section, active }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
+      qId => (prod.answers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
+      qId => `product:${prod.id}:${qId}`,
+      active ? null : 'Sensor unchecked — kept visible because it has saved answers')).join('')}
+  `;
+}
+
+function notesTabHtml(p) {
+  return `
+    <div class="card">
+      <div class="card-header"><span class="card-title">General Notes</span></div>
+      <div class="card-body">
+        <textarea class="form-textarea" style="min-height:300px;" id="di-notes"
+          placeholder="Any general notes, meeting summaries, open questions…">${esc(p.notes || '')}</textarea>
+        <div class="print-val">${esc(p.notes || '')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function ensureGeneralAnswer(qId) {
+  const list = State.detailPartner.generalAnswers || (State.detailPartner.generalAnswers = []);
+  let a = list.find(x => x.qId === qId);
+  if (!a) { a = { qId, status: '', remarks: '' }; list.push(a); }
+  return a;
+}
+
+function ensureProductAnswer(productId, qId) {
+  const prod = findProduct(productId);
+  if (!prod) return null;
+  const list = prod.answers || (prod.answers = []);
+  let a = list.find(x => x.qId === qId);
+  if (!a) { a = { qId, status: '', remarks: '' }; list.push(a); }
+  return a;
 }
 
 function productCardHtml(prod, schema) {
@@ -974,19 +1032,33 @@ function productCardHtml(prod, schema) {
             return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-sensor="${prod.id}:${s.key}">${esc(s.label)}</span>`;
           }).join('')}
         </div>
-        ${schema.productSensors.filter(s => prod.sensors && prod.sensors[s.key]).map(s => `
+        ${schema.productSensors.filter(s => {
+          const checked = prod.sensors && prod.sensors[s.key];
+          const hasNote = prod.sensorNotes && prod.sensorNotes[s.key] && prod.sensorNotes[s.key].trim();
+          return checked || hasNote; // keep visible if notes exist even after the sensor is unchecked
+        }).map(s => {
+          const checked = !!(prod.sensors && prod.sensors[s.key]);
+          return `
           <div class="product-note-group">
-            <label class="form-label">${esc(s.label)} notes — spec, details…</label>
+            <label class="form-label">${esc(s.label)} notes — spec, details…${checked ? '' : ' <span class="text-muted" style="font-weight:400;">(sensor unchecked — kept because it has saved notes)</span>'}</label>
             <textarea class="form-textarea" rows="2" placeholder="${esc(s.label)} spec / notes…"
               data-product-note="${prod.id}:${s.key}">${esc((prod.sensorNotes && prod.sensorNotes[s.key]) || '')}</textarea>
             <div class="print-val">${esc((prod.sensorNotes && prod.sensorNotes[s.key]) || '')}</div>
           </div>
-        `).join('')}
+        `;
+        }).join('')}
         <div class="product-toggle-label" style="margin-top:14px;">Functions</div>
-        <div class="toggle-pill-row">
+        <div class="toggle-pill-row" style="margin-bottom:8px;">
           ${schema.productFunctions.map(f => {
             const on = !!(prod.functions && prod.functions[f.key]);
             return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-function="${prod.id}:${f.key}">${esc(f.label)}</span>`;
+          }).join('')}
+        </div>
+        <div class="product-toggle-label" style="margin-top:14px;">SoCs</div>
+        <div class="toggle-pill-row">
+          ${(schema.productSocs || []).map(c => {
+            const on = !!(prod.socs && prod.socs[c.key]);
+            return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-soc="${prod.id}:${c.key}">${esc(c.label)}</span>`;
           }).join('')}
         </div>
       </div>
@@ -994,16 +1066,8 @@ function productCardHtml(prod, schema) {
   `;
 }
 
-function refreshProductsTab() {
-  const el = document.getElementById('detail-tab-products');
-  if (el) {
-    el.innerHTML = productsTabHtml(State.detailPartner);
-    autoGrowAll(el);
-  }
-}
-
 function handleDetailClick(e) {
-  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function]');
+  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc]');
   if (!el) return;
 
   if (el.dataset.businessModel !== undefined) {
@@ -1019,92 +1083,45 @@ function handleDetailClick(e) {
     markDirty();
     const products = State.detailPartner.products || (State.detailPartner.products = []);
     products.push(newProduct(State.schema, products.length + 1));
-    refreshProductsTab();
+    State.activeDetailTab = 'product:' + products[products.length - 1].id;
+    refreshDetailTabsAndPanels();
     return;
   }
 
   if (el.dataset.removeProduct) {
+    const prod = findProduct(el.dataset.removeProduct);
+    const name = (prod && prod.name) || 'this product';
+    if (!confirm(`Remove "${name}"? This deletes all its sensor/function settings and answered questions. This cannot be undone once you Save.`)) return;
     markDirty();
     State.detailPartner.products = (State.detailPartner.products || []).filter(pr => pr.id !== el.dataset.removeProduct);
-    refreshProductsTab();
+    if (State.activeDetailTab === 'product:' + el.dataset.removeProduct) State.activeDetailTab = 'general';
+    refreshDetailTabsAndPanels();
     return;
   }
 
   if (el.dataset.toggleSensor) {
-    markDirty();
     const [pid, key] = el.dataset.toggleSensor.split(':');
     const prod = findProduct(pid);
-    if (prod) {
-      prod.sensors = prod.sensors || {};
-      prod.sensors[key] = !prod.sensors[key];
-      refreshProductsTab();
-    }
+    if (!prod) return;
+    if (tryToggleScopedField(prod, 'sensor', key)) { markDirty(); refreshDetailTabsAndPanels(); }
     return;
   }
 
   if (el.dataset.toggleFunction) {
-    markDirty();
     const [pid, key] = el.dataset.toggleFunction.split(':');
     const prod = findProduct(pid);
-    if (prod) {
-      prod.functions = prod.functions || {};
-      prod.functions[key] = !prod.functions[key];
-      refreshProductsTab();
-    }
+    if (!prod) return;
+    if (tryToggleScopedField(prod, 'function', key)) { markDirty(); refreshDetailTabsAndPanels(); }
     return;
   }
-}
 
-function ensureSectionScore(sectionId) {
-  let ss = State.detailPartner.techScores.find(x => x.sectionId === sectionId);
-  if (!ss) {
-    ss = { sectionId, score: null, remarks: '', questions: [] };
-    State.detailPartner.techScores.push(ss);
+  if (el.dataset.toggleSoc) {
+    const [pid, key] = el.dataset.toggleSoc.split(':');
+    const prod = findProduct(pid);
+    if (!prod) return;
+    if (tryToggleScopedField(prod, 'soc', key)) { markDirty(); refreshDetailTabsAndPanels(); }
+    return;
   }
-  if (!ss.questions) ss.questions = [];
-  return ss;
-}
-
-function ensureQuestion(ss, qId) {
-  let qd = ss.questions.find(x => x.qId === qId);
-  if (!qd) {
-    qd = { qId, score: null, applicability: 'Applicable', remarks: '' };
-    ss.questions.push(qd);
-  }
-  return qd;
-}
-
-function ensurePerceptionResponse(psectionId, qId) {
-  let pr = State.detailPartner.perceptionResponses.find(x => x.sectionId === psectionId);
-  if (!pr) {
-    pr = { sectionId: psectionId, questions: [] };
-    State.detailPartner.perceptionResponses.push(pr);
-  }
-  if (!pr.questions) pr.questions = [];
-  let qd = pr.questions.find(x => x.qId === qId);
-  if (!qd) {
-    qd = { qId, response: '', lntRemark: '', judgement: 'TBD' };
-    pr.questions.push(qd);
-  }
-  return qd;
-}
-
-function refreshSidebarScores() {
-  const sidebar = document.querySelector('.detail-sidebar');
-  if (!sidebar) return;
-  State.schema.techSections.forEach(sec => {
-    const ss = State.detailPartner.techScores.find(x => x.sectionId === sec.id);
-    const score = ss ? ss.score : null;
-    const row = sidebar.querySelector('.section-score-row[data-section-id="' + sec.id + '"]');
-    if (row) {
-      row.querySelector('.section-bar-fill').style.width = barFill(score) + '%';
-      const cell = row.querySelector('.score-cell');
-      if (cell) {
-        cell.className = 'score-cell ' + scoreClass(score);
-        cell.textContent = score != null ? score : 'N/A';
-      }
-    }
-  });
 }
 
 // ── Edit Meta modal ────────────────────────────────────────────────────────

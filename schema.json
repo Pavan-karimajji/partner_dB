@@ -1703,6 +1703,19 @@
     { "key": "BSD", "label": "BSD" },
     { "key": "RCTA", "label": "RCTA" }
   ],
+  "productSocs": [
+    { "key": "ti_sitara",     "label": "TI Sitara" },
+    { "key": "ti_tda4vl",     "label": "TI TDA4VL (entry)" },
+    { "key": "ti_tda4vm",     "label": "TI TDA4VM (mid)" },
+    { "key": "nxp_s32v234",   "label": "NXP S32V234 (entry)" },
+    { "key": "nxp_s32g",      "label": "NXP S32G (mid)" },
+    { "key": "renesas_v3m",   "label": "Renesas R-Car V3M (entry)" },
+    { "key": "renesas_v3h",   "label": "Renesas R-Car V3H (mid)" },
+    { "key": "qcom_sa6155p",  "label": "Qualcomm SA6155P (entry)" },
+    { "key": "qcom_sa8155p",  "label": "Qualcomm SA8155P (mid)" },
+    { "key": "ambarella_cv2", "label": "Ambarella CV2 (entry)" },
+    { "key": "ambarella_cv22","label": "Ambarella CV22 (mid)" }
+  ],
   "verdictThresholds": {
     "approved": 4.0,
     "conditional": 3.0
@@ -1719,5 +1732,32 @@
     "3": "Acceptable",
     "4": "Good",
     "5": "Excellent"
-  }
+  },
+  "answerStatuses": [
+    { "key": "na",          "label": "NA" },
+    { "key": "yet_to_start", "label": "Yet to Start" },
+    { "key": "in_progress",  "label": "In Progress" },
+    { "key": "accomplished", "label": "Accomplished" },
+    { "key": "verified",     "label": "Verified" }
+  ],
+  "questionCategories": [
+    { "id": "general", "label": "General" },
+    { "id": "product", "label": "Product" }
+  ],
+  "detailSections": [
+    { "id": "gen-overview",     "category": "general", "label": "Company Overview", "scope": null },
+    { "id": "prod-common",      "category": "product",  "label": "Common Product Info", "scope": null },
+    { "id": "prod-camera",      "category": "product",  "label": "Camera Subsystem", "scope": { "type": "sensor", "keys": ["camera"] } },
+    { "id": "prod-radar",       "category": "product",  "label": "Radar Subsystem", "scope": { "type": "sensor", "keys": ["radar"] } },
+    { "id": "prod-func-aeb",    "category": "product",  "label": "AEB Function Detail", "scope": { "type": "function", "keys": ["AEB"] } },
+    { "id": "prod-func-acc",    "category": "product",  "label": "ACC Function Detail", "scope": { "type": "function", "keys": ["ACC"] } }
+  ],
+  "detailQuestions": [
+    { "id": 1, "sectionId": "gen-overview",  "text": "Sample general question — answered once per partner." },
+    { "id": 2, "sectionId": "prod-common",   "text": "Sample product question — shown for every product, regardless of sensors/functions/SoCs." },
+    { "id": 3, "sectionId": "prod-camera",   "text": "Sample camera-specific question — shown only on products with the Camera sensor checked." },
+    { "id": 4, "sectionId": "prod-radar",    "text": "Sample radar-specific question — shown only on products with the Radar sensor checked." },
+    { "id": 5, "sectionId": "prod-func-aeb", "text": "Sample AEB-specific question — shown only on products with the AEB function checked." },
+    { "id": 6, "sectionId": "prod-func-acc", "text": "Sample ACC-specific question — shown only on products with the ACC function checked." }
+  ]
 }
