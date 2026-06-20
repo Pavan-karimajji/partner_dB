@@ -123,6 +123,7 @@ def api_create_partner():
         "businessModel": [],
         "products": [],
         "generalAnswers": [],
+        "patents": [],
         "hardDisqualifiers": [],
         "decision": {
             "rationale": "",

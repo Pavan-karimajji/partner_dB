@@ -402,6 +402,34 @@ function handleDetailChange(e) {
     State.detailPartner.notes = el.value;
     return;
   }
+
+  // Patent relevance type — swaps the second control (sensor/function picker
+  // vs. free-text label), so the card needs a targeted re-render.
+  if (el.dataset.patentRelevanceType) {
+    markDirty();
+    const pt = findPatent(el.dataset.patentRelevanceType);
+    if (pt) {
+      pt.relevanceType = el.value;
+      pt.relevanceKey = '';
+      pt.relevanceLabel = '';
+      const card = document.querySelector(`.patent-card[data-patent-id="${pt.id}"]`);
+      if (card) {
+        card.outerHTML = patentCardHtml(pt, State.schema);
+        autoGrowAll(document.getElementById('detail-tab-patents'));
+      }
+    }
+    return;
+  }
+
+  // Patent field (title, patentId, status, jurisdiction, grantedBy, notes,
+  // relevanceKey, relevanceLabel) — all keyed "patentId:fieldName".
+  if (el.dataset.patentField) {
+    markDirty();
+    const [ptId, field] = el.dataset.patentField.split(':');
+    const pt = findPatent(ptId);
+    if (pt) pt[field] = el.value;
+    return;
+  }
 }
 
 // ── Products & Portfolio tab ────────────────────────────────────────────────
@@ -436,14 +464,14 @@ function computePortfolio(products, schema) {
 // ── General / Product / Notes tabs ──────────────────────────────────────────
 
 function panelIdForTab(tabKey) {
-  if (tabKey === 'general' || tabKey === 'notes') return 'detail-tab-' + tabKey;
+  if (tabKey === 'general' || tabKey === 'notes' || tabKey === 'patents') return 'detail-tab-' + tabKey;
   if (tabKey.indexOf('product:') === 0) return 'detail-tab-product-' + tabKey.split(':')[1];
   return 'detail-tab-general';
 }
 
 function normalizeActiveDetailTab(p) {
   const products = p.products || [];
-  const validKeys = ['general', 'notes'].concat(products.map(pr => 'product:' + pr.id));
+  const validKeys = ['general', 'patents', 'notes'].concat(products.map(pr => 'product:' + pr.id));
   if (!validKeys.includes(State.activeDetailTab)) State.activeDetailTab = 'general';
   return State.activeDetailTab;
 }
@@ -456,6 +484,7 @@ function detailTabButtonsHtml(p, activeTab) {
     html += `<button class="detail-subtab${activeTab === key ? ' active' : ''}" data-detail-tab="${key}">${esc(prod.name || 'Product')}</button>`;
   });
   html += `<button class="btn btn-secondary btn-sm" data-add-product type="button">+ Add Product</button>`;
+  html += `<button class="detail-subtab${activeTab === 'patents' ? ' active' : ''}" data-detail-tab="patents">Patents</button>`;
   html += `<button class="detail-subtab${activeTab === 'notes' ? ' active' : ''}" data-detail-tab="notes">Notes</button>`;
   return html;
 }
@@ -465,6 +494,7 @@ function detailPanelsHtml(p, activeTab) {
   const mk = (key, inner) => `<div class="detail-tab-panel" id="${panelIdForTab(key)}"${key === activeTab ? '' : ' style="display:none;"'}>${inner}</div>`;
   let html = mk('general', generalTabHtml(p));
   products.forEach(prod => { html += mk('product:' + prod.id, productTabHtml(prod)); });
+  html += mk('patents', patentsTabHtml(p));
   html += mk('notes', notesTabHtml(p));
   return html;
 }
@@ -683,6 +713,117 @@ function notesTabHtml(p) {
   `;
 }
 
+// ── Patents tab ──────────────────────────────────────────────────────────
+// Patents live at partner level (not nested in a product) since a single
+// patent often isn't tied to one product instance. "Relevant To" is a loose
+// tag rather than a hard scope — sensor/function reuse the existing
+// productSensors/productFunctions lists; Perception/Hardware/Custom are
+// free text since there's no fixed taxonomy for those yet.
+
+function findPatent(patentId) {
+  return (State.detailPartner.patents || []).find(pt => pt.id === patentId);
+}
+
+function newPatent(ordinal) {
+  const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : 'pt' + Date.now().toString(16) + Math.random().toString(16).slice(2);
+  return {
+    id, title: 'Patent ' + ordinal, patentId: '', status: '',
+    grantedBy: '', jurisdiction: '',
+    relevanceType: '', relevanceKey: '', relevanceLabel: '',
+    notes: '',
+  };
+}
+
+function patentCardHtml(pt, schema) {
+  const relevanceType = pt.relevanceType || '';
+  let relevanceControl = '<div class="text-muted" style="font-size:.8125rem;padding-top:8px;">—</div>';
+  if (relevanceType === 'sensor') {
+    relevanceControl = `
+      <select class="form-select" data-patent-field="${pt.id}:relevanceKey">
+        <option value="">— select sensor —</option>
+        ${schema.productSensors.map(s => `<option value="${s.key}"${pt.relevanceKey === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
+      </select>`;
+  } else if (relevanceType === 'function') {
+    relevanceControl = `
+      <select class="form-select" data-patent-field="${pt.id}:relevanceKey">
+        <option value="">— select function —</option>
+        ${schema.productFunctions.map(f => `<option value="${f.key}"${pt.relevanceKey === f.key ? ' selected' : ''}>${esc(f.label)}</option>`).join('')}
+      </select>`;
+  } else if (relevanceType) {
+    relevanceControl = `
+      <input class="form-input" type="text" placeholder="What is this relevant to?"
+        data-patent-field="${pt.id}:relevanceLabel" value="${esc(pt.relevanceLabel || '')}" />`;
+  }
+
+  return `
+    <div class="card patent-card" data-patent-id="${pt.id}">
+      <div class="card-header">
+        <input class="form-input" style="font-weight:600;max-width:280px;"
+          data-patent-field="${pt.id}:title" value="${esc(pt.title || '')}" />
+        <button class="btn btn-danger btn-sm" data-remove-patent="${pt.id}" type="button">Remove</button>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label">Patent ID / Application No.</label>
+            <input class="form-input" type="text" placeholder="e.g. US17/123,456"
+              data-patent-field="${pt.id}:patentId" value="${esc(pt.patentId || '')}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-select" data-patent-field="${pt.id}:status">
+              <option value="">— select —</option>
+              ${schema.patentStatuses.map(s => `<option value="${s.key}"${pt.status === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jurisdiction</label>
+            <input class="form-input" type="text" placeholder="e.g. India, US, EU"
+              data-patent-field="${pt.id}:jurisdiction" value="${esc(pt.jurisdiction || '')}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Granted By</label>
+            <input class="form-input" type="text" placeholder="e.g. USPTO, IPO India"
+              data-patent-field="${pt.id}:grantedBy" value="${esc(pt.grantedBy || '')}" />
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
+          <div class="form-group">
+            <label class="form-label">Relevant To</label>
+            <select class="form-select" data-patent-relevance-type="${pt.id}">
+              <option value="">— none —</option>
+              ${schema.patentRelevanceTypes.map(r => `<option value="${r.key}"${relevanceType === r.key ? ' selected' : ''}>${esc(r.label)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">&nbsp;</label>
+            ${relevanceControl}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-textarea" rows="2" placeholder="Notes…"
+            data-patent-field="${pt.id}:notes">${esc(pt.notes || '')}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function patentsTabHtml(p) {
+  const schema = State.schema;
+  const patents = p.patents || [];
+  return `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn btn-secondary btn-sm" data-add-patent type="button">+ Add Patent</button>
+    </div>
+    ${patents.length === 0
+      ? '<div class="text-muted" style="font-size:.8125rem;">No patents added yet.</div>'
+      : patents.map(pt => patentCardHtml(pt, schema)).join('')}
+  `;
+}
+
 function ensureGeneralAnswer(qId) {
   const list = State.detailPartner.generalAnswers || (State.detailPartner.generalAnswers = []);
   let a = list.find(x => x.qId === qId);
@@ -750,7 +891,7 @@ function productCardHtml(prod, schema) {
 }
 
 function handleDetailClick(e) {
-  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc]');
+  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc],[data-add-patent],[data-remove-patent]');
   if (!el) return;
 
   if (el.dataset.businessModel !== undefined) {
@@ -803,6 +944,24 @@ function handleDetailClick(e) {
     const prod = findProduct(pid);
     if (!prod) return;
     if (tryToggleScopedField(prod, 'soc', key)) { markDirty(); refreshDetailTabsAndPanels(); }
+    return;
+  }
+
+  if (el.dataset.addPatent !== undefined) {
+    markDirty();
+    const patents = State.detailPartner.patents || (State.detailPartner.patents = []);
+    patents.push(newPatent(patents.length + 1));
+    refreshDetailTabsAndPanels();
+    return;
+  }
+
+  if (el.dataset.removePatent) {
+    const pt = findPatent(el.dataset.removePatent);
+    const title = (pt && pt.title) || 'this patent';
+    if (!confirm(`Remove "${title}"? This cannot be undone once you Save.`)) return;
+    markDirty();
+    State.detailPartner.patents = (State.detailPartner.patents || []).filter(x => x.id !== el.dataset.removePatent);
+    refreshDetailTabsAndPanels();
     return;
   }
 }

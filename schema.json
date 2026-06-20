@@ -108,6 +108,54 @@
     "No FMEA or safety concept",
     "No ASPICE assessment"
   ],
+  "patentStatuses": [
+    {
+      "key": "not_filed",
+      "label": "Not Filed"
+    },
+    {
+      "key": "filed",
+      "label": "Filed / Pending"
+    },
+    {
+      "key": "published",
+      "label": "Published"
+    },
+    {
+      "key": "granted",
+      "label": "Granted"
+    },
+    {
+      "key": "rejected",
+      "label": "Rejected / Abandoned"
+    },
+    {
+      "key": "expired",
+      "label": "Expired"
+    }
+  ],
+  "patentRelevanceTypes": [
+    {
+      "key": "sensor",
+      "label": "Sensor"
+    },
+    {
+      "key": "function",
+      "label": "Function"
+    },
+    {
+      "key": "perception",
+      "label": "Perception"
+    },
+    {
+      "key": "hardware",
+      "label": "Hardware"
+    },
+    {
+      "key": "custom",
+      "label": "Custom"
+    }
+  ],
   "answerStatuses": [
     {
       "key": "na",

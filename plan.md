@@ -163,3 +163,41 @@ and unused by the new UI.
 ## Status
 
 Plan reviewed and approved. Ready for implementation.
+
+## Addendum — Patents tab (added after Stage 1 implementation, before Stage 2)
+
+A fifth fixed sub-tab, `Patents`, sits between `[+ Add Product]` and `Notes`:
+
+```
+General | Product 1 | Product 2 | [+ Add Product] | Patents | Notes
+```
+
+Patents live at partner level (not nested in a product — a patent often
+isn't tied to a single product instance), as an addable/removable list like
+Products, but rendered inside one fixed tab rather than getting a tab per
+patent.
+
+**Per-patent fields:**
+- `title`, `patentId` (application/patent number — relevant once NDA-shared
+  real IDs exist), `status` (full lifecycle, see below), `grantedBy`
+  (issuing authority, e.g. USPTO/IPO India), `jurisdiction` (free text),
+  `notes`.
+- `relevanceType` — one of `sensor` / `function` / `perception` / `hardware`
+  / `custom`, plus either `relevanceKey` (reuses `productSensors`/
+  `productFunctions` lists when type is sensor/function) or
+  `relevanceLabel` (free text for perception/hardware/custom). Loosely tied
+  — not a hard scope like product question sections — and may be left
+  blank for company-level patents not tied to anything specific.
+
+**Status taxonomy** (`schema.patentStatuses`): `Not Filed` → `Filed/Pending`
+→ `Published` → `Granted` → `Rejected/Abandoned` → `Expired`.
+
+No question/answer-status sections under Patents — it's metadata tracking,
+not an evaluation checklist like General/Product tabs.
+
+Implementation: `schema.json` (`patentStatuses`, `patentRelevanceTypes`),
+`server.py` (`patents: []` on new-partner template), `data/partners.json`
+(`patents: []` added to existing partners), `static/app.js`
+(`findPatent`/`newPatent`/`patentCardHtml`/`patentsTabHtml`, add/remove
+click handlers, `data-patent-field`/`data-patent-relevance-type` change
+handlers).

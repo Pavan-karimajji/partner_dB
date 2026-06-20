@@ -16,10 +16,12 @@
       },
       "evaluationDate": "2026-06-17",
       "evaluator": "L&T ADAS Team",
+      "generalAnswers": [],
       "hardDisqualifiers": [],
       "id": "aab65255-e6e3-464c-84cb-04d03de796ce",
       "name": "gahan",
       "notes": "Meeting held on 12-Jun-2026 with Company One CTO and BD team.\n\nKey takeaways:\n- Willing to co-develop India-specific dataset extension under a JDA\n- ISO 21434 certification targeted by Q3 2026 — commitment letter requested\n- SOTIF gap acknowledged; they will share a closure plan by 30-Jun-2026\n\nOpen actions:\n- L&T to share test route specifications for Pune/Chennai validation runs\n- Company One to provide ASIL-D decomposition draft by 15-Jul-2026\n- Legal to review IP clauses in the NDA before any source code access",
+      "patents": [],
       "productVersion": "v2.1 (Placeholder)",
       "products": [
         {
@@ -76,8 +78,7 @@
         }
       ],
       "shortName": "CO",
-      "stage": "Under Evaluation",
-      "generalAnswers": []
+      "stage": "Under Evaluation"
     },
     {
       "addedDate": "2026-06-17",
@@ -90,6 +91,7 @@
       "evaluationDate": "",
       "evaluator": "pavan",
       "generalAnswers": [],
+      "patents": [],
       "hardDisqualifiers": [],
       "id": "c7ef0371-3164-47c6-b728-51acfdbce0dc",
       "name": "temp",
