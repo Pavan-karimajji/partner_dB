@@ -21,10 +21,6 @@ const State = {
   partnersSummary: [],   // lightweight list (from GET /api/partners)
   detailPartner: null,   // full partner object loaded for detail view
   detailDirty: false,
-  radarChart: null,
-  drillChart: null,
-  selectedDrillSectionId: null,
-  partnersFullCache: {},
   activeDetailTab: 'general',
 };
 
@@ -78,31 +74,7 @@ function switchTab(tabId) {
   if (tabId === 'decisions')  renderDecisionsFull();
 }
 
-// ── Score helpers ─────────────────────────────────────────────────────────
-function scoreClass(s) {
-  if (s === null || s === undefined) return 'score-na';
-  if (s >= 5) return 'score-5';
-  if (s >= 4) return 'score-4';
-  if (s >= 3) return 'score-3';
-  if (s >= 2) return 'score-2';
-  return 'score-1';
-}
-
-function scoreCell(s) {
-  const label = s != null ? s : 'N/A';
-  return `<span class="score-cell ${scoreClass(s)}">${label}</span>`;
-}
-
-function verdictBadge(v) {
-  const map = {
-    'Approved':               'badge-approved',
-    'Conditionally Approved': 'badge-conditional',
-    'Not Approved':           'badge-not-approved',
-    'Pending':                'badge-pending',
-  };
-  return `<span class="badge ${map[v] || 'badge-pending'}">${v || 'Pending'}</span>`;
-}
-
+// ── Decision status badge ────────────────────────────────────────────────
 function statusBadge(s) {
   const map = {
     'Shortlisted': 'badge-shortlisted',
@@ -113,44 +85,14 @@ function statusBadge(s) {
   return `<span class="badge ${map[s] || 'badge-pending'}">${s}</span>`;
 }
 
-function barFill(score) {
-  if (score == null) return 0;
-  return Math.round((score / 5) * 100);
-}
-
-// ── Weighted score from section scores array ───────────────────────────────
-function computeWeightedScore(sectionScores) {
-  if (!State.schema || !sectionScores) return null;
-  const sections = State.schema.techSections;
-  const totalWeight = sections.reduce((a, s) => a + s.weight, 0);
-  let wsum = 0, hasAny = false;
-  for (const ss of sectionScores) {
-    if (ss.score == null) continue;
-    hasAny = true;
-    const def = sections.find(s => s.id === ss.sectionId);
-    if (def) wsum += (ss.score / 5) * def.weight;
-  }
-  if (!hasAny) return null;
-  return Math.round((wsum / totalWeight) * 5 * 100) / 100;
-}
-
-function deriveVerdict(wav) {
-  if (wav == null) return 'Pending';
-  const t = State.schema.verdictThresholds;
-  if (wav >= t.approved)    return 'Approved';
-  if (wav >= t.conditional) return 'Conditionally Approved';
-  return 'Not Approved';
-}
-
 // ── Overview ───────────────────────────────────────────────────────────────
 function renderOverview() {
   const partners = State.partnersSummary;
 
   // Stats
   const stats = document.getElementById('overview-stats');
-  const totalWeight = State.schema.techSections.reduce((a, s) => a + s.weight, 0);
-  const scored = partners.filter(p => p.weightedScore != null).length;
   const shortlisted = partners.filter(p => p.decisionStatus === 'Shortlisted').length;
+  const totalProducts = partners.reduce((a, p) => a + (p.productCount || 0), 0);
   stats.innerHTML = `
     <div class="stat-card">
       <div class="stat-label">Partners</div>
@@ -158,19 +100,14 @@ function renderOverview() {
       <div class="stat-sub">under evaluation</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Scored</div>
-      <div class="stat-value">${scored}</div>
-      <div class="stat-sub">of ${partners.length} have a score</div>
-    </div>
-    <div class="stat-card">
       <div class="stat-label">Shortlisted</div>
       <div class="stat-value">${shortlisted}</div>
       <div class="stat-sub">decision pending</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Questions</div>
-      <div class="stat-value">${State.schema.techQuestions.length}</div>
-      <div class="stat-sub">across ${State.schema.techSections.length} sections</div>
+      <div class="stat-label">Products</div>
+      <div class="stat-value">${totalProducts}</div>
+      <div class="stat-sub">across all partners</div>
     </div>
   `;
 
@@ -203,19 +140,13 @@ function renderOverview() {
 }
 
 function renderPartnerCard(p) {
-  const wav = p.weightedScore;
-  const pct = wav != null ? barFill(wav) : 0;
-  const scoreLabel = wav != null ? wav.toFixed(1) + ' / 5' : 'Not scored';
+  const productCount = p.productCount || 0;
   return `
     <div class="partner-card" data-id="${p.id}">
       <div class="partner-card-name">${esc(p.name)}</div>
       <div class="partner-card-sub">${esc(p.evaluator || '')}${p.evaluationDate ? ' · ' + p.evaluationDate : ''}</div>
-      <div class="partner-card-score">
-        <div class="score-bar-wrap"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-        <span class="score-label">${scoreLabel}</span>
-      </div>
       <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;">
-        ${verdictBadge(p.verdict)}
+        <span class="text-muted" style="font-size:.75rem;">${productCount} product${productCount === 1 ? '' : 's'}</span>
         ${p.decisionStatus ? statusBadge(p.decisionStatus) : ''}
       </div>
     </div>
@@ -223,220 +154,10 @@ function renderPartnerCard(p) {
 }
 
 // ── Comparison ─────────────────────────────────────────────────────────────
-function renderComparison() {
-  const partners = State.partnersSummary;
-  const sections = State.schema.techSections;
-
-  if (partners.length === 0) {
-    document.getElementById('comparison-table').innerHTML =
-      '<tr><td colspan="20"><div class="empty-state">No partners yet. Add one to get started.</div></td></tr>';
-    return;
-  }
-
-  // Radar chart
-  const radarLabels = sections.map(s => shortSectionName(s.name));
-  const radarDatasets = partners.map((p, i) => {
-    const data = sections.map(sec => {
-      const ss = p.sectionScores.find(x => x.sectionId === sec.id);
-      return ss && ss.score != null ? ss.score : 0;
-    });
-    return {
-      label: p.name,
-      data,
-      borderColor: COLORS.chartPalette[i % COLORS.chartPalette.length],
-      backgroundColor: hexAlpha(COLORS.chartPalette[i % COLORS.chartPalette.length], 0.08),
-      pointBackgroundColor: COLORS.chartPalette[i % COLORS.chartPalette.length],
-      borderWidth: 2,
-      pointRadius: 3,
-    };
-  });
-
-  if (State.radarChart) State.radarChart.destroy();
-  State.radarChart = new Chart(document.getElementById('radar-chart'), {
-    type: 'radar',
-    data: { labels: radarLabels, datasets: radarDatasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: {
-        r: {
-          min: 0, max: 5,
-          ticks: { stepSize: 1, font: { size: 10 } },
-          pointLabels: { font: { size: 10 }, color: COLORS.navy },
-          grid: { color: 'rgba(0,0,0,.07)' },
-        }
-      },
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-      onClick: (evt, elements) => {
-        if (elements.length) selectDrillSection(sections[elements[0].index].id);
-      },
-      onHover: (evt, elements) => {
-        evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
-      },
-    }
-  });
-
-  // Score matrix table
-  const table = document.getElementById('comparison-table');
-  const thead = `<thead><tr>
-    <th style="min-width:160px;">Section</th>
-    <th>Weight</th>
-    ${partners.map(p => `<th>${esc(p.name)}</th>`).join('')}
-  </tr></thead>`;
-
-  const tbody = `<tbody>
-    ${sections.map(sec => `
-      <tr class="matrix-section-row" data-section-id="${sec.id}">
-        <td>${esc(shortSectionName(sec.name))}</td>
-        <td class="text-muted">${sec.weight}%</td>
-        ${partners.map(p => {
-          const ss = p.sectionScores.find(x => x.sectionId === sec.id);
-          return `<td class="matrix-score-cell" data-partner-id="${p.id}" data-section-id="${sec.id}" title="Open ${esc(shortSectionName(sec.name))} · ${esc(p.name)}">${scoreCell(ss ? ss.score : null)}</td>`;
-        }).join('')}
-      </tr>
-    `).join('')}
-    <tr style="border-top:2px solid var(--gray-300);">
-      <td style="font-weight:700;color:var(--navy);">Weighted Average</td>
-      <td></td>
-      ${partners.map(p => `<td>${p.weightedScore != null ? `<strong>${p.weightedScore.toFixed(2)}</strong>` : '—'}</td>`).join('')}
-    </tr>
-    <tr>
-      <td style="font-weight:700;color:var(--navy);">Verdict</td>
-      <td></td>
-      ${partners.map(p => `<td>${verdictBadge(p.verdict)}</td>`).join('')}
-    </tr>
-  </tbody>`;
-
-  table.innerHTML = thead + tbody;
-
-  // Bind matrix row clicks for drill-down (section name / weight cells)
-  table.querySelectorAll('tbody tr.matrix-section-row').forEach(row => {
-    row.addEventListener('click', () => selectDrillSection(parseInt(row.dataset.sectionId)));
-  });
-
-  // Bind score cell clicks → Partner Detail at that section (stop propagation so row drill doesn't also fire)
-  table.querySelectorAll('td.matrix-score-cell').forEach(td => {
-    td.addEventListener('click', e => {
-      e.stopPropagation();
-      openDetailAndScrollTo(td.dataset.partnerId, parseInt(td.dataset.sectionId));
-    });
-  });
-
-  // Re-apply row highlight if a section is already selected
-  if (State.selectedDrillSectionId) highlightMatrixRow(State.selectedDrillSectionId);
-}
-
-// ── Section Drill-Down ─────────────────────────────────────────────────────
-async function selectDrillSection(sectionId) {
-  State.selectedDrillSectionId = sectionId;
-  const section = State.schema.techSections.find(s => s.id === sectionId);
-  const questions = State.schema.techQuestions.filter(q => q.sectionId === sectionId);
-
-  document.getElementById('drill-card-title').textContent = `${section.name} — Question Breakdown`;
-  document.getElementById('btn-drill-clear').style.display = '';
-
-  // Fetch and cache full partner objects we don't have yet
-  const missing = State.partnersSummary.filter(p => !State.partnersFullCache[p.id]);
-  if (missing.length) {
-    try {
-      const results = await Promise.all(missing.map(p => api('GET', `/api/partners/${p.id}`)));
-      results.forEach(p => { State.partnersFullCache[p.id] = p; });
-    } catch (e) {
-      toast('Failed to load question data: ' + e.message, true);
-      return;
-    }
-  }
-
-  const labels = questions.map(q =>
-    q.text.length > 48 ? q.text.slice(0, 45) + '…' : q.text
-  );
-
-  const datasets = State.partnersSummary.map((ps, i) => {
-    const full = State.partnersFullCache[ps.id];
-    const ss = full ? full.techScores.find(x => x.sectionId === sectionId) : null;
-    return {
-      label: ps.name,
-      data: questions.map(q => {
-        const qd = ss ? (ss.questions || []).find(x => x.qId === q.id) : null;
-        return qd && qd.score != null ? qd.score : 0;
-      }),
-      backgroundColor: hexAlpha(COLORS.chartPalette[i % COLORS.chartPalette.length], 0.75),
-      borderColor: COLORS.chartPalette[i % COLORS.chartPalette.length],
-      borderWidth: 1,
-      borderRadius: 3,
-    };
-  });
-
-  // Height: enough room per question for all partner bars
-  const barGroupH = Math.max(28, State.partnersSummary.length * 16 + 8);
-  const chartH = Math.max(280, questions.length * barGroupH + 60);
-  const wrap = document.getElementById('drill-chart-wrap');
-  wrap.style.height = chartH + 'px';
-  wrap.style.display = '';
-  document.getElementById('drill-empty').style.display = 'none';
-
-  if (State.drillChart) State.drillChart.destroy();
-  State.drillChart = new Chart(document.getElementById('drill-chart'), {
-    type: 'bar',
-    data: { labels, datasets },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { min: 0, max: 5, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: 'rgba(0,0,0,.05)' } },
-        y: { ticks: { font: { size: 10 } } },
-      },
-      plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
-        tooltip: {
-          callbacks: { title: ctx => questions[ctx[0].dataIndex].text },
-        },
-      },
-    },
-  });
-
-  highlightMatrixRow(sectionId);
-}
-
-function clearDrillSection() {
-  State.selectedDrillSectionId = null;
-  if (State.drillChart) { State.drillChart.destroy(); State.drillChart = null; }
-  const title = document.getElementById('drill-card-title');
-  const clearBtn = document.getElementById('btn-drill-clear');
-  if (title) title.textContent = 'Section Detail';
-  if (clearBtn) clearBtn.style.display = 'none';
-  document.getElementById('drill-empty').style.display = '';
-  document.getElementById('drill-chart-wrap').style.display = 'none';
-  clearMatrixRowHighlight();
-}
-
-function highlightMatrixRow(sectionId) {
-  document.querySelectorAll('#comparison-table tbody tr.matrix-section-row').forEach(row => {
-    row.classList.toggle('drill-selected', parseInt(row.dataset.sectionId) === sectionId);
-  });
-}
-
-function clearMatrixRowHighlight() {
-  document.querySelectorAll('#comparison-table tbody tr.drill-selected')
-    .forEach(row => row.classList.remove('drill-selected'));
-}
-
-function shortSectionName(name) {
-  const map = {
-    'Company & Product Maturity':            'Company',
-    'System Architecture':                   'Architecture',
-    'Camera & Sensor Subsystem':             'Camera/Sensor',
-    'Validation & Test Infrastructure':      'Validation',
-    'Functional Safety (ISO 26262 / SOTIF)': 'Safety',
-    'Cybersecurity (ISO 21434)':             'Cybersecurity',
-    'Production Readiness & Lifecycle':      'Production',
-    'Software Quality & Reliability':        'SW Quality',
-    'HMI & Driver Interaction':              'HMI',
-    'Regional & Regulatory Compliance':      'Compliance',
-    'EMC, Environmental & Reliability':      'EMC/Env',
-  };
-  return map[name] || name;
-}
+// Placeholder — the old radar/drill/matrix charts were built entirely on the
+// retired 1-5 techScores system. A status-tag-based comparison view is a
+// Stage 2 design task; see plan.md.
+function renderComparison() {}
 
 // ── Partner Detail ─────────────────────────────────────────────────────────
 async function openDetailFor(partnerId) {
@@ -444,15 +165,6 @@ async function openDetailFor(partnerId) {
   const sel = document.getElementById('detail-partner-select');
   sel.value = partnerId;
   await loadDetailPartner(partnerId);
-}
-
-async function openDetailAndScrollTo(partnerId, sectionId) {
-  await openDetailFor(partnerId);
-  const accordion = document.querySelector(`.accordion-item[data-section-id="${sectionId}"]`);
-  if (!accordion) return;
-  const header = accordion.querySelector('[data-accordion]');
-  if (header && !header.classList.contains('open')) header.classList.add('open');
-  setTimeout(() => accordion.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 
 async function loadDetailPartner(partnerId) {
@@ -477,9 +189,6 @@ async function loadDetailPartner(partnerId) {
 
 function renderDetailContent(p) {
   const schema = State.schema;
-  const wav = p.weightedScore;
-  const verdict = p.verdict || deriveVerdict(wav);
-
   const content = document.getElementById('detail-content');
   content.innerHTML = `
     <div class="detail-layout print-target">
@@ -491,11 +200,6 @@ function renderDetailContent(p) {
             <button class="btn btn-secondary btn-sm" id="btn-edit-meta">Edit Info</button>
           </div>
           <div class="card-body">
-            <div class="big-score">
-              <div class="big-score-value">${wav != null ? wav.toFixed(2) : '—'}<span class="big-score-max">/5</span></div>
-              <div class="big-score-label">Weighted Score</div>
-              <div style="margin-top:10px;">${verdictBadge(verdict)}</div>
-            </div>
             <div class="info-block">
               <div class="info-row"><span class="label">Evaluator</span><span class="value" id="di-evaluator">${esc(p.evaluator || '—')}</span></div>
               <div class="info-row"><span class="label">Product / Version</span><span class="value" id="di-version">${esc(p.productVersion || '—')}</span></div>
@@ -516,27 +220,6 @@ function renderDetailContent(p) {
                 }).join('')}
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Section scores summary -->
-        <div class="card">
-          <div class="card-header"><span class="card-title">Section Scores</span></div>
-          <div class="card-body" style="padding-top:8px;padding-bottom:8px;">
-            ${schema.techSections.map(sec => {
-              const ss = p.techScores.find(x => x.sectionId === sec.id);
-              const score = ss ? ss.score : null;
-              return `
-                <div class="section-score-row" data-section-id="${sec.id}">
-                  <div class="section-name">${esc(shortSectionName(sec.name))}</div>
-                  <div class="section-weight">${sec.weight}%</div>
-                  <div class="section-bar-wrap">
-                    <div class="section-bar-fill" style="width:${barFill(score)}%"></div>
-                  </div>
-                  ${scoreCell(score)}
-                </div>
-              `;
-            }).join('')}
           </div>
         </div>
 
@@ -1202,7 +885,6 @@ async function saveDetail() {
   try {
     await api('PUT', `/api/partners/${State.detailPartner.id}`, State.detailPartner);
     toast('Saved');
-    delete State.partnersFullCache[State.detailPartner.id];
     await refreshPartnersSummary();
     const opt = document.querySelector(`#detail-partner-select option[value="${State.detailPartner.id}"]`);
     if (opt) opt.textContent = State.detailPartner.name;
@@ -1265,46 +947,6 @@ async function guardNavigation(action) {
   return true;
 }
 
-// ── Decision Log ───────────────────────────────────────────────────────────
-function renderDecisions() {
-  const partners = State.partnersSummary;
-  const table = document.getElementById('decision-table');
-
-  const rows = partners.filter(p => p.decisionStatus || p.verdict !== 'Pending');
-  if (rows.length === 0) {
-    table.innerHTML = `<tr><td><div class="empty-state">No decisions recorded yet. Score partners and set a decision status in the Partner Detail view.</div></td></tr>`;
-    return;
-  }
-
-  table.innerHTML = `
-    <thead><tr>
-      <th>Partner</th>
-      <th>Weighted Score</th>
-      <th>Auto Verdict</th>
-      <th>Decision</th>
-      <th>Reviewer</th>
-      <th>Date</th>
-      <th>Rationale</th>
-    </tr></thead>
-    <tbody>
-    ${partners.map(p => {
-      const summary = State.partnersSummary.find(x => x.id === p.id) || {};
-      return `
-        <tr>
-          <td style="font-weight:600;color:var(--navy);cursor:pointer;" onclick="openDetailFor('${p.id}')">${esc(p.name)}</td>
-          <td>${p.weightedScore != null ? p.weightedScore.toFixed(2) : '—'}</td>
-          <td>${verdictBadge(p.verdict)}</td>
-          <td>${p.decisionStatus ? statusBadge(p.decisionStatus) : '—'}</td>
-          <td>${esc(p.decisionStatus ? '—' : '')}</td>
-          <td>—</td>
-          <td class="rationale-text">—</td>
-        </tr>
-      `;
-    }).join('')}
-    </tbody>
-  `;
-}
-
 // ── Modal helpers ──────────────────────────────────────────────────────────
 function openModal(id) {
   document.getElementById(id).classList.add('open');
@@ -1365,7 +1007,7 @@ async function renderDecisionsFull() {
   const partners = State.partnersSummary;
 
   if (partners.length === 0) {
-    table.innerHTML = `<tr><td colspan="7"><div class="empty-state">No partners yet.</div></td></tr>`;
+    table.innerHTML = `<tr><td colspan="5"><div class="empty-state">No partners yet.</div></td></tr>`;
     return;
   }
 
@@ -1374,25 +1016,27 @@ async function renderDecisionsFull() {
     partners.map(p => api('GET', `/api/partners/${p.id}`))
   );
 
+  const rows = fullPartners.filter(p => (p.decision || {}).status);
+  if (rows.length === 0) {
+    table.innerHTML = `<tr><td colspan="5"><div class="empty-state">No decisions recorded yet. Set a decision status in the Partner Detail view.</div></td></tr>`;
+    return;
+  }
+
   table.innerHTML = `
     <thead><tr>
       <th>Partner</th>
-      <th>Score</th>
-      <th>Auto Verdict</th>
       <th>Decision</th>
       <th>Reviewer</th>
       <th>Date</th>
       <th>Rationale</th>
     </tr></thead>
     <tbody>
-    ${fullPartners.map(p => {
+    ${rows.map(p => {
       const d = p.decision || {};
       return `
         <tr>
           <td style="font-weight:600;color:var(--navy);cursor:pointer;" onclick="openDetailFor('${p.id}')">${esc(p.name)}</td>
-          <td>${p.weightedScore != null ? p.weightedScore.toFixed(2) : '—'}</td>
-          <td>${verdictBadge(p.verdict)}</td>
-          <td>${d.status ? statusBadge(d.status) : '—'}</td>
+          <td>${statusBadge(d.status)}</td>
           <td>${esc(d.reviewer || '—')}</td>
           <td>${esc(d.date || '—')}</td>
           <td class="rationale-text">${esc(d.rationale || '—')}</td>
@@ -1475,9 +1119,6 @@ async function boot() {
       e.returnValue = ''; // required for Chrome
     }
   });
-
-  // Drill-down clear button
-  document.getElementById('btn-drill-clear').addEventListener('click', clearDrillSection);
 
   // Wire add partner confirm
   bindAddPartnerConfirm();

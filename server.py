@@ -54,32 +54,6 @@ def load_schema():
         return json.load(f)
 
 
-def compute_weighted_score(tech_scores, schema):
-    total_weight = sum(s["weight"] for s in schema["techSections"])
-    weighted_sum = 0.0
-    for sec_score in tech_scores:
-        score = sec_score.get("score")
-        if score is None:
-            continue
-        sec_def = next((s for s in schema["techSections"] if s["id"] == sec_score["sectionId"]), None)
-        if sec_def:
-            weighted_sum += (score / 5.0) * sec_def["weight"]
-    # Normalised to 0-5 scale
-    if total_weight == 0:
-        return None
-    return round((weighted_sum / total_weight) * 5.0, 2)
-
-
-def derive_verdict(weighted_avg, thresholds):
-    if weighted_avg is None:
-        return "Pending"
-    if weighted_avg >= thresholds["approved"]:
-        return "Approved"
-    if weighted_avg >= thresholds["conditional"]:
-        return "Conditionally Approved"
-    return "Not Approved"
-
-
 # ── static files ─────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -104,10 +78,8 @@ def api_schema():
 @app.route("/api/partners", methods=["GET"])
 def api_partners_list():
     data = load_partners()
-    schema = load_schema()
     summary = []
     for p in data["partners"]:
-        wav = compute_weighted_score(p.get("techScores", []), schema)
         summary.append({
             "id": p["id"],
             "name": p["name"],
@@ -115,13 +87,8 @@ def api_partners_list():
             "stage": p.get("stage", "Under Evaluation"),
             "evaluationDate": p.get("evaluationDate"),
             "evaluator": p.get("evaluator", ""),
-            "weightedScore": wav,
-            "verdict": derive_verdict(wav, schema["verdictThresholds"]),
             "decisionStatus": p.get("decision", {}).get("status", ""),
-            "sectionScores": [
-                {"sectionId": s["sectionId"], "score": s.get("score")}
-                for s in p.get("techScores", [])
-            ],
+            "productCount": len(p.get("products", [])),
         })
     return jsonify(summary)
 
@@ -132,10 +99,6 @@ def api_partner_detail(partner_id):
     partner = next((p for p in data["partners"] if p["id"] == partner_id), None)
     if not partner:
         abort(404)
-    schema = load_schema()
-    wav = compute_weighted_score(partner.get("techScores", []), schema)
-    partner["weightedScore"] = wav
-    partner["verdict"] = derive_verdict(wav, schema["verdictThresholds"])
     return jsonify(partner)
 
 
@@ -148,29 +111,6 @@ def api_create_partner():
     if not name:
         return jsonify({"error": "name is required"}), 400
 
-    schema = load_schema()
-
-    def empty_tech_scores():
-        result = []
-        for sec in schema["techSections"]:
-            questions = [
-                {"qId": q["id"], "score": None, "applicability": "Applicable", "remarks": ""}
-                for q in schema["techQuestions"] if q["sectionId"] == sec["id"]
-            ]
-            result.append({"sectionId": sec["id"], "score": None, "remarks": "", "questions": questions})
-        return result
-
-    def empty_perception():
-        result = []
-        for sec in schema["perceptionSections"]:
-            questions = [
-                {"qId": q["id"], "sectionTag": q.get("sectionTag", ""),
-                 "response": "", "lntRemark": "", "judgement": "TBD"}
-                for q in sec["questions"]
-            ]
-            result.append({"sectionId": sec["id"], "questions": questions})
-        return result
-
     new_partner = {
         "id": str(uuid.uuid4()),
         "name": name,
@@ -182,11 +122,9 @@ def api_create_partner():
         "stage": body.get("stage", "Under Evaluation"),
         "businessModel": [],
         "products": [],
-        "techScores": empty_tech_scores(),
-        "perceptionResponses": empty_perception(),
+        "generalAnswers": [],
         "hardDisqualifiers": [],
         "decision": {
-            "verdict": "",
             "rationale": "",
             "reviewer": "",
             "date": "",
@@ -238,31 +176,20 @@ def api_delete_partner(partner_id):
 @app.route("/api/export/csv")
 def api_export_csv():
     data = load_partners()
-    schema = load_schema()
-    sections = schema["techSections"]
 
     buf = io.StringIO()
     writer = csv.writer(buf)
 
     # Header row
     writer.writerow(
-        ["Partner", "Stage", "Evaluator", "Eval Date"]
-        + [s["name"] for s in sections]
-        + ["Weighted Score", "Verdict", "Decision Status", "Reviewer", "Decision Date", "Rationale"]
+        ["Partner", "Stage", "Evaluator", "Eval Date", "Decision Status", "Reviewer", "Decision Date", "Rationale"]
     )
 
     for p in data["partners"]:
-        scores_by_sid = {s["sectionId"]: s.get("score") for s in p.get("techScores", [])}
-        section_cols = [scores_by_sid.get(s["id"], "") for s in sections]
-        wav = compute_weighted_score(p.get("techScores", []), schema)
-        verdict = derive_verdict(wav, schema["verdictThresholds"])
         d = p.get("decision") or {}
         writer.writerow(
             [p["name"], p.get("stage", ""), p.get("evaluator", ""), p.get("evaluationDate", "")]
-            + [("" if v is None else v) for v in section_cols]
             + [
-                ("" if wav is None else round(wav, 2)),
-                verdict,
                 d.get("status", ""),
                 d.get("reviewer", ""),
                 d.get("date", ""),

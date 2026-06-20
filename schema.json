@@ -1,1763 +1,233 @@
 {
-  "techSections": [
-    {
-      "id": 1,
-      "name": "Company & Product Maturity",
-      "weight": 10
-    },
-    {
-      "id": 2,
-      "name": "System Architecture",
-      "weight": 10
-    },
-    {
-      "id": 3,
-      "name": "Camera & Sensor Subsystem",
-      "weight": 8
-    },
-    {
-      "id": 4,
-      "name": "Validation & Test Infrastructure",
-      "weight": 7
-    },
-    {
-      "id": 5,
-      "name": "Functional Safety (ISO 26262 / SOTIF)",
-      "weight": 10
-    },
-    {
-      "id": 6,
-      "name": "Cybersecurity (ISO 21434)",
-      "weight": 4
-    },
-    {
-      "id": 7,
-      "name": "Production Readiness & Lifecycle",
-      "weight": 5
-    },
-    {
-      "id": 8,
-      "name": "Software Quality & Reliability",
-      "weight": 3
-    },
-    {
-      "id": 9,
-      "name": "HMI & Driver Interaction",
-      "weight": 1
-    },
-    {
-      "id": 10,
-      "name": "Regional & Regulatory Compliance",
-      "weight": 1
-    },
-    {
-      "id": 11,
-      "name": "EMC, Environmental & Reliability",
-      "weight": 1
-    }
-  ],
-  "techQuestions": [
-    {
-      "id": 1,
-      "sectionId": 1,
-      "sectionTag": "Corporate",
-      "subsection": null,
-      "text": "Company founding year & automotive history",
-      "criteria": "Min. 5 years in automotive; verifiable track record"
-    },
-    {
-      "id": 2,
-      "sectionId": 1,
-      "sectionTag": "Corporate",
-      "subsection": null,
-      "text": "Total headcount & ADAS-specific R&D staff",
-      "criteria": "R&D >30% of headcount; dedicated ADAS team >50"
-    },
-    {
-      "id": 3,
-      "sectionId": 1,
-      "sectionTag": "Corporate",
-      "subsection": null,
-      "text": "Geographic presence & support in India",
-      "criteria": "Local engineering support; India office or partner"
-    },
-    {
-      "id": 4,
-      "sectionId": 1,
-      "sectionTag": "Corporate",
-      "subsection": null,
-      "text": "Key leadership & technical team credentials",
-      "criteria": "Domain experts with OEM/Tier-1 background"
-    },
-    {
-      "id": 5,
-      "sectionId": 1,
-      "sectionTag": "Track Record",
-      "subsection": null,
-      "text": "OEM production programs (named or anonymized)",
-      "criteria": "Min. 2 active SOP programs with volume OEMs"
-    },
-    {
-      "id": 6,
-      "sectionId": 1,
-      "sectionTag": "Track Record",
-      "subsection": null,
-      "text": "Vehicle classes supported (passenger, SUV, LCV)",
-      "criteria": "Coverage of passenger cars, SUVs, LCVs"
-    },
-    {
-      "id": 7,
-      "sectionId": 1,
-      "sectionTag": "Track Record",
-      "subsection": null,
-      "text": "Cumulative production volume shipped",
-      "criteria": "Preferred >500K units; minimum >100K"
-    },
-    {
-      "id": 8,
-      "sectionId": 1,
-      "sectionTag": "Track Record",
-      "subsection": null,
-      "text": "SOP experience (number of launches)",
-      "criteria": "Min. 3 SOP launches with ramp-up evidence"
-    },
-    {
-      "id": 9,
-      "sectionId": 1,
-      "sectionTag": "Track Record",
-      "subsection": null,
-      "text": "Field failure rate / warranty data",
-      "criteria": "<50 PPM field failure; warranty claims data available"
-    },
-    {
-      "id": 10,
-      "sectionId": 1,
-      "sectionTag": "Track Record",
-      "subsection": null,
-      "text": "NCAP test results achieved by customers",
-      "criteria": "Euro NCAP 5-star with AEB/LKA contribution evidence"
-    },
-    {
-      "id": 11,
-      "sectionId": 1,
-      "sectionTag": "Certifications",
-      "subsection": null,
-      "text": "ASPICE level (CL2 / CL3)",
-      "criteria": "CL2 minimum; CL3 preferred; third-party audited"
-    },
-    {
-      "id": 12,
-      "sectionId": 1,
-      "sectionTag": "Certifications",
-      "subsection": null,
-      "text": "IATF 16949 quality management",
-      "criteria": "IATF 16949 mandatory for production parts"
-    },
-    {
-      "id": 13,
-      "sectionId": 1,
-      "sectionTag": "Roadmap",
-      "subsection": null,
-      "text": "Product roadmap (3–5 year horizon)",
-      "criteria": "Roadmap aligned with OEM L2/L2+ timeline"
-    },
-    {
-      "id": 14,
-      "sectionId": 1,
-      "sectionTag": "Roadmap",
-      "subsection": null,
-      "text": "Multi-platform SoC portability roadmap",
-      "criteria": "TI TDA4x, Qualcomm SA8x, Renesas R-Car, NXP S32"
-    },
-    {
-      "id": 15,
-      "sectionId": 1,
-      "sectionTag": "Roadmap",
-      "subsection": null,
-      "text": "OTA update capability & roadmap",
-      "criteria": "Incremental + full OTA; A/B partition; rollback"
-    },
-    {
-      "id": 16,
-      "sectionId": 1,
-      "sectionTag": "Roadmap",
-      "subsection": null,
-      "text": "Regional compliance roadmap (NCAP/GSR/AIS-184)",
-      "criteria": "Euro NCAP 2026, GSR2, AIS-184 India compliance plan"
-    },
-    {
-      "id": 17,
-      "sectionId": 2,
-      "sectionTag": "Compute",
-      "subsection": null,
-      "text": "Target SoC platform(s) and TOPS rating",
-      "criteria": "Named SoC; TOPS utilization <80%"
-    },
-    {
-      "id": 18,
-      "sectionId": 2,
-      "sectionTag": "Compute",
-      "subsection": null,
-      "text": "CPU/GPU/NPU/DSP partitioning strategy",
-      "criteria": "Documented resource allocation"
-    },
-    {
-      "id": 19,
-      "sectionId": 2,
-      "sectionTag": "Compute",
-      "subsection": null,
-      "text": "Hardware Abstraction Layer (HAL)",
-      "criteria": "Documented HAL; SoC swap demonstrated or planned"
-    },
-    {
-      "id": 20,
-      "sectionId": 2,
-      "sectionTag": "Compute",
-      "subsection": null,
-      "text": "Thermal envelope & power budget",
-      "criteria": "<15W typical; passive cooling support"
-    },
-    {
-      "id": 21,
-      "sectionId": 2,
-      "sectionTag": "Compute",
-      "subsection": null,
-      "text": "Memory architecture (DDR bandwidth)",
-      "criteria": "Memory map; bandwidth analysis; no contention"
-    },
-    {
-      "id": 22,
-      "sectionId": 2,
-      "sectionTag": "SW Arch",
-      "subsection": null,
-      "text": "AUTOSAR Classic / Adaptive support",
-      "criteria": "Adaptive preferred; Classic BSW tested"
-    },
-    {
-      "id": 23,
-      "sectionId": 2,
-      "sectionTag": "SW Arch",
-      "subsection": null,
-      "text": "RTOS / OS support (QNX, Linux, SafeRTOS)",
-      "criteria": "Safety-certified RTOS for ASIL; Linux for AI"
-    },
-    {
-      "id": 24,
-      "sectionId": 2,
-      "sectionTag": "SW Arch",
-      "subsection": null,
-      "text": "Middleware (SOME/IP, DDS, IPC)",
-      "criteria": "Documented; SOME/IP or DDS supported"
-    },
-    {
-      "id": 25,
-      "sectionId": 2,
-      "sectionTag": "SW Arch",
-      "subsection": null,
-      "text": "CAN / CAN-FD / Ethernet integration",
-      "criteria": "All three supported; signal mapping documented"
-    },
-    {
-      "id": 26,
-      "sectionId": 2,
-      "sectionTag": "SW Arch",
-      "subsection": null,
-      "text": "Logging & replay framework",
-      "criteria": "Raw sensor + metadata; lossless; >1 hour"
-    },
-    {
-      "id": 27,
-      "sectionId": 2,
-      "sectionTag": "SW Arch",
-      "subsection": null,
-      "text": "Calibration architecture (XCP/CCP, A2L)",
-      "criteria": "Run-time calibration; XCP/CCP support; A2L files"
-    },
-    {
-      "id": 28,
-      "sectionId": 2,
-      "sectionTag": "Pipeline",
-      "subsection": null,
-      "text": "End-to-end latency (camera to actuation)",
-      "criteria": "<150ms total; <100ms perception; documented"
-    },
-    {
-      "id": 29,
-      "sectionId": 2,
-      "sectionTag": "Pipeline",
-      "subsection": null,
-      "text": "Boot time (cold start to operational)",
-      "criteria": "<5s first output; <10s full pipeline"
-    },
-    {
-      "id": 30,
-      "sectionId": 2,
-      "sectionTag": "Pipeline",
-      "subsection": null,
-      "text": "Warm restart / recovery time",
-      "criteria": "<2 seconds after watchdog reset"
-    },
-    {
-      "id": 31,
-      "sectionId": 2,
-      "sectionTag": "Pipeline",
-      "subsection": null,
-      "text": "Watchdog implementation",
-      "criteria": "Multi-level; HW + SW; documented escalation"
-    },
-    {
-      "id": 32,
-      "sectionId": 2,
-      "sectionTag": "Pipeline",
-      "subsection": null,
-      "text": "Error recovery & exception handling",
-      "criteria": "Graceful degradation; no silent failures; all logged"
-    },
-    {
-      "id": 33,
-      "sectionId": 2,
-      "sectionTag": "Power",
-      "subsection": null,
-      "text": "Sleep/wake & ignition cycle handling",
-      "criteria": "State machine documented; parasitic draw <5mA"
-    },
-    {
-      "id": 34,
-      "sectionId": 2,
-      "sectionTag": "Power",
-      "subsection": null,
-      "text": "Graceful shutdown sequence",
-      "criteria": "Safe state before power loss; NVM write protection"
-    },
-    {
-      "id": 35,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Image sensor supplier & model (AEC-Q100)",
-      "criteria": "Automotive-grade; OnSemi AR0820/AR0234 or equiv."
-    },
-    {
-      "id": 36,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Sensor type (RGB / RGB-IR / NIR) & rationale",
-      "criteria": "RGB for ADAS; RGB-IR or NIR for DMS; documented"
-    },
-    {
-      "id": 37,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Resolution & pixel size",
-      "criteria": "Min. 2MP front; pixel size >2µm for low-light"
-    },
-    {
-      "id": 38,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Dynamic range (HDR capability)",
-      "criteria": "HDR >120dB; split-pixel or DOL-HDR"
-    },
-    {
-      "id": 39,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Low-light performance (min. lux)",
-      "criteria": "<0.1 lux DMS; <1 lux forward camera"
-    },
-    {
-      "id": 40,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "LED Flicker Mitigation (LFM)",
-      "criteria": "LFM-capable; tested against LED signals"
-    },
-    {
-      "id": 41,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Field of view (H × V × D) per camera",
-      "criteria": "Forward: >50°H; DMS: >80°H; documented"
-    },
-    {
-      "id": 42,
-      "sectionId": 3,
-      "sectionTag": "Sensor",
-      "subsection": null,
-      "text": "Rolling shutter artifact handling",
-      "criteria": "Global shutter preferred; RS compensation algorithm"
-    },
-    {
-      "id": 43,
-      "sectionId": 3,
-      "sectionTag": "ISP",
-      "subsection": null,
-      "text": "ISP pipeline (on-chip vs. external)",
-      "criteria": "Documented ISP chain; tunable per environment"
-    },
-    {
-      "id": 44,
-      "sectionId": 3,
-      "sectionTag": "ISP",
-      "subsection": null,
-      "text": "Auto exposure / auto white balance",
-      "criteria": "Robust AE/AWB; ROI-based; <3 frame convergence"
-    },
-    {
-      "id": 45,
-      "sectionId": 3,
-      "sectionTag": "ISP",
-      "subsection": null,
-      "text": "Tunnel entry/exit handling",
-      "criteria": "<5 frame adaptation; no saturation/blackout"
-    },
-    {
-      "id": 46,
-      "sectionId": 3,
-      "sectionTag": "ISP",
-      "subsection": null,
-      "text": "Sun glare / strong backlight handling",
-      "criteria": "HDR + tone mapping; no perception blind spot"
-    },
-    {
-      "id": 47,
-      "sectionId": 3,
-      "sectionTag": "ISP",
-      "subsection": null,
-      "text": "IR cut filter / day-night switching (DMS)",
-      "criteria": "Automatic; <500ms transition; no false switches"
-    },
-    {
-      "id": 48,
-      "sectionId": 3,
-      "sectionTag": "Robustness",
-      "subsection": null,
-      "text": "Operating temperature range",
-      "criteria": "−40°C to +85°C sensor; −40 to +105°C ECU"
-    },
-    {
-      "id": 49,
-      "sectionId": 3,
-      "sectionTag": "Robustness",
-      "subsection": null,
-      "text": "IP rating for camera module",
-      "criteria": "IP67 exterior; IP52 cabin"
-    },
-    {
-      "id": 50,
-      "sectionId": 3,
-      "sectionTag": "Robustness",
-      "subsection": null,
-      "text": "EMC/EMI compliance",
-      "criteria": "CISPR 25 Class 5; ISO 11452; test reports"
-    },
-    {
-      "id": 51,
-      "sectionId": 3,
-      "sectionTag": "Robustness",
-      "subsection": null,
-      "text": "Vibration & shock resistance",
-      "criteria": "ISO 16750-3; random vibration + shock tested"
-    },
-    {
-      "id": 52,
-      "sectionId": 3,
-      "sectionTag": "Robustness",
-      "subsection": null,
-      "text": "Lens contamination detection",
-      "criteria": "Blockage detection; coverage % estimation"
-    },
-    {
-      "id": 53,
-      "sectionId": 3,
-      "sectionTag": "Robustness",
-      "subsection": null,
-      "text": "Calibration drift over lifetime",
-      "criteria": "<0.5° shift over 10 years; self-calibration"
-    },
-    {
-      "id": 54,
-      "sectionId": 3,
-      "sectionTag": "Components",
-      "subsection": null,
-      "text": "BOM transparency & second-source strategy",
-      "criteria": "Alternate sources for sensor, lens, connector"
-    },
-    {
-      "id": 55,
-      "sectionId": 3,
-      "sectionTag": "Components",
-      "subsection": null,
-      "text": "AEC-Q100/Q104 compliance",
-      "criteria": "Full qualification reports; lot traceability"
-    },
-    {
-      "id": 56,
-      "sectionId": 3,
-      "sectionTag": "Components",
-      "subsection": null,
-      "text": "Chip shortage contingency plan",
-      "criteria": "Buffer stock strategy; multi-fab sourcing"
-    },
-    {
-      "id": 57,
-      "sectionId": 4,
-      "sectionTag": "SIL/HIL",
-      "subsection": null,
-      "text": "SIL (Software-in-the-Loop) capability",
-      "criteria": "Full perception stack runnable on PC; documented"
-    },
-    {
-      "id": 58,
-      "sectionId": 4,
-      "sectionTag": "SIL/HIL",
-      "subsection": null,
-      "text": "HIL (Hardware-in-the-Loop) capability",
-      "criteria": "Real ECU + simulated sensors; frame-accurate"
-    },
-    {
-      "id": 59,
-      "sectionId": 4,
-      "sectionTag": "SIL/HIL",
-      "subsection": null,
-      "text": "Simulation tool integration",
-      "criteria": "IPG CarMaker, CARLA, LGSVL, or NVIDIA DriveSim"
-    },
-    {
-      "id": 60,
-      "sectionId": 4,
-      "sectionTag": "SIL/HIL",
-      "subsection": null,
-      "text": "Synthetic data generation pipeline",
-      "criteria": "Procedural; domain randomization; weather/lighting"
-    },
-    {
-      "id": 61,
-      "sectionId": 4,
-      "sectionTag": "SIL/HIL",
-      "subsection": null,
-      "text": "OpenSCENARIO/ASAM scenario generation",
-      "criteria": "Parameterized library; combinatorial"
-    },
-    {
-      "id": 62,
-      "sectionId": 4,
-      "sectionTag": "Data",
-      "subsection": null,
-      "text": "Replay validation framework",
-      "criteria": "Bit-exact or validated-equivalent; automated"
-    },
-    {
-      "id": 63,
-      "sectionId": 4,
-      "sectionTag": "Data",
-      "subsection": null,
-      "text": "Total replay hours available",
-      "criteria": ">10,000 hours; geographically diverse"
-    },
-    {
-      "id": 64,
-      "sectionId": 4,
-      "sectionTag": "Data",
-      "subsection": null,
-      "text": "Dataset management platform",
-      "criteria": "Searchable; version-controlled; metadata-tagged"
-    },
-    {
-      "id": 65,
-      "sectionId": 4,
-      "sectionTag": "Data",
-      "subsection": null,
-      "text": "Annotation pipeline & quality",
-      "criteria": "Multi-annotator; QA sampling >5%; tool named"
-    },
-    {
-      "id": 66,
-      "sectionId": 4,
-      "sectionTag": "Data",
-      "subsection": null,
-      "text": "Edge case data mining pipeline",
-      "criteria": "Auto-discovery of rare events from fleet data"
-    },
-    {
-      "id": 67,
-      "sectionId": 4,
-      "sectionTag": "CI/CD",
-      "subsection": null,
-      "text": "Automated regression framework",
-      "criteria": "Nightly/weekly runs; KPI trend dashboards"
-    },
-    {
-      "id": 68,
-      "sectionId": 4,
-      "sectionTag": "CI/CD",
-      "subsection": null,
-      "text": "CI/CD pipeline integration",
-      "criteria": "Build + unit test + SIL on every commit"
-    },
-    {
-      "id": 69,
-      "sectionId": 4,
-      "sectionTag": "CI/CD",
-      "subsection": null,
-      "text": "Number of automated test scenarios",
-      "criteria": "Preferred >50,000; minimum >5,000"
-    },
-    {
-      "id": 70,
-      "sectionId": 4,
-      "sectionTag": "CI/CD",
-      "subsection": null,
-      "text": "Test coverage per ADAS function",
-      "criteria": ">80% requirement coverage; traceability"
-    },
-    {
-      "id": 71,
-      "sectionId": 4,
-      "sectionTag": "Real-World",
-      "subsection": null,
-      "text": "Test vehicle fleet size",
-      "criteria": ">5 vehicles; multiple markets"
-    },
-    {
-      "id": 72,
-      "sectionId": 4,
-      "sectionTag": "Real-World",
-      "subsection": null,
-      "text": "Accumulated real-world test km",
-      "criteria": ">1M km; geographic diversity"
-    },
-    {
-      "id": 73,
-      "sectionId": 4,
-      "sectionTag": "Real-World",
-      "subsection": null,
-      "text": "Test track access",
-      "criteria": "Named facility; AEB/LKA tracks available"
-    },
-    {
-      "id": 74,
-      "sectionId": 5,
-      "sectionTag": "FuSa",
-      "subsection": null,
-      "text": "Target ASIL per function",
-      "criteria": "AEB: ASIL-B(D); LKA: ASIL-B; DMS: QM/ASIL-A"
-    },
-    {
-      "id": 75,
-      "sectionId": 5,
-      "sectionTag": "FuSa",
-      "subsection": null,
-      "text": "Safety concepts (TSC, FSC, HSC, SSC)",
-      "criteria": "All documented; reviewed; shareable under NDA"
-    },
-    {
-      "id": 76,
-      "sectionId": 5,
-      "sectionTag": "FuSa",
-      "subsection": null,
-      "text": "ASIL decomposition strategy",
-      "criteria": "Documented per function; independence argument"
-    },
-    {
-      "id": 77,
-      "sectionId": 5,
-      "sectionTag": "FuSa",
-      "subsection": null,
-      "text": "FMEA / FMEDA availability",
-      "criteria": "HW FMEDA with DC and SFF; SW FMEA per module"
-    },
-    {
-      "id": 78,
-      "sectionId": 5,
-      "sectionTag": "FuSa",
-      "subsection": null,
-      "text": "Diagnostic coverage (DC) metrics",
-      "criteria": "DC >90% ASIL-B; >99% ASIL-D"
-    },
-    {
-      "id": 79,
-      "sectionId": 5,
-      "sectionTag": "Safety Arch",
-      "subsection": null,
-      "text": "Safety monitor / supervisor architecture",
-      "criteria": "Independent monitor; separate from main pipeline"
-    },
-    {
-      "id": 80,
-      "sectionId": 5,
-      "sectionTag": "Safety Arch",
-      "subsection": null,
-      "text": "Fallback mechanism (fail-safe / fail-operational)",
-      "criteria": "Safe state documented; transition time defined"
-    },
-    {
-      "id": 81,
-      "sectionId": 5,
-      "sectionTag": "Safety Arch",
-      "subsection": null,
-      "text": "Sensor fault detection & handling",
-      "criteria": "Camera open/short/blind/blocked/degraded detection"
-    },
-    {
-      "id": 82,
-      "sectionId": 5,
-      "sectionTag": "Safety Arch",
-      "subsection": null,
-      "text": "AI output plausibility checks",
-      "criteria": "Range/rate/consistency checks on all AI outputs"
-    },
-    {
-      "id": 83,
-      "sectionId": 5,
-      "sectionTag": "Safety Arch",
-      "subsection": null,
-      "text": "Safe state definition per function",
-      "criteria": "Clear safe state; transition <100ms"
-    },
-    {
-      "id": 84,
-      "sectionId": 5,
-      "sectionTag": "SOTIF",
-      "subsection": null,
-      "text": "SOTIF analysis completed",
-      "criteria": "Known/unknown triggering conditions documented"
-    },
-    {
-      "id": 85,
-      "sectionId": 5,
-      "sectionTag": "SOTIF",
-      "subsection": null,
-      "text": "Triggering condition catalog",
-      "criteria": ">100 triggering conditions per function"
-    },
-    {
-      "id": 86,
-      "sectionId": 5,
-      "sectionTag": "SOTIF",
-      "subsection": null,
-      "text": "AI-specific SOTIF measures",
-      "criteria": "ODD monitoring; confidence thresholding; fallback"
-    },
-    {
-      "id": 87,
-      "sectionId": 5,
-      "sectionTag": "Fault Inject",
-      "subsection": null,
-      "text": "Fault injection test capability",
-      "criteria": "SW + HW fault injection; automated"
-    },
-    {
-      "id": 88,
-      "sectionId": 5,
-      "sectionTag": "Fault Inject",
-      "subsection": null,
-      "text": "Third-party safety assessment",
-      "criteria": "Independent assessment by TUV/SGS/Exida"
-    },
-    {
-      "id": 89,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Secure boot chain",
-      "criteria": "Root of trust; verified boot stages; documented"
-    },
-    {
-      "id": 90,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Secure OTA update mechanism",
-      "criteria": "Signed packages; encrypted; rollback protection"
-    },
-    {
-      "id": 91,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Secure communication (SecOC, TLS, MACsec)",
-      "criteria": "TLS/DTLS external; SecOC CAN; MACsec Ethernet"
-    },
-    {
-      "id": 92,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Key management system (HSM)",
-      "criteria": "HSM-based; key rotation; per-vehicle keys"
-    },
-    {
-      "id": 93,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Debug port protection",
-      "criteria": "JTAG locked in production; secure debug access"
-    },
-    {
-      "id": 94,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "TARA (ISO 21434 compliant)",
-      "criteria": "ISO 21434 compliant; per-component analysis"
-    },
-    {
-      "id": 95,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Camera spoofing / adversarial attack testing",
-      "criteria": "Tested: projected images, stickers, IR attacks"
-    },
-    {
-      "id": 96,
-      "sectionId": 6,
-      "sectionTag": "Cybersec",
-      "subsection": null,
-      "text": "Penetration testing completed",
-      "criteria": "Third-party pen test; findings remediated"
-    },
-    {
-      "id": 97,
-      "sectionId": 6,
-      "sectionTag": "Privacy",
-      "subsection": null,
-      "text": "GDPR / privacy compliance (DMS/OMS data)",
-      "criteria": "Data minimization; on-device; no cloud face upload"
-    },
-    {
-      "id": 98,
-      "sectionId": 6,
-      "sectionTag": "Privacy",
-      "subsection": null,
-      "text": "Data anonymization pipeline",
-      "criteria": "Face blur; license plate anon for logging"
-    },
-    {
-      "id": 99,
-      "sectionId": 6,
-      "sectionTag": "Privacy",
-      "subsection": null,
-      "text": "Driver consent management",
-      "criteria": "Opt-in/opt-out mechanism; documented"
-    },
-    {
-      "id": 100,
-      "sectionId": 7,
-      "sectionTag": "Production",
-      "subsection": null,
-      "text": "SOP readiness checklist (PPAP equivalent)",
-      "criteria": "PPAP equivalent; all gates passed"
-    },
-    {
-      "id": 101,
-      "sectionId": 7,
-      "sectionTag": "Production",
-      "subsection": null,
-      "text": "EOL calibration process",
-      "criteria": "Automated; <60s per camera; documented tolerance"
-    },
-    {
-      "id": 102,
-      "sectionId": 7,
-      "sectionTag": "Production",
-      "subsection": null,
-      "text": "ECU flashing process (factory & field)",
-      "criteria": "Documented; reprogramming time <10min"
-    },
-    {
-      "id": 103,
-      "sectionId": 7,
-      "sectionTag": "Production",
-      "subsection": null,
-      "text": "Variant management (feature flags, ODX)",
-      "criteria": "Feature flags; variant coding; XML/ODX-based"
-    },
-    {
-      "id": 104,
-      "sectionId": 7,
-      "sectionTag": "Production",
-      "subsection": null,
-      "text": "Multi-platform portability (>2 SoCs)",
-      "criteria": "Demonstrated on >2 SoC platforms"
-    },
-    {
-      "id": 105,
-      "sectionId": 7,
-      "sectionTag": "OTA",
-      "subsection": null,
-      "text": "OTA update architecture",
-      "criteria": "A/B partition; delta updates; rollback"
-    },
-    {
-      "id": 106,
-      "sectionId": 7,
-      "sectionTag": "OTA",
-      "subsection": null,
-      "text": "Fleet monitoring dashboard",
-      "criteria": "Real-time health; KPI trend; anomaly alerts"
-    },
-    {
-      "id": 107,
-      "sectionId": 7,
-      "sectionTag": "OTA",
-      "subsection": null,
-      "text": "Field log collection & upload",
-      "criteria": "Event-triggered + periodic; bandwidth-aware"
-    },
-    {
-      "id": 108,
-      "sectionId": 7,
-      "sectionTag": "OTA",
-      "subsection": null,
-      "text": "Remote diagnostics capability",
-      "criteria": "DTCs, sensor status, SW version remotely"
-    },
-    {
-      "id": 109,
-      "sectionId": 7,
-      "sectionTag": "Lifecycle",
-      "subsection": null,
-      "text": "Spare parts strategy (camera modules)",
-      "criteria": "10-year supply; drop-in replacement"
-    },
-    {
-      "id": 110,
-      "sectionId": 7,
-      "sectionTag": "Lifecycle",
-      "subsection": null,
-      "text": "End-of-life / obsolescence management",
-      "criteria": "Last-buy notification; >15 year lifecycle"
-    },
-    {
-      "id": 111,
-      "sectionId": 7,
-      "sectionTag": "Lifecycle",
-      "subsection": null,
-      "text": "Warranty & liability framework",
-      "criteria": "Warranty duration; ADAS-specific liability"
-    },
-    {
-      "id": 112,
-      "sectionId": 7,
-      "sectionTag": "Lifecycle",
-      "subsection": null,
-      "text": "IP / model ownership in partnership",
-      "criteria": "IP ownership; source code escrow; model rights"
-    },
-    {
-      "id": 113,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "MISRA-C/C++ compliance",
-      "criteria": "MISRA 2012 safety code; deviation log"
-    },
-    {
-      "id": 114,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "Static analysis tool & results",
-      "criteria": "Polyspace/Coverity/QAC; zero critical findings"
-    },
-    {
-      "id": 115,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "Memory leak detection & prevention",
-      "criteria": "Valgrind/ASan; no dynamic alloc at runtime"
-    },
-    {
-      "id": 116,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "Unit test coverage (line / branch)",
-      "criteria": "Line >80%; branch >70%"
-    },
-    {
-      "id": 117,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "MC/DC coverage for safety-critical modules",
-      "criteria": "MC/DC for ASIL-B+; documented per module"
-    },
-    {
-      "id": 118,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "Long-duration stability (>72h run)",
-      "criteria": "No crash, no memory growth, no degradation"
-    },
-    {
-      "id": 119,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "CPU overload handling",
-      "criteria": "Graceful frame skip; no crash; priority preserved"
-    },
-    {
-      "id": 120,
-      "sectionId": 8,
-      "sectionTag": "SW Quality",
-      "subsection": null,
-      "text": "Crash recovery & core dump analysis",
-      "criteria": "Auto-restart; crash log + core dump preserved"
-    },
-    {
-      "id": 121,
-      "sectionId": 9,
-      "sectionTag": "HMI",
-      "subsection": null,
-      "text": "Multi-modal alert (visual + audio + haptic)",
-      "criteria": "Escalation ladder documented; OEM configurable"
-    },
-    {
-      "id": 122,
-      "sectionId": 9,
-      "sectionTag": "HMI",
-      "subsection": null,
-      "text": "Driver takeover request (TOR) strategy",
-      "criteria": "Progressive urgency; time budget; HMI integration"
-    },
-    {
-      "id": 123,
-      "sectionId": 9,
-      "sectionTag": "HMI",
-      "subsection": null,
-      "text": "Warning suppression logic",
-      "criteria": "Context-based suppression; driver-state aware"
-    },
-    {
-      "id": 124,
-      "sectionId": 9,
-      "sectionTag": "HMI",
-      "subsection": null,
-      "text": "HMI integration API specification",
-      "criteria": "Documented API; cluster + HUD + audio"
-    },
-    {
-      "id": 125,
-      "sectionId": 9,
-      "sectionTag": "HMI",
-      "subsection": null,
-      "text": "Multi-language / multi-region alert content",
-      "criteria": "Localization support; icon + text + audio"
-    },
-    {
-      "id": 126,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "Euro NCAP 2025/2026 readiness",
-      "criteria": "AEB VRU, LSS, OMS, DMS protocols covered"
-    },
-    {
-      "id": 127,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "Bharat NCAP / GNCAP readiness",
-      "criteria": "AEB car-to-car and VRU tested to protocol"
-    },
-    {
-      "id": 128,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "AIS-184 (India ADAS) compliance",
-      "criteria": "AEBS, LDWS per Indian standard"
-    },
-    {
-      "id": 129,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "UN R79 / R131 type approval",
-      "criteria": "Type approval readiness; test reports"
-    },
-    {
-      "id": 130,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "EU GSR2 readiness",
-      "criteria": "ISA, DMS, EDR, AEB cyclist/pedestrian"
-    },
-    {
-      "id": 131,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "Type approval test lab partnerships",
-      "criteria": "Named labs; pre-approval testing completed"
-    },
-    {
-      "id": 132,
-      "sectionId": 10,
-      "sectionTag": "Compliance",
-      "subsection": null,
-      "text": "Market-specific adaptation process",
-      "criteria": "Speed units, sign database, driving-side"
-    },
-    {
-      "id": 133,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "HALT / HASS testing completed",
-      "criteria": "Highly accelerated life test; stress margins"
-    },
-    {
-      "id": 134,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "Thermal cycling test (AEC-Q100)",
-      "criteria": "−40 to +125°C; 1000 cycles; zero failures"
-    },
-    {
-      "id": 135,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "Humidity / salt spray corrosion test",
-      "criteria": "85/85 test; salt spray per IEC 60068"
-    },
-    {
-      "id": 136,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "Mechanical shock & vibration (ISO 16750)",
-      "criteria": "Test reports all axes; pass criteria met"
-    },
-    {
-      "id": 137,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "Radiated emissions (CISPR 25 Class 5)",
-      "criteria": "Test report; pass at Class 5"
-    },
-    {
-      "id": 138,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "Radiated immunity (ISO 11452)",
-      "criteria": "100 V/m minimum; function maintained"
-    },
-    {
-      "id": 139,
-      "sectionId": 11,
-      "sectionTag": "EMC/Env",
-      "subsection": null,
-      "text": "ESD immunity (ISO 10605)",
-      "criteria": "Contact ±8kV; air ±15kV; no damage"
-    }
-  ],
-  "perceptionSections": [
-    {
-      "id": "P1",
-      "name": "Stack Overview",
-      "questions": [
-        {
-          "id": 1,
-          "subsection": null,
-          "sectionTag": "Stack Overview",
-          "text": "What is your primary product — a perception SDK, a full ADAS software stack, or an integrated ECU solution?"
-        },
-        {
-          "id": 2,
-          "subsection": null,
-          "sectionTag": "Stack Overview",
-          "text": "What functions does your stack cover — AEB, ACC, LKA, LDW, DMS? For each: in production / validated but not shipped / in development."
-        },
-        {
-          "id": 3,
-          "subsection": null,
-          "sectionTag": "Stack Overview",
-          "text": "Does your stack include the ADAS function layer (AEB decision logic, LKA torque, ACC control) or does it output a perception SceneModel only?"
-        }
-      ]
-    },
-    {
-      "id": "P2",
-      "name": "Perception Capability",
-      "questions": [
-        {
-          "id": 4,
-          "subsection": "2A — Perception Pipeline Architecture",
-          "sectionTag": "Pipeline Architecture",
-          "text": "Describe your full perception pipeline end-to-end. For each perception task confirm: dedicated model / head on shared backbone / not present — and DL/ML or classical. State whether single multitask or separate models per task, and explain rationale:\n• Object detection  • Semantic segmentation  • Lane detection  • Monocular depth  • Freespace/drivable area  • Object tracking"
-        },
-        {
-          "id": 5,
-          "subsection": "2A — Perception Pipeline Architecture",
-          "sectionTag": "Pipeline Architecture",
-          "text": "What model backbone do you use — ResNet, EfficientNet, custom, other? Design rationale at your target TOPS budget?"
-        },
-        {
-          "id": 6,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "What object classes does your detector support? Confirm: auto-rickshaws, two-wheelers, pedestrians, cattle/animals, overloaded/non-standard vehicles."
-        },
-        {
-          "id": 7,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "Detection range per class under daylight — provide: class → min detection range → reliable tracking range."
-        },
-        {
-          "id": 8,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "Detection performance (precision / recall / mAP) on: internal test dataset / public benchmark (KITTI, nuScenes) / Indian road scenarios."
-        },
-        {
-          "id": 9,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "How does detection degrade under: night/low light / rain/glare / dust/haze / partial occlusion?"
-        },
-        {
-          "id": 10,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "False positive rate on static roadside objects — walls, signboards, parked vehicles, speed bumps."
-        },
-        {
-          "id": 11,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "What training datasets were used? Were India-specific datasets (IDD or equivalent) included? Describe geographic and demographic diversity."
-        },
-        {
-          "id": 12,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Detection",
-          "text": "What is your ODD for object detection? Be explicit about what the stack does NOT handle."
-        },
-        {
-          "id": 13,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Ghost Suppression",
-          "text": "What software-side techniques does your stack use for camera ghost suppression — lens flare, windshield reflections, wet surface reflections? Describe approach and false positive rate."
-        },
-        {
-          "id": 14,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Object Re-ID",
-          "text": "For tracked objects that disappear due to occlusion — what is your re-identification strategy? Maximum occlusion duration after which re-ID is still reliable?"
-        },
-        {
-          "id": 15,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Heading Estimation",
-          "text": "Does your stack estimate heading angle for detected objects? Heading estimation error at 50m?"
-        },
-        {
-          "id": 16,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "Velocity Estimation",
-          "text": "What is your relative velocity estimation accuracy for moving objects? Error in km/h at 50m and 80m."
-        },
-        {
-          "id": 17,
-          "subsection": "2B — Object Detection",
-          "sectionTag": "FP/FN Catalog",
-          "text": "Provide your structured false positive catalog for object detection — rain drops, sun flare, tunnel entry, shadows, road reflections. For each: mitigation and residual false positive rate."
-        },
-        {
-          "id": 18,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane Detection",
-          "text": "Lane types supported? Confirm: solid/dashed / faded/worn / temporary construction markings including orange/yellow and cone/barrier / unmarked roads / dirt/gravel."
-        },
-        {
-          "id": 19,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane Detection",
-          "text": "Lane detection F1 score under: clear markings / faded markings / night/wet roads / intersections and merges."
-        },
-        {
-          "id": 20,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane Detection",
-          "text": "How does the system behave when lane detection fails or confidence drops? Does it fail safe?"
-        },
-        {
-          "id": 21,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane Detection",
-          "text": "Does lane detection include lane type classification (solid vs dashed, single vs double)? If yes, accuracy metrics."
-        },
-        {
-          "id": 22,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane Curvature",
-          "text": "Minimum road curvature radius your lane detection reliably supports. At your minimum radius, lateral position accuracy at 80m lookahead?"
-        },
-        {
-          "id": 23,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane Topology",
-          "text": "Does your stack detect lane topology changes — merges, splits, forks — ahead of the vehicle? Lookahead distance?"
-        },
-        {
-          "id": 24,
-          "subsection": "2C — Lane Detection",
-          "sectionTag": "Lane FP Catalog",
-          "text": "Structured false positive catalog for lane detection — phantom lane scenarios: road cracks, tar strips, curb shadows, guard rails, wet reflections. Mitigation and residual rate."
-        },
-        {
-          "id": 25,
-          "subsection": "2D — Depth and Freespace",
-          "sectionTag": "Depth Estimation",
-          "text": "What method do you use for depth/distance estimation from a monocular camera?"
-        },
-        {
-          "id": 26,
-          "subsection": "2D — Depth and Freespace",
-          "sectionTag": "Depth Estimation",
-          "text": "Longitudinal distance accuracy at 10m, 20m, 40m, 80m — at daylight, night, and rain."
-        },
-        {
-          "id": 27,
-          "subsection": "2D — Depth and Freespace",
-          "sectionTag": "Depth Estimation",
-          "text": "Do you use ground plane assumptions (IPM/homography)? How does accuracy degrade on uneven roads, speed bumps, slopes?"
-        },
-        {
-          "id": 28,
-          "subsection": "2D — Depth and Freespace",
-          "sectionTag": "Freespace",
-          "text": "Does your stack output a freespace/drivable area map? Describe representation — grid, polygon, other."
-        },
-        {
-          "id": 29,
-          "subsection": "2D — Depth and Freespace",
-          "sectionTag": "Freespace",
-          "text": "Update rate and latency of the freespace output?"
-        },
-        {
-          "id": 1,
-          "subsection": "2E — Speed Limit & Traffic Signal Recognition",
-          "sectionTag": "SLR",
-          "text": "Does your perception stack include Speed Limit Recognition (SLR)? If yes:\n• Sign types — numeric, variable message/LED VMS, end-of-limit\n• Detection accuracy and false positive rate\n• India-specific sign database / formats supported?"
-        },
-        {
-          "id": 2,
-          "subsection": "2E — Speed Limit & Traffic Signal Recognition",
-          "sectionTag": "TSR",
-          "text": "Does your perception stack include Traffic Signal Recognition (TSR)? If yes:\n• Signal states — red, amber, green, flashing, arrow\n• Detection range and accuracy\n• Perception output only, or feeds into function layer?"
-        },
-        {
-          "id": 3,
-          "subsection": "2E — Speed Limit & Traffic Signal Recognition",
-          "sectionTag": "SLR/TSR",
-          "text": "Are SLR and TSR dedicated models, heads on shared backbone, or separate pipeline? TOPS budget impact?"
-        },
-        {
-          "id": 4,
-          "subsection": "2F — Model Quality and Temporal Stability",
-          "sectionTag": "Quantization",
-          "text": "What is your mAP at FP32 vs INT8? QAT or PTQ used for quantization? Accuracy recovery method?"
-        },
-        {
-          "id": 5,
-          "subsection": "2F — Model Quality and Temporal Stability",
-          "sectionTag": "Temporal Stability",
-          "text": "Temporal detection stability — class consistency % across consecutive frames? How is flicker/bbox jitter measured?"
-        },
-        {
-          "id": 6,
-          "subsection": "2F — Model Quality and Temporal Stability",
-          "sectionTag": "Tracking Metrics",
-          "text": "Tracking algorithm used (ByteTrack, DeepSORT, other)? MOTA score and tracking ID switch rate (IDSW %)?"
-        },
-        {
-          "id": 7,
-          "subsection": "2F — Model Quality and Temporal Stability",
-          "sectionTag": "Multi-Frame Fusion",
-          "text": "Describe your multi-frame confidence fusion strategy — temporal voting or N-of-M frame confirmation. How is this tuned?"
-        },
-        {
-          "id": 8,
-          "subsection": "2G — Output Interface",
-          "sectionTag": "Output Interface",
-          "text": "What is the output of your perception stack? Describe: object list, lane boundaries, freespace, confidence scores, heading estimates, velocity estimates."
-        },
-        {
-          "id": 9,
-          "subsection": "2G — Output Interface",
-          "sectionTag": "Output Interface",
-          "text": "At what rate (Hz) is the perception output produced? Frame drop rate under normal and peak load?"
-        },
-        {
-          "id": 10,
-          "subsection": "2G — Output Interface",
-          "sectionTag": "Output Interface",
-          "text": "End-to-end latency from image capture to perception output?"
-        }
-      ]
-    },
-    {
-      "id": "P3",
-      "name": "ADAS Function Layer",
-      "questions": [
-        {
-          "id": 11,
-          "subsection": null,
-          "sectionTag": "Function Layer",
-          "text": "Which ADAS functions do you own beyond perception — AEB decision logic, LDW alert, LKA torque command, ACC set-speed control? For each: owned / must be implemented by integrator."
-        },
-        {
-          "id": 12,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "AEB Coverage",
-          "text": "For each AEB scenario provide: max ego speed / max target speed / detection-to-brake latency / validation status:\n• CCRs (Stationary)  • CCRm (Decelerating)  • CCRb (Moving)\n• CPNCO (Ped crossing)  • CPFA (Ped ahead)\n• Lateral Cut-in  • Lateral Cut-out\n• Oncoming Car (CCFTAP)  • Oncoming Ped\n• Ego Turn into Car  • Ego Turn into Ped"
-        },
-        {
-          "id": 13,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "ACC Cut-in",
-          "text": "For ACC cut-in handling:\n• Min cut-in TLC your system reacts to\n• Distinguishes intentional lane change from gradual drift\n• Response latency to ACC deceleration command\n• Strategy: highway vs urban low-speed cut-ins"
-        },
-        {
-          "id": 14,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "Cut-in Occlusion",
-          "text": "Cut-in occlusion strategy — when cut-in vehicle is partially occluded before entering ego lane. How early can the system anticipate the cut-in?"
-        },
-        {
-          "id": 15,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "LDW/LKA",
-          "text": "For LDW/LKA — max ego speed at which function is active? Minimum speed below which it deactivates?"
-        },
-        {
-          "id": 16,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "TTC Accuracy",
-          "text": "TTC estimation accuracy — error in seconds at TTC = 2.0s (critical intervention window)."
-        },
-        {
-          "id": 17,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "False Braking Rate",
-          "text": "False braking rate in field conditions — unintended AEB events per 10,000 km of normal driving."
-        },
-        {
-          "id": 18,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "Special Scenarios",
-          "text": "Does your stack detect / warn for: road debris / fallen cargo / stationary obstacles? Emergency vehicle detection (flashing lights)?"
-        },
-        {
-          "id": 19,
-          "subsection": "3A — AEB Scenario Coverage",
-          "sectionTag": "NCAP/AEBS",
-          "text": "Have your AEB/LDW functions been tested against any NCAP or AEBS protocol? If yes, which protocol, year, and results?"
-        },
-        {
-          "id": 20,
-          "subsection": "3B — Tunability and Configuration",
-          "sectionTag": "Tunability",
-          "text": "Describe tunability across four levels (supported? / tooling / partner involvement?):\n• Runtime config — thresholds via config file, no recompile\n• Platform tuning — retune per vehicle variant via calibration\n• Model fine-tuning — fine-tune on L&T data independently\n• Full retraining — full training pipeline access"
-        },
-        {
-          "id": 21,
-          "subsection": "3B — Tunability and Configuration",
-          "sectionTag": "Tunability",
-          "text": "Which parameters can L&T modify via config files — without recompiling or involving your team? Provide a representative list."
-        }
-      ]
-    },
-    {
-      "id": "P4",
-      "name": "DMS Capability",
-      "questions": [
-        {
-          "id": 22,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "Do you have a DMS stack? Developed in-house or sourced from a sub-vendor?"
-        },
-        {
-          "id": 23,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "What sensor does your DMS require — RGB, IR, or either? Recommended spec: resolution, FPS, wavelength."
-        },
-        {
-          "id": 24,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "Driver states detected? Confirm:\n• Eye closure / blink rate / drowsiness (PERCLOS)\n• Gaze direction / distraction  • Yawning  • Head pose\n• Phone usage  • Smoking  • Eating/drinking\n• Driver presence / absence\n• Child presence in vehicle (OMS)"
-        },
-        {
-          "id": 25,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "Response latency from driver state change to DMS alert output?"
-        },
-        {
-          "id": 26,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "False positive rate for drowsiness detection in normal driving — target: less than 1 per hour?"
-        },
-        {
-          "id": 27,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "Does DMS run independently or is it architecturally integrated with the front safety perception stack?"
-        },
-        {
-          "id": 28,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "If integrated: combined TOPS budget for front safety + DMS simultaneously on the same SoC?"
-        },
-        {
-          "id": 29,
-          "subsection": null,
-          "sectionTag": "DMS",
-          "text": "If separate: DMS TOPS budget in isolation, and minimum SoC spec it has run on?"
-        },
-        {
-          "id": 30,
-          "subsection": null,
-          "sectionTag": "DMS Robustness",
-          "text": "How robust is your DMS to accessories — sunglasses (various tint levels), face masks, hats, scarves?"
-        },
-        {
-          "id": 31,
-          "subsection": null,
-          "sectionTag": "DMS Demographics",
-          "text": "Has your DMS been tested for demographic robustness — equal performance across skin tones and facial structures?"
-        }
-      ]
-    },
-    {
-      "id": "P5",
-      "name": "Hardware and Compute",
-      "questions": [
-        {
-          "id": 1,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "List all SoCs your stack runs on (production or validated). For each: SoC name / TOPS rating / functions running."
-        },
-        {
-          "id": 2,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Total TOPS consumed by your full stack (perception + ADAS functions) at nominal operation?"
-        },
-        {
-          "id": 3,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Minimum TOPS required to run your ADAS functions at acceptable performance?"
-        },
-        {
-          "id": 4,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Can perception + ADAS functions fit within 2 TOPS? If yes, evidence. If no, what is the minimum?"
-        },
-        {
-          "id": 5,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Have you ported to any TI SoC (TDA4VM, AM62A, or equivalent)? Performance data or estimated effort?"
-        },
-        {
-          "id": 6,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Is your inference pipeline optimized for TIDL? If not, what runtime do you use?"
-        },
-        {
-          "id": 7,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Quantization level — FP32, FP16, INT8? Accuracy delta from FP32 baseline to deployment precision?"
-        },
-        {
-          "id": 8,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Memory footprint — model weights + runtime memory?"
-        },
-        {
-          "id": 9,
-          "subsection": null,
-          "sectionTag": "Hardware",
-          "text": "Minimum camera specification your stack is validated on — resolution, FPS, sensor type?"
-        }
-      ]
-    },
-    {
-      "id": "P6",
-      "name": "Integration and Interface",
-      "questions": [
-        {
-          "id": 10,
-          "subsection": null,
-          "sectionTag": "Integration",
-          "text": "Is your stack compatible with AUTOSAR Adaptive for production deployment?"
-        },
-        {
-          "id": 11,
-          "subsection": null,
-          "sectionTag": "Integration",
-          "text": "Any ISP dependency — specific ISP or camera module required? If yes, which ones?"
-        },
-        {
-          "id": 12,
-          "subsection": null,
-          "sectionTag": "Integration",
-          "text": "Do you provide calibration tooling (intrinsic, extrinsic, homography)? Process and time per vehicle variant?"
-        },
-        {
-          "id": 13,
-          "subsection": null,
-          "sectionTag": "Integration",
-          "text": "Do you provide a SIL environment? If yes, what simulator — CarMaker, CARLA, LGSVL, or other?"
-        }
-      ]
-    },
-    {
-      "id": "P7",
-      "name": "Known Limitations and India Readiness",
-      "questions": [
-        {
-          "id": 14,
-          "subsection": null,
-          "sectionTag": "Limitations",
-          "text": "Known limitations of your current stack that you are actively working to resolve?"
-        },
-        {
-          "id": 15,
-          "subsection": null,
-          "sectionTag": "Limitations",
-          "text": "Are there scenarios validated only in limited conditions — highway only, specific weather, specific geographies?"
-        },
-        {
-          "id": 16,
-          "subsection": null,
-          "sectionTag": "India Readiness",
-          "text": "Validated on Indian roads? If yes: cities/road types / India-specific scenarios including speed breakers / performance data?"
-        },
-        {
-          "id": 17,
-          "subsection": null,
-          "sectionTag": "India Readiness",
-          "text": "What India-specific edge cases has your stack been optimized for? Be specific — not marketing language."
-        },
-        {
-          "id": 18,
-          "subsection": null,
-          "sectionTag": "India Readiness",
-          "text": "What challenging perception problems has your stack solved that are typically unsolved at your price/TOPS point?"
-        }
-      ]
-    }
-  ],
   "businessModels": [
     "Component Supplier",
     "Software Stack Provider",
     "White-labelled Solution Provider"
   ],
   "productSensors": [
-    { "key": "radar", "label": "Radar" },
-    { "key": "camera", "label": "Camera" },
-    { "key": "fusion", "label": "Fusion" },
-    { "key": "soc", "label": "SoC" }
+    {
+      "key": "radar",
+      "label": "Radar"
+    },
+    {
+      "key": "camera",
+      "label": "Camera"
+    },
+    {
+      "key": "fusion",
+      "label": "Fusion"
+    },
+    {
+      "key": "soc",
+      "label": "SoC"
+    }
   ],
   "productFunctions": [
-    { "key": "AEB", "label": "AEB" },
-    { "key": "ACC", "label": "ACC" },
-    { "key": "LDW", "label": "LDW" },
-    { "key": "LCA", "label": "LCA" },
-    { "key": "LKA", "label": "LKA" },
-    { "key": "MOIS", "label": "MOIS" },
-    { "key": "BSD", "label": "BSD" },
-    { "key": "RCTA", "label": "RCTA" }
+    {
+      "key": "AEB",
+      "label": "AEB"
+    },
+    {
+      "key": "ACC",
+      "label": "ACC"
+    },
+    {
+      "key": "LDW",
+      "label": "LDW"
+    },
+    {
+      "key": "LCA",
+      "label": "LCA"
+    },
+    {
+      "key": "LKA",
+      "label": "LKA"
+    },
+    {
+      "key": "MOIS",
+      "label": "MOIS"
+    },
+    {
+      "key": "BSD",
+      "label": "BSD"
+    },
+    {
+      "key": "RCTA",
+      "label": "RCTA"
+    }
   ],
   "productSocs": [
-    { "key": "ti_sitara",     "label": "TI Sitara" },
-    { "key": "ti_tda4vl",     "label": "TI TDA4VL (entry)" },
-    { "key": "ti_tda4vm",     "label": "TI TDA4VM (mid)" },
-    { "key": "nxp_s32v234",   "label": "NXP S32V234 (entry)" },
-    { "key": "nxp_s32g",      "label": "NXP S32G (mid)" },
-    { "key": "renesas_v3m",   "label": "Renesas R-Car V3M (entry)" },
-    { "key": "renesas_v3h",   "label": "Renesas R-Car V3H (mid)" },
-    { "key": "qcom_sa6155p",  "label": "Qualcomm SA6155P (entry)" },
-    { "key": "qcom_sa8155p",  "label": "Qualcomm SA8155P (mid)" },
-    { "key": "ambarella_cv2", "label": "Ambarella CV2 (entry)" },
-    { "key": "ambarella_cv22","label": "Ambarella CV22 (mid)" }
+    {
+      "key": "ti_sitara",
+      "label": "TI Sitara"
+    },
+    {
+      "key": "ti_tda4vl",
+      "label": "TI TDA4VL (entry)"
+    },
+    {
+      "key": "ti_tda4vm",
+      "label": "TI TDA4VM (mid)"
+    },
+    {
+      "key": "nxp_s32v234",
+      "label": "NXP S32V234 (entry)"
+    },
+    {
+      "key": "nxp_s32g",
+      "label": "NXP S32G (mid)"
+    },
+    {
+      "key": "renesas_v3m",
+      "label": "Renesas R-Car V3M (entry)"
+    },
+    {
+      "key": "renesas_v3h",
+      "label": "Renesas R-Car V3H (mid)"
+    },
+    {
+      "key": "qcom_sa6155p",
+      "label": "Qualcomm SA6155P (entry)"
+    },
+    {
+      "key": "qcom_sa8155p",
+      "label": "Qualcomm SA8155P (mid)"
+    },
+    {
+      "key": "ambarella_cv2",
+      "label": "Ambarella CV2 (entry)"
+    },
+    {
+      "key": "ambarella_cv22",
+      "label": "Ambarella CV22 (mid)"
+    }
   ],
-  "verdictThresholds": {
-    "approved": 4.0,
-    "conditional": 3.0
-  },
   "hardDisqualifiers": [
     "Demo-only system (no production-ready software)",
     "No replay / log framework",
     "No FMEA or safety concept",
     "No ASPICE assessment"
   ],
-  "scoreLabels": {
-    "1": "Unacceptable",
-    "2": "Below Expectations",
-    "3": "Acceptable",
-    "4": "Good",
-    "5": "Excellent"
-  },
   "answerStatuses": [
-    { "key": "na",          "label": "NA" },
-    { "key": "yet_to_start", "label": "Yet to Start" },
-    { "key": "in_progress",  "label": "In Progress" },
-    { "key": "accomplished", "label": "Accomplished" },
-    { "key": "verified",     "label": "Verified" }
+    {
+      "key": "na",
+      "label": "NA"
+    },
+    {
+      "key": "yet_to_start",
+      "label": "Yet to Start"
+    },
+    {
+      "key": "in_progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "accomplished",
+      "label": "Accomplished"
+    },
+    {
+      "key": "verified",
+      "label": "Verified"
+    }
   ],
   "questionCategories": [
-    { "id": "general", "label": "General" },
-    { "id": "product", "label": "Product" }
+    {
+      "id": "general",
+      "label": "General"
+    },
+    {
+      "id": "product",
+      "label": "Product"
+    }
   ],
   "detailSections": [
-    { "id": "gen-overview",     "category": "general", "label": "Company Overview", "scope": null },
-    { "id": "prod-common",      "category": "product",  "label": "Common Product Info", "scope": null },
-    { "id": "prod-camera",      "category": "product",  "label": "Camera Subsystem", "scope": { "type": "sensor", "keys": ["camera"] } },
-    { "id": "prod-radar",       "category": "product",  "label": "Radar Subsystem", "scope": { "type": "sensor", "keys": ["radar"] } },
-    { "id": "prod-func-aeb",    "category": "product",  "label": "AEB Function Detail", "scope": { "type": "function", "keys": ["AEB"] } },
-    { "id": "prod-func-acc",    "category": "product",  "label": "ACC Function Detail", "scope": { "type": "function", "keys": ["ACC"] } }
+    {
+      "id": "gen-overview",
+      "category": "general",
+      "label": "Company Overview",
+      "scope": null
+    },
+    {
+      "id": "prod-common",
+      "category": "product",
+      "label": "Common Product Info",
+      "scope": null
+    },
+    {
+      "id": "prod-camera",
+      "category": "product",
+      "label": "Camera Subsystem",
+      "scope": {
+        "type": "sensor",
+        "keys": [
+          "camera"
+        ]
+      }
+    },
+    {
+      "id": "prod-radar",
+      "category": "product",
+      "label": "Radar Subsystem",
+      "scope": {
+        "type": "sensor",
+        "keys": [
+          "radar"
+        ]
+      }
+    },
+    {
+      "id": "prod-func-aeb",
+      "category": "product",
+      "label": "AEB Function Detail",
+      "scope": {
+        "type": "function",
+        "keys": [
+          "AEB"
+        ]
+      }
+    },
+    {
+      "id": "prod-func-acc",
+      "category": "product",
+      "label": "ACC Function Detail",
+      "scope": {
+        "type": "function",
+        "keys": [
+          "ACC"
+        ]
+      }
+    }
   ],
   "detailQuestions": [
-    { "id": 1, "sectionId": "gen-overview",  "text": "Sample general question — answered once per partner." },
-    { "id": 2, "sectionId": "prod-common",   "text": "Sample product question — shown for every product, regardless of sensors/functions/SoCs." },
-    { "id": 3, "sectionId": "prod-camera",   "text": "Sample camera-specific question — shown only on products with the Camera sensor checked." },
-    { "id": 4, "sectionId": "prod-radar",    "text": "Sample radar-specific question — shown only on products with the Radar sensor checked." },
-    { "id": 5, "sectionId": "prod-func-aeb", "text": "Sample AEB-specific question — shown only on products with the AEB function checked." },
-    { "id": 6, "sectionId": "prod-func-acc", "text": "Sample ACC-specific question — shown only on products with the ACC function checked." }
+    {
+      "id": 1,
+      "sectionId": "gen-overview",
+      "text": "Sample general question — answered once per partner."
+    },
+    {
+      "id": 2,
+      "sectionId": "prod-common",
+      "text": "Sample product question — shown for every product, regardless of sensors/functions/SoCs."
+    },
+    {
+      "id": 3,
+      "sectionId": "prod-camera",
+      "text": "Sample camera-specific question — shown only on products with the Camera sensor checked."
+    },
+    {
+      "id": 4,
+      "sectionId": "prod-radar",
+      "text": "Sample radar-specific question — shown only on products with the Radar sensor checked."
+    },
+    {
+      "id": 5,
+      "sectionId": "prod-func-aeb",
+      "text": "Sample AEB-specific question — shown only on products with the AEB function checked."
+    },
+    {
+      "id": 6,
+      "sectionId": "prod-func-acc",
+      "text": "Sample ACC-specific question — shown only on products with the ACC function checked."
+    }
   ]
 }

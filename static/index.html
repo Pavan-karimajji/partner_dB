@@ -48,36 +48,13 @@
     <div class="page-header">
       <div>
         <div class="page-title">Partner Comparison</div>
-        <div class="page-subtitle">Weighted scores across all evaluation sections</div>
+        <div class="page-subtitle">Cross-partner comparison views</div>
       </div>
       <a class="btn btn-secondary btn-sm" href="/api/export/csv" download>Export CSV</a>
     </div>
-    <div class="comparison-grid">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Section Score Radar</span></div>
-        <div class="card-body">
-          <div class="chart-container"><canvas id="radar-chart"></canvas></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title" id="drill-card-title">Section Detail</span>
-          <button class="btn btn-secondary btn-sm" id="btn-drill-clear" style="display:none;">Clear</button>
-        </div>
-        <div class="card-body">
-          <div id="drill-empty" class="empty-state" style="padding:32px 0;">
-            Click a section in the radar above or a row in the matrix to see question-level scores.
-          </div>
-          <div id="drill-chart-wrap" style="display:none;position:relative;">
-            <canvas id="drill-chart"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="card">
-      <div class="card-header"><span class="card-title">Section Score Matrix</span></div>
-      <div class="card-body" style="overflow-x:auto;">
-        <table class="score-table" id="comparison-table"></table>
+      <div class="card-body">
+        <div class="empty-state" style="padding:48px 0;">Comparison views are being redesigned around the new General/Product question structure — coming in Stage 2.</div>
       </div>
     </div>
   </div>
@@ -89,7 +66,7 @@
     <div class="page-header">
       <div>
         <div class="page-title">Partner Detail</div>
-        <div class="page-subtitle">Full evaluation view — edit scores and responses inline</div>
+        <div class="page-subtitle">Full evaluation view — edit answers and responses inline</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <select class="form-select" id="detail-partner-select" style="width:200px;">
@@ -189,7 +166,6 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <!-- ── Scripts ─────────────────────────────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>
