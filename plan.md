@@ -557,13 +557,43 @@ high/medium/low priority, every section has a valid domain, heatmap
 shows exactly the 5 populated domains as columns, Partner Detail
 unaffected, zero console errors.
 
+## Priority sub-tabs UI — DONE
+
+User clarified the priority work wasn't meant to stay data-only: the
+actual expectation was that expanding a section (e.g. "Compute &
+Hardware") shows 3 sub-tabs — High/Medium/Low — so the questions within
+it are filterable by meeting-prep urgency, not just a flat list with an
+invisible priority field. Implemented:
+
+- `answerQuestionsTableHtml` now groups a section's questions by
+  `priority` and renders a `.priority-tab-row` (3 pill buttons, each
+  showing a live count e.g. "High (2)") plus 3 `.priority-panel` divs,
+  only one visible at a time.
+- Defaults to the **first non-empty tab in High → Medium → Low order**
+  per section — so a section with zero High questions (e.g. Power &
+  Ignition Management) opens on Medium or Low instead of an empty panel,
+  verified working.
+- Click handling in `handleDetailClick` (checked early, alongside the
+  existing section-collapse handler) — pure DOM toggling, no `State`
+  tracking, consistent with how section collapse/expand already works;
+  resets to the default tab on re-render, which is fine.
+- CSS: `.priority-tab`/`.priority-tab-high`/`-medium`/`-low` (red/amber/
+  green pill buttons), print view always shows all 3 panels expanded and
+  hides the tab row (same pattern as the section-collapse print
+  override).
+
+Verified via Playwright (`C:\tmp\pwtest\test-priority-tabs.js`): tab
+counts match schema exactly (Compute & Hardware: High 2 / Medium 8 /
+Low 5 = 15 total); clicking each tab swaps the visible panel correctly;
+section collapse still works independently of which priority tab is
+selected; zero console errors.
+
 ## Next steps
 
-1. UI for all of the above is explicitly deferred per the user — no
-   priority filter, hero-tag toggle, or Patents-in-heatmap UI exists
-   yet. Revisit once there's a concrete view in mind (e.g. a
-   "meeting prep" filtered view of just High-priority + hero-elevated
-   sections for a given product).
+1. Hero-tag toggle UI and Patents-in-heatmap UI are still explicitly
+   deferred per the user — no UI exists yet for marking a product's
+   hero sensors/functions, or for showing Patents & Innovation as a
+   heatmap column. Revisit once there's a concrete view in mind.
 2. Possible follow-up: revisit whether some of the very small sections
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab

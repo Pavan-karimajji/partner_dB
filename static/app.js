@@ -678,7 +678,48 @@ function answerRowHtml(q, ans, key) {
   `;
 }
 
+const PRIORITY_TABS = [
+  { key: 'high', label: 'High' },
+  { key: 'medium', label: 'Medium' },
+  { key: 'low', label: 'Low' },
+];
+
+function priorityPanelHtml(priorityKey, questions, getAnswer, keyFor) {
+  if (questions.length === 0) {
+    return `<div class="text-muted" style="font-size:.8125rem;padding:8px 0;">No ${priorityKey}-priority questions in this section.</div>`;
+  }
+  return `
+    <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Partner Response</span><span>L&amp;T Remarks</span></div>
+    ${questions.map(q => answerRowHtml(q, getAnswer(q.id), keyFor(q.id))).join('')}
+  `;
+}
+
+// Each section's questions are split into High/Med/Low sub-tabs — High =
+// cover live in the first customer meeting, Low = fine as a written
+// follow-up (see schema.detailQuestions[].priority). Defaults to the
+// first non-empty tab so a section with no High questions doesn't open
+// on an empty panel.
 function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveNote) {
+  const byPriority = { high: [], medium: [], low: [] };
+  questions.forEach(q => { (byPriority[q.priority] || byPriority.medium).push(q); });
+  const firstNonEmpty = PRIORITY_TABS.find(p => byPriority[p.key].length > 0) || PRIORITY_TABS[0];
+
+  const tabsHtml = questions.length === 0 ? '' : `
+    <div class="priority-tab-row">
+      ${PRIORITY_TABS.map(p => `
+        <button class="priority-tab priority-tab-${p.key}${p.key === firstNonEmpty.key ? ' active' : ''}" data-priority-tab="${p.key}" type="button">${p.label} (${byPriority[p.key].length})</button>
+      `).join('')}
+    </div>
+  `;
+
+  const panelsHtml = questions.length === 0
+    ? `<div class="text-muted" style="font-size:.8125rem;">No questions defined for this section yet.</div>`
+    : PRIORITY_TABS.map(p => `
+        <div class="priority-panel" data-priority-panel="${p.key}"${p.key === firstNonEmpty.key ? '' : ' style="display:none;"'}>
+          ${priorityPanelHtml(p.key, byPriority[p.key], getAnswer, keyFor)}
+        </div>
+      `).join('');
+
   return `
     <div class="card q-section-card">
       <div class="card-header" data-section-toggle-header>
@@ -686,10 +727,8 @@ function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveN
         ${inactiveNote ? `<span class="text-muted" style="font-size:.75rem;">${esc(inactiveNote)}</span>` : ''}
       </div>
       <div class="card-body">
-        <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Partner Response</span><span>L&amp;T Remarks</span></div>
-        ${questions.length === 0
-          ? `<div class="text-muted" style="font-size:.8125rem;">No questions defined for this section yet.</div>`
-          : questions.map(q => answerRowHtml(q, getAnswer(q.id), keyFor(q.id))).join('')}
+        ${tabsHtml}
+        ${panelsHtml}
       </div>
     </div>
   `;
@@ -1026,6 +1065,20 @@ function handleDetailClick(e) {
   if (sectionHeader) {
     const card = sectionHeader.closest('.q-section-card');
     if (card) card.classList.toggle('collapsed');
+    return;
+  }
+
+  // High/Medium/Low priority sub-tabs within a section's card-body.
+  const priorityTabBtn = e.target.closest('[data-priority-tab]');
+  if (priorityTabBtn) {
+    const card = priorityTabBtn.closest('.q-section-card');
+    if (card) {
+      const key = priorityTabBtn.dataset.priorityTab;
+      card.querySelectorAll('[data-priority-tab]').forEach(b => b.classList.toggle('active', b === priorityTabBtn));
+      card.querySelectorAll('[data-priority-panel]').forEach(p => {
+        p.style.display = p.dataset.priorityPanel === key ? '' : 'none';
+      });
+    }
     return;
   }
 

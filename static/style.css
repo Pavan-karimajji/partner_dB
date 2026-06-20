@@ -297,6 +297,23 @@ input, textarea, select { font: inherit; }
 .q-section-card.collapsed .accordion-chevron { transform: rotate(-90deg); }
 .q-section-card.collapsed .card-body { display: none; }
 
+/* High/Medium/Low priority sub-tabs within an expanded section */
+.priority-tab-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.priority-tab {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--gray-600);
+}
+.priority-tab:hover { background: var(--gray-50); }
+.priority-tab.active.priority-tab-high   { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+.priority-tab.active.priority-tab-medium { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+.priority-tab.active.priority-tab-low    { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+
 /* Question row in detail */
 .q-row {
   display: grid;
@@ -580,6 +597,8 @@ input, textarea, select { font: inherit; }
   .accordion-header { border-radius: var(--radius) !important; }
   .q-section-card .card-body { display: block !important; }
   .q-section-card .accordion-chevron { display: none !important; }
+  .priority-tab-row { display: none !important; }
+  .priority-panel { display: block !important; }
 
   /* Show all detail sub-tabs */
   .detail-tab-panel { display: block !important; }
