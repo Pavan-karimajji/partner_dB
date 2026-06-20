@@ -201,3 +201,220 @@ Implementation: `schema.json` (`patentStatuses`, `patentRelevanceTypes`),
 (`findPatent`/`newPatent`/`patentCardHtml`/`patentsTabHtml`, add/remove
 click handlers, `data-patent-field`/`data-patent-relevance-type` change
 handlers).
+
+---
+
+# Stage 2 — Real Question Migration
+
+Status: IN PROGRESS — tracking file built, open decisions pending review.
+Branch: `product-level-eval`
+
+## Goal
+
+Replace the 6 sample `detailQuestions` from Stage 1 with the real ~217
+questions currently sitting in three source spreadsheets under `docs/`,
+correctly sorted into General vs. Product-scoped sections. Then redesign
+the Comparison page (currently a placeholder) around the new status-tag
+answers.
+
+## Source material
+
+- `docs/adas_vendor_technical_evaluation_internal.xlsx` — 139 items,
+  4 sheets, L&T-internal phrasing + scoring criteria + remarks column.
+  Continuously numbered 1–139 across its sheets.
+- `docs/adas_vendor_technical_evaluation_supplier.xlsx` — same 139-item
+  set minus 5 internal-only items (134 total), vendor-facing question
+  phrasing, numbering restarts at 1 per sheet.
+- `docs/adas_partner_perception_and_function_evaluation.xlsx` — 78 items,
+  3 sheets, vendor-facing phrasing, numbering restarts at 1 per sheet.
+  No internal/supplier split for this one.
+
+Combined total: 217 items (139 + 78).
+
+## Methodology (agreed with user)
+
+1. Build one tracking markdown file listing every source question with a
+   proposed target (General vs. Product, and scope if Product). Use
+   checkboxes so items can be ticked off as we confirm placement together.
+2. Where similar/duplicate questions exist across the source files,
+   resolve into a single right place; ask the user when ambiguous rather
+   than guessing.
+3. End state: every item is mapped; redundant/duplicate items removed
+   (not kept twice).
+4. Known structural gap to close (as a **separate follow-up phase**, not
+   in this same pass): radar/lidar/fusion subsystem questions and
+   radar-typical functions (BSD, RCTA) have zero coverage in the source
+   material and need to be authored from scratch.
+
+## Work done so far
+
+- Extracted full content of all 3 workbooks to `docs/_extract/*.txt`
+  (scratch, not committed yet — ok to delete once migration is done).
+- Built `docs/_extract/combined_tech.json` and `combined_perc.json` —
+  canonical per-item records (ref, category, text, section,
+  internal-only flag) reconstructed from the source sheets.
+  - **Important correctness note**: the internal vs. supplier item
+    alignment is NOT purely positional — items can be dropped or
+    reordered mid-category. The current canonical data was verified by
+    hand, item-by-item, against the actual spreadsheet content (not by
+    Jaccard/word-overlap heuristics, which produced false positives).
+    The 5 confirmed internal-only items (no vendor-facing phrasing
+    exists) are internal numbers: **9** (Field failure rate/warranty
+    data), **97/98/99** (GDPR privacy / data anonymization / driver
+    consent), **106** (Fleet monitoring dashboard).
+- Built `docs/_extract/build_migration_md.py` — generates
+  `docs/stage2_question_migration.md` from the combined JSON + a
+  category→target mapping table (`TECH_RULES` / `PERC_RULES` in that
+  script). Re-run this script if the mapping rules change rather than
+  hand-editing the generated `.md` for bulk changes.
+- Produced **`docs/stage2_question_migration.md`** — the live tracking
+  file. 217 items, each with a proposed `general`/`product` + scope,
+  organized by source section. 37 items flagged `⚠️ NEEDS REVIEW` or
+  `⚠️ DUPLICATE` (see "Open decisions" list at the top of that file).
+
+## Open decisions — RESOLVED
+
+1. **DMS modeling** → add `DMS` to `productFunctions`, parallel to
+   AEB/ACC/etc. — matches how the source material itself groups it.
+   The 3 DMS-related Perception sections become `function:DMS` scoped.
+   *(Schema change not yet implemented — see Next steps.)*
+2. **Duplicate: Compute/SoC/TOPS** → merged into one Product-common
+   "Architecture & Platform" section. Dropped `PERC-S3#1` (literal
+   duplicate of `TECH#17`); kept the complementary deeper Perception
+   questions (TIDL, quantization, min-TOPS, camera min-spec).
+3. **Duplicate: AUTOSAR support** → kept `TECH#22` (covers Classic +
+   Adaptive), dropped `PERC-S3#10` (narrower subset).
+4. **Duplicate: SIL/HIL/simulator** → kept `TECH#57-59` (more complete
+   breakdown), dropped `PERC-S3#13`.
+5. **Camera-only vs. generic split** → applied per item: `TECH#49`/`#52`/
+   `#53` (IP rating, lens contamination, calibration drift) → Camera
+   Subsystem; `TECH#48`/`#50`/`#51` (operating temp, EMC/EMI,
+   vibration/shock) + all of Components → new Product-common section
+   "HW Robustness & Components". `PERC-S3#11`/`#12` (ISP dependency,
+   calibration tooling) also moved to Camera Subsystem despite sitting
+   in the generic "Integration" category.
+6. **Function-scoped safety items** ("Target ASIL per function", "Safe
+   state definition per function") → kept in General as free text; no
+   new scoping infrastructure built for just 2 items.
+7. **Camera-scoped lifecycle item** → `TECH#109` ("Spare parts strategy
+   (camera modules)") moved to Camera Subsystem.
+8. **Limitations / India Readiness** → Product-common (wording is
+   explicitly "your current stack", not company-wide).
+
+All resolutions are baked into `docs/_extract/build_migration_md.py`
+(`TECH_RULES`/`PERC_RULES`/`OVERRIDES`) and reflected in the regenerated
+`docs/stage2_question_migration.md` — 217/217 items now have a confirmed
+placement; 3 are marked `DROPPED (confirmed duplicate)` and pre-checked.
+
+## Schema/data model change already agreed (not yet implemented)
+
+- Add a **`partnerResponse`** field to the answer model (general and
+  product answers), separate from the existing `remarks` field — mirrors
+  the source sheets' `Vendor Response` vs. `L&T Remarks`/`L&T Judgement`
+  split. `remarks` = L&T's internal note; `partnerResponse` = what the
+  vendor actually said. Needs `answerRowHtml`/`ensureGeneralAnswer`/
+  `ensureProductAnswer` in `app.js` updated, plus a new column in the
+  question-table UI.
+
+## Implementation — DONE
+
+1. ~~Resolve the 8 open decisions above (with user).~~
+2. ~~Add `DMS` to `schema.json`'s `productFunctions` list.~~
+3. ~~Implement the `partnerResponse` field~~ — added to `app.js`
+   (`ensureGeneralAnswer`/`ensureProductAnswer` default it to `''`,
+   `answerRowHtml` renders it as a second textarea between Status and
+   Remarks, `handleDetailChange` has a `data-ans-partner-response`
+   branch, `sectionHasAnswerData` counts it for the data-loss guard) and
+   `style.css` (`.ans-row` grid widened from 4 to 5 columns: # / Question
+   / Status / Partner Response / L&T Remarks).
+4. ~~Write the real questions into `schema.json`.~~ Generated
+   programmatically via `docs/_extract/build_schema_sections.py` (reads
+   `combined_tech.json`/`combined_perc.json`, applies a category→section
+   map + the same per-ref `OVERRIDES` used in the tracking file, emits
+   `detailSections`/`detailQuestions` directly into `schema.json`).
+   Each question carries a `sourceRef` field (e.g. `"TECH#47"`,
+   `"PERC-S2#12"`) back to the original spreadsheet item for audit
+   traceability — not used by the UI, just for future verification.
+5. ~~Decide what happens to old sample answers (qIds 1–6).~~ Dropped —
+   `data/partners.json` `generalAnswers`/product `answers` filtered to
+   `qId > 6` (both partners had none beyond the samples, so this was a
+   no-op on real data, confirmed via `git diff` before saving).
+
+**Final structure**: 28 sections (3 General, 25 Product — scoped where
+noted), 214 questions (217 source items minus 3 confirmed duplicates).
+Section breakdown by question count: Company Overview (19), Validation &
+Test Infra (17), Functional Safety & Cybersecurity (26), Compute &
+Hardware (15), Software Architecture (6), Pipeline & Runtime (5), Power
+(2), Camera: Image Sensor & Optics (8), Camera: ISP (5), Camera:
+Robustness & Calibration (6), HW Robustness & Components (6), Camera
+Perception: Pipeline Architecture (2) / Object Detection (12) / Lane
+Detection (7) / Depth & Freespace (5) / SLR-TSR (3) / Model Quality (4) /
+Output Interface (4), AEB Function Detail (5), ACC Function Detail (2),
+LDW/LKA Function Detail (1), DMS Function Detail (10), Production
+Readiness & Lifecycle (12), Software Quality (8), HMI (5), Regional
+Compliance (7), EMC & Environmental (7), Known Limitations & India
+Readiness (5).
+
+**Note on section granularity**: the open-decisions conversation only
+resolved *where* each question group goes at a coarse level (e.g. "all
+camera perception → Product, sensor:camera"). When actually writing the
+sections I split "Camera Perception" and "Architecture & Platform" into
+several smaller sections each (mirroring the source spreadsheets' own
+2A/2B/2C.../2.1/2.2/2.3 sub-structure) rather than one mega-section per
+bucket — this was my call, not separately re-confirmed with the user,
+made because a single ~50-question table would have been unusable. Easy
+to rebalance later since it's pure data, not code.
+
+**Verified via Playwright** (`C:\tmp\pwtest\test-stage2.js`): General tab
+shows the 3 General sections; Product 1 (radar+SoC, no camera) correctly
+hides all Camera/Camera-Perception sections; Product 2 (camera, LDW)
+correctly shows them and shows LDW/LKA Function Detail while hiding AEB
+Function Detail (AEB not checked); status + partnerResponse + remarks
+all persist correctly through save/reload. Zero console errors.
+
+## Corrections after first Stage 2 review (done)
+
+User feedback after reviewing the implementation:
+
+1. **Question-table sections should collapse** — clicking a section
+   heading (e.g. "Compute & Hardware") did nothing. Fixed: each
+   `answerQuestionsTableHtml` card is now `.q-section-card` with a
+   `data-section-toggle-header` on its `.card-header` and a chevron
+   (`▾`) in the title. `handleDetailClick` toggles a `.collapsed` class
+   on the card (checked first, before the other data-* targets, since
+   the header isn't one of those). CSS: default open, `.collapsed
+   .card-body { display:none }`, chevron rotates -90°. Print view always
+   force-expands (`.q-section-card .card-body { display:block
+   !important }`), matching the existing accordion print rule.
+2. **Add major headings for sensors/functions with zero question
+   coverage** — "just major headings are sufficient" (content can be
+   authored later). Added 6 placeholder sections (0 questions each, so
+   they render "No questions defined for this section yet."):
+   `prod-radar-subsystem` (sensor:radar), `prod-fusion-subsystem`
+   (sensor:fusion), `prod-func-lca`/`prod-func-bsd`/`prod-func-rcta`/
+   `prod-func-mois` (function-scoped). SoC intentionally excluded — see
+   the Stage 1 decision "no questions for SoC, they're standard/just
+   inventory toggles." These show up automatically via the existing
+   generic scope mechanism the moment the matching sensor/function is
+   checked on a product — no other code change needed.
+
+Both implemented in `docs/_extract/build_schema_sections.py`
+(`SECTIONS`/`SECTION_ORDER`) + `app.js`/`style.css`, verified via
+Playwright (`C:\tmp\pwtest\test-corrections.js`): all 4 new function
+headings appear after toggling their function on; collapse/expand works
+on header click and doesn't trigger on clicks inside the body; zero
+console errors. New section/question totals: **34 sections, 214
+questions** (6 sections still at 0 questions — the placeholders above).
+
+## Next steps
+
+1. **Follow-up phase (explicitly deferred, not blocking the above)**:
+   author the real Radar Subsystem / Fusion Subsystem / LCA / BSD / RCTA
+   / MOIS questions — only the headings exist so far, since the source
+   material has zero coverage for them.
+2. Redesign the Comparison page around the new status-tag answers
+   (currently a placeholder — see Stage 1 addendum to index.html).
+3. Possible follow-up: revisit whether some of the very small sections
+   (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
+   questions) should be merged into a neighboring section for less tab
+   clutter — low priority, easy to change later.

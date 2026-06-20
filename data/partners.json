@@ -25,6 +25,7 @@
       "productVersion": "v2.1 (Placeholder)",
       "products": [
         {
+          "answers": [],
           "functions": {
             "ACC": true,
             "AEB": true,
@@ -51,6 +52,7 @@
           }
         },
         {
+          "answers": [],
           "functions": {
             "ACC": false,
             "AEB": false,

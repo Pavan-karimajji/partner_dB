@@ -1,0 +1,548 @@
+[
+ {
+  "ref": "PERC-S1#1",
+  "category": "Stack Overview",
+  "text": "What is your primary product — a perception SDK, a full ADAS software stack, or an integrated ECU solution?",
+  "section": "SECTION 1 — Stack Overview",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S1#2",
+  "category": "Stack Overview",
+  "text": "What functions does your stack cover — AEB, ACC, LKA, LDW, DMS? For each: in production / validated but not shipped / in development.",
+  "section": "SECTION 1 — Stack Overview",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S1#3",
+  "category": "Stack Overview",
+  "text": "Does your stack include the ADAS function layer (AEB decision logic, LKA torque, ACC control) or does it output a perception SceneModel only?",
+  "section": "SECTION 1 — Stack Overview",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S1#4",
+  "category": "Pipeline Architecture",
+  "text": "Describe your full perception pipeline end-to-end. For each perception task confirm: dedicated model / head on shared backbone / not present — and DL/ML or classical. State whether single multitask or separate models per task, and explain rationale:\n• Object detection  • Semantic segmentation  • Lane detection  • Monocular depth  • Freespace/drivable area  • Object tracking",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2A — Perception Pipeline Architecture"
+ },
+ {
+  "ref": "PERC-S1#5",
+  "category": "Pipeline Architecture",
+  "text": "What model backbone do you use — ResNet, EfficientNet, custom, other? Design rationale at your target TOPS budget?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2A — Perception Pipeline Architecture"
+ },
+ {
+  "ref": "PERC-S1#6",
+  "category": "Object Detection",
+  "text": "What object classes does your detector support? Confirm: auto-rickshaws, two-wheelers, pedestrians, cattle/animals, overloaded/non-standard vehicles.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#7",
+  "category": "Object Detection",
+  "text": "Detection range per class under daylight — provide: class → min detection range → reliable tracking range.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#8",
+  "category": "Object Detection",
+  "text": "Detection performance (precision / recall / mAP) on: internal test dataset / public benchmark (KITTI, nuScenes) / Indian road scenarios.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#9",
+  "category": "Object Detection",
+  "text": "How does detection degrade under: night/low light / rain/glare / dust/haze / partial occlusion?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#10",
+  "category": "Object Detection",
+  "text": "False positive rate on static roadside objects — walls, signboards, parked vehicles, speed bumps.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#11",
+  "category": "Object Detection",
+  "text": "What training datasets were used? Were India-specific datasets (IDD or equivalent) included? Describe geographic and demographic diversity.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#12",
+  "category": "Object Detection",
+  "text": "What is your ODD for object detection? Be explicit about what the stack does NOT handle.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#13",
+  "category": "Ghost Suppression",
+  "text": "What software-side techniques does your stack use for camera ghost suppression — lens flare, windshield reflections, wet surface reflections? Describe approach and false positive rate.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#14",
+  "category": "Object Re-ID",
+  "text": "For tracked objects that disappear due to occlusion — what is your re-identification strategy? Maximum occlusion duration after which re-ID is still reliable?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#15",
+  "category": "Heading Estimation",
+  "text": "Does your stack estimate heading angle for detected objects? Heading estimation error at 50m?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#16",
+  "category": "Velocity Estimation",
+  "text": "What is your relative velocity estimation accuracy for moving objects? Error in km/h at 50m and 80m.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#17",
+  "category": "FP/FN Catalog",
+  "text": "Provide your structured false positive catalog for object detection — rain drops, sun flare, tunnel entry, shadows, road reflections. For each: mitigation and residual false positive rate.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2B — Object Detection"
+ },
+ {
+  "ref": "PERC-S1#18",
+  "category": "Lane Detection",
+  "text": "Lane types supported? Confirm: solid/dashed / faded/worn / temporary construction markings including orange/yellow and cone/barrier / unmarked roads / dirt/gravel.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#19",
+  "category": "Lane Detection",
+  "text": "Lane detection F1 score under: clear markings / faded markings / night/wet roads / intersections and merges.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#20",
+  "category": "Lane Detection",
+  "text": "How does the system behave when lane detection fails or confidence drops? Does it fail safe?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#21",
+  "category": "Lane Detection",
+  "text": "Does lane detection include lane type classification (solid vs dashed, single vs double)? If yes, accuracy metrics.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#22",
+  "category": "Lane Curvature",
+  "text": "Minimum road curvature radius your lane detection reliably supports. At your minimum radius, lateral position accuracy at 80m lookahead?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#23",
+  "category": "Lane Topology",
+  "text": "Does your stack detect lane topology changes — merges, splits, forks — ahead of the vehicle? Lookahead distance?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#24",
+  "category": "Lane FP Catalog",
+  "text": "Structured false positive catalog for lane detection — phantom lane scenarios: road cracks, tar strips, curb shadows, guard rails, wet reflections. Mitigation and residual rate.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2C — Lane Detection"
+ },
+ {
+  "ref": "PERC-S1#25",
+  "category": "Depth Estimation",
+  "text": "What method do you use for depth/distance estimation from a monocular camera?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2D — Depth and Freespace"
+ },
+ {
+  "ref": "PERC-S1#26",
+  "category": "Depth Estimation",
+  "text": "Longitudinal distance accuracy at 10m, 20m, 40m, 80m — at daylight, night, and rain.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2D — Depth and Freespace"
+ },
+ {
+  "ref": "PERC-S1#27",
+  "category": "Depth Estimation",
+  "text": "Do you use ground plane assumptions (IPM/homography)? How does accuracy degrade on uneven roads, speed bumps, slopes?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2D — Depth and Freespace"
+ },
+ {
+  "ref": "PERC-S1#28",
+  "category": "Freespace",
+  "text": "Does your stack output a freespace/drivable area map? Describe representation — grid, polygon, other.",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2D — Depth and Freespace"
+ },
+ {
+  "ref": "PERC-S1#29",
+  "category": "Freespace",
+  "text": "Update rate and latency of the freespace output?",
+  "section": "SECTION 2 — Perception Capability",
+  "subsection": "2D — Depth and Freespace"
+ },
+ {
+  "ref": "PERC-S2#1",
+  "category": "SLR",
+  "text": "Does your perception stack include Speed Limit Recognition (SLR)? If yes:\n• Sign types — numeric, variable message/LED VMS, end-of-limit\n• Detection accuracy and false positive rate\n• India-specific sign database / formats supported?",
+  "section": null,
+  "subsection": "2E — Speed Limit & Traffic Signal Recognition"
+ },
+ {
+  "ref": "PERC-S2#2",
+  "category": "TSR",
+  "text": "Does your perception stack include Traffic Signal Recognition (TSR)? If yes:\n• Signal states — red, amber, green, flashing, arrow\n• Detection range and accuracy\n• Perception output only, or feeds into function layer?",
+  "section": null,
+  "subsection": "2E — Speed Limit & Traffic Signal Recognition"
+ },
+ {
+  "ref": "PERC-S2#3",
+  "category": "SLR/TSR",
+  "text": "Are SLR and TSR dedicated models, heads on shared backbone, or separate pipeline? TOPS budget impact?",
+  "section": null,
+  "subsection": "2E — Speed Limit & Traffic Signal Recognition"
+ },
+ {
+  "ref": "PERC-S2#4",
+  "category": "Quantization",
+  "text": "What is your mAP at FP32 vs INT8? QAT or PTQ used for quantization? Accuracy recovery method?",
+  "section": null,
+  "subsection": "2F — Model Quality and Temporal Stability"
+ },
+ {
+  "ref": "PERC-S2#5",
+  "category": "Temporal Stability",
+  "text": "Temporal detection stability — class consistency % across consecutive frames? How is flicker/bbox jitter measured?",
+  "section": null,
+  "subsection": "2F — Model Quality and Temporal Stability"
+ },
+ {
+  "ref": "PERC-S2#6",
+  "category": "Tracking Metrics",
+  "text": "Tracking algorithm used (ByteTrack, DeepSORT, other)? MOTA score and tracking ID switch rate (IDSW %)?",
+  "section": null,
+  "subsection": "2F — Model Quality and Temporal Stability"
+ },
+ {
+  "ref": "PERC-S2#7",
+  "category": "Multi-Frame Fusion",
+  "text": "Describe your multi-frame confidence fusion strategy — temporal voting or N-of-M frame confirmation. How is this tuned?",
+  "section": null,
+  "subsection": "2F — Model Quality and Temporal Stability"
+ },
+ {
+  "ref": "PERC-S2#8",
+  "category": "Output Interface",
+  "text": "What is the output of your perception stack? Describe: object list, lane boundaries, freespace, confidence scores, heading estimates, velocity estimates.",
+  "section": null,
+  "subsection": "2G — Output Interface"
+ },
+ {
+  "ref": "PERC-S2#9",
+  "category": "Output Interface",
+  "text": "At what rate (Hz) is the perception output produced? Frame drop rate under normal and peak load?",
+  "section": null,
+  "subsection": "2G — Output Interface"
+ },
+ {
+  "ref": "PERC-S2#10",
+  "category": "Output Interface",
+  "text": "End-to-end latency from image capture to perception output?",
+  "section": null,
+  "subsection": "2G — Output Interface"
+ },
+ {
+  "ref": "PERC-S2#11",
+  "category": "Function Layer",
+  "text": "Which ADAS functions do you own beyond perception — AEB decision logic, LDW alert, LKA torque command, ACC set-speed control? For each: owned / must be implemented by integrator.",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "2G — Output Interface"
+ },
+ {
+  "ref": "PERC-S2#12",
+  "category": "AEB Coverage",
+  "text": "For each AEB scenario provide: max ego speed / max target speed / detection-to-brake latency / validation status:\n• CCRs (Stationary)  • CCRm (Decelerating)  • CCRb (Moving)\n• CPNCO (Ped crossing)  • CPFA (Ped ahead)\n• Lateral Cut-in  • Lateral Cut-out\n• Oncoming Car (CCFTAP)  • Oncoming Ped\n• Ego Turn into Car  • Ego Turn into Ped",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#13",
+  "category": "ACC Cut-in",
+  "text": "For ACC cut-in handling:\n• Min cut-in TLC your system reacts to\n• Distinguishes intentional lane change from gradual drift\n• Response latency to ACC deceleration command\n• Strategy: highway vs urban low-speed cut-ins",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#14",
+  "category": "Cut-in Occlusion",
+  "text": "Cut-in occlusion strategy — when cut-in vehicle is partially occluded before entering ego lane. How early can the system anticipate the cut-in?",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#15",
+  "category": "LDW/LKA",
+  "text": "For LDW/LKA — max ego speed at which function is active? Minimum speed below which it deactivates?",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#16",
+  "category": "TTC Accuracy",
+  "text": "TTC estimation accuracy — error in seconds at TTC = 2.0s (critical intervention window).",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#17",
+  "category": "False Braking Rate",
+  "text": "False braking rate in field conditions — unintended AEB events per 10,000 km of normal driving.",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#18",
+  "category": "Special Scenarios",
+  "text": "Does your stack detect / warn for: road debris / fallen cargo / stationary obstacles? Emergency vehicle detection (flashing lights)?",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#19",
+  "category": "NCAP/AEBS",
+  "text": "Have your AEB/LDW functions been tested against any NCAP or AEBS protocol? If yes, which protocol, year, and results?",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3A — AEB Scenario Coverage"
+ },
+ {
+  "ref": "PERC-S2#20",
+  "category": "Tunability",
+  "text": "Describe tunability across four levels (supported? / tooling / partner involvement?):\n• Runtime config — thresholds via config file, no recompile\n• Platform tuning — retune per vehicle variant via calibration\n• Model fine-tuning — fine-tune on L&T data independently\n• Full retraining — full training pipeline access",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#21",
+  "category": "Tunability",
+  "text": "Which parameters can L&T modify via config files — without recompiling or involving your team? Provide a representative list.",
+  "section": "SECTION 3 — ADAS Function Layer",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#22",
+  "category": "DMS",
+  "text": "Do you have a DMS stack? Developed in-house or sourced from a sub-vendor?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#23",
+  "category": "DMS",
+  "text": "What sensor does your DMS require — RGB, IR, or either? Recommended spec: resolution, FPS, wavelength.",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#24",
+  "category": "DMS",
+  "text": "Driver states detected? Confirm:\n• Eye closure / blink rate / drowsiness (PERCLOS)\n• Gaze direction / distraction  • Yawning  • Head pose\n• Phone usage  • Smoking  • Eating/drinking\n• Driver presence / absence\n• Child presence in vehicle (OMS)",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#25",
+  "category": "DMS",
+  "text": "Response latency from driver state change to DMS alert output?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#26",
+  "category": "DMS",
+  "text": "False positive rate for drowsiness detection in normal driving — target: less than 1 per hour?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#27",
+  "category": "DMS",
+  "text": "Does DMS run independently or is it architecturally integrated with the front safety perception stack?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#28",
+  "category": "DMS",
+  "text": "If integrated: combined TOPS budget for front safety + DMS simultaneously on the same SoC?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#29",
+  "category": "DMS",
+  "text": "If separate: DMS TOPS budget in isolation, and minimum SoC spec it has run on?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#30",
+  "category": "DMS Robustness",
+  "text": "How robust is your DMS to accessories — sunglasses (various tint levels), face masks, hats, scarves?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S2#31",
+  "category": "DMS Demographics",
+  "text": "Has your DMS been tested for demographic robustness — equal performance across skin tones and facial structures?",
+  "section": "SECTION 4 — DMS Capability",
+  "subsection": "3B — Tunability and Configuration"
+ },
+ {
+  "ref": "PERC-S3#1",
+  "category": "Hardware",
+  "text": "List all SoCs your stack runs on (production or validated). For each: SoC name / TOPS rating / functions running.",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#2",
+  "category": "Hardware",
+  "text": "Total TOPS consumed by your full stack (perception + ADAS functions) at nominal operation?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#3",
+  "category": "Hardware",
+  "text": "Minimum TOPS required to run your ADAS functions at acceptable performance?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#4",
+  "category": "Hardware",
+  "text": "Can perception + ADAS functions fit within 2 TOPS? If yes, evidence. If no, what is the minimum?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#5",
+  "category": "Hardware",
+  "text": "Have you ported to any TI SoC (TDA4VM, AM62A, or equivalent)? Performance data or estimated effort?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#6",
+  "category": "Hardware",
+  "text": "Is your inference pipeline optimized for TIDL? If not, what runtime do you use?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#7",
+  "category": "Hardware",
+  "text": "Quantization level — FP32, FP16, INT8? Accuracy delta from FP32 baseline to deployment precision?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#8",
+  "category": "Hardware",
+  "text": "Memory footprint — model weights + runtime memory?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#9",
+  "category": "Hardware",
+  "text": "Minimum camera specification your stack is validated on — resolution, FPS, sensor type?",
+  "section": "SECTION 5 — Hardware and Compute",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#10",
+  "category": "Integration",
+  "text": "Is your stack compatible with AUTOSAR Adaptive for production deployment?",
+  "section": "SECTION 6 — Integration and Interface",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#11",
+  "category": "Integration",
+  "text": "Any ISP dependency — specific ISP or camera module required? If yes, which ones?",
+  "section": "SECTION 6 — Integration and Interface",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#12",
+  "category": "Integration",
+  "text": "Do you provide calibration tooling (intrinsic, extrinsic, homography)? Process and time per vehicle variant?",
+  "section": "SECTION 6 — Integration and Interface",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#13",
+  "category": "Integration",
+  "text": "Do you provide a SIL environment? If yes, what simulator — CarMaker, CARLA, LGSVL, or other?",
+  "section": "SECTION 6 — Integration and Interface",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#14",
+  "category": "Limitations",
+  "text": "Known limitations of your current stack that you are actively working to resolve?",
+  "section": "SECTION 7 — Known Limitations and India Readiness",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#15",
+  "category": "Limitations",
+  "text": "Are there scenarios validated only in limited conditions — highway only, specific weather, specific geographies?",
+  "section": "SECTION 7 — Known Limitations and India Readiness",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#16",
+  "category": "India Readiness",
+  "text": "Validated on Indian roads? If yes: cities/road types / India-specific scenarios including speed breakers / performance data?",
+  "section": "SECTION 7 — Known Limitations and India Readiness",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#17",
+  "category": "India Readiness",
+  "text": "What India-specific edge cases has your stack been optimized for? Be specific — not marketing language.",
+  "section": "SECTION 7 — Known Limitations and India Readiness",
+  "subsection": null
+ },
+ {
+  "ref": "PERC-S3#18",
+  "category": "India Readiness",
+  "text": "What challenging perception problems has your stack solved that are typically unsolved at your price/TOPS point?",
+  "section": "SECTION 7 — Known Limitations and India Readiness",
+  "subsection": null
+ }
+]

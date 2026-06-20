@@ -284,6 +284,19 @@ input, textarea, select { font: inherit; }
 .accordion-body { padding: 0 16px 16px; display: none; }
 .accordion-header.open + .accordion-body { display: block; }
 
+/* Collapsible question-table section cards (General/Product tabs) —
+   default open; click the heading to collapse. */
+.q-section-card .card-header { cursor: pointer; user-select: none; }
+.q-section-card .accordion-chevron {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: .75rem;
+  color: var(--gray-500);
+  transition: transform .15s;
+}
+.q-section-card.collapsed .accordion-chevron { transform: rotate(-90deg); }
+.q-section-card.collapsed .card-body { display: none; }
+
 /* Question row in detail */
 .q-row {
   display: grid;
@@ -335,10 +348,11 @@ input, textarea, select { font: inherit; }
   box-shadow: 0 0 0 2px rgba(91,93,181,.2);
 }
 
-/* General / Product answer rows — wider status column for status labels */
+/* General / Product answer rows — wider status column for status labels.
+   Columns: # | Question | Status | Partner Response | L&T Remarks */
 .ans-row {
   display: grid;
-  grid-template-columns: 28px minmax(140px, 320px) 140px 1fr;
+  grid-template-columns: 28px minmax(140px, 280px) 140px 1fr 1fr;
   gap: 10px;
   align-items: start;
   padding: 8px 0;
@@ -527,6 +541,8 @@ input, textarea, select { font: inherit; }
   /* Expand all accordions */
   .accordion-body { display: block !important; }
   .accordion-header { border-radius: var(--radius) !important; }
+  .q-section-card .card-body { display: block !important; }
+  .q-section-card .accordion-chevron { display: none !important; }
 
   /* Show all detail sub-tabs */
   .detail-tab-panel { display: block !important; }

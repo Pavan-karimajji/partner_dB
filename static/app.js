@@ -363,6 +363,19 @@ function handleDetailChange(e) {
     return;
   }
 
+  // Answer partner response (general or product question)
+  if (el.dataset.ansPartnerResponse) {
+    markDirty();
+    const [scope, a, b] = el.dataset.ansPartnerResponse.split(':');
+    if (scope === 'general') {
+      ensureGeneralAnswer(parseInt(a)).partnerResponse = el.value;
+    } else if (scope === 'product') {
+      const ans = ensureProductAnswer(a, parseInt(b));
+      if (ans) ans.partnerResponse = el.value;
+    }
+    return;
+  }
+
   // Answer remarks (general or product question)
   if (el.dataset.ansRemarks) {
     markDirty();
@@ -543,7 +556,9 @@ function answerRowHtml(q, ans, key) {
         ${schema.answerStatuses.map(s => `<option value="${s.key}"${ans.status === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
       </select>
       <span class="print-val">${esc(answerStatusLabel(ans.status))}</span>
-      <textarea class="q-remarks-input" rows="2" placeholder="Remarks…" data-ans-remarks="${key}">${esc(ans.remarks || '')}</textarea>
+      <textarea class="q-remarks-input" rows="2" placeholder="Partner response…" data-ans-partner-response="${key}">${esc(ans.partnerResponse || '')}</textarea>
+      <span class="print-val">${esc(ans.partnerResponse || '')}</span>
+      <textarea class="q-remarks-input" rows="2" placeholder="L&amp;T remarks…" data-ans-remarks="${key}">${esc(ans.remarks || '')}</textarea>
       <span class="print-val">${esc(ans.remarks || '')}</span>
     </div>
   `;
@@ -551,13 +566,13 @@ function answerRowHtml(q, ans, key) {
 
 function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveNote) {
   return `
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">${esc(title)}</span>
+    <div class="card q-section-card">
+      <div class="card-header" data-section-toggle-header>
+        <span class="card-title">${esc(title)} <span class="accordion-chevron">&#9662;</span></span>
         ${inactiveNote ? `<span class="text-muted" style="font-size:.75rem;">${esc(inactiveNote)}</span>` : ''}
       </div>
       <div class="card-body">
-        <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Remarks</span></div>
+        <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Partner Response</span><span>L&amp;T Remarks</span></div>
         ${questions.length === 0
           ? `<div class="text-muted" style="font-size:.8125rem;">No questions defined for this section yet.</div>`
           : questions.map(q => answerRowHtml(q, getAnswer(q.id), keyFor(q.id))).join('')}
@@ -604,7 +619,7 @@ function sectionScopeMatches(section, prod) {
 function sectionHasAnswerData(section, prod) {
   return questionsForSection(section.id).some(q => {
     const a = (prod.answers || []).find(x => x.qId === q.id);
-    return !!(a && (a.status || (a.remarks && a.remarks.trim())));
+    return !!(a && (a.status || (a.remarks && a.remarks.trim()) || (a.partnerResponse && a.partnerResponse.trim())));
   });
 }
 
@@ -827,7 +842,7 @@ function patentsTabHtml(p) {
 function ensureGeneralAnswer(qId) {
   const list = State.detailPartner.generalAnswers || (State.detailPartner.generalAnswers = []);
   let a = list.find(x => x.qId === qId);
-  if (!a) { a = { qId, status: '', remarks: '' }; list.push(a); }
+  if (!a) { a = { qId, status: '', partnerResponse: '', remarks: '' }; list.push(a); }
   return a;
 }
 
@@ -836,7 +851,7 @@ function ensureProductAnswer(productId, qId) {
   if (!prod) return null;
   const list = prod.answers || (prod.answers = []);
   let a = list.find(x => x.qId === qId);
-  if (!a) { a = { qId, status: '', remarks: '' }; list.push(a); }
+  if (!a) { a = { qId, status: '', partnerResponse: '', remarks: '' }; list.push(a); }
   return a;
 }
 
@@ -891,6 +906,15 @@ function productCardHtml(prod, schema) {
 }
 
 function handleDetailClick(e) {
+  // Collapsible question-table sections — click the heading to toggle.
+  // Checked first since the header sits outside the other data-* targets.
+  const sectionHeader = e.target.closest('[data-section-toggle-header]');
+  if (sectionHeader) {
+    const card = sectionHeader.closest('.q-section-card');
+    if (card) card.classList.toggle('collapsed');
+    return;
+  }
+
   const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc],[data-add-patent],[data-remove-patent]');
   if (!el) return;
 

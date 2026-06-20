@@ -1,0 +1,975 @@
+[
+ {
+  "ref": "TECH#1",
+  "category": "Corporate",
+  "text": "Provide your company founding year and automotive industry history.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#2",
+  "category": "Corporate",
+  "text": "What is your total headcount and ADAS-specific R&D staff count?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#3",
+  "category": "Corporate",
+  "text": "Describe your geographic presence and engineering support capability in India.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#4",
+  "category": "Corporate",
+  "text": "Provide key leadership and technical team credentials relevant to ADAS.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#5",
+  "category": "Track Record",
+  "text": "List your current OEM production programs (named or anonymized) — vehicle program, SOP date, annual volume.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#6",
+  "category": "Track Record",
+  "text": "What vehicle classes does your ADAS solution currently support — passenger cars, SUVs, LCVs?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#7",
+  "category": "Track Record",
+  "text": "What is your cumulative production volume shipped to date?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#8",
+  "category": "Track Record",
+  "text": "How many SOP program launches have you completed? Provide evidence of ramp-up.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#9",
+  "category": "Track Record",
+  "text": "Field failure rate / warranty data",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": true
+ },
+ {
+  "ref": "TECH#10",
+  "category": "Track Record",
+  "text": "Have your customers achieved NCAP ratings using your ADAS stack? Provide details.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#11",
+  "category": "Certifications",
+  "text": "What is your current ASPICE level? Has it been third-party audited?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#12",
+  "category": "Certifications",
+  "text": "Do you hold IATF 16949 certification for production parts?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#13",
+  "category": "Roadmap",
+  "text": "Describe your product roadmap over the next 3–5 years.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#14",
+  "category": "Roadmap",
+  "text": "Which SoC platforms do you support or plan to support — TI TDA4x, Qualcomm SA8x, Renesas R-Car, NXP S32?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#15",
+  "category": "Roadmap",
+  "text": "Do you support OTA software updates? Describe your OTA architecture — A/B partition, delta, rollback.",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#16",
+  "category": "Roadmap",
+  "text": "What is your compliance roadmap for Euro NCAP 2026, GSR2, and AIS-184 India?",
+  "section": "SECTION 1 — COMPANY & PRODUCT MATURITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#17",
+  "category": "Compute",
+  "text": "Which SoC platform(s) does your stack currently target? Provide TOPS rating and utilization.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#18",
+  "category": "Compute",
+  "text": "Describe your CPU/GPU/NPU/DSP resource partitioning strategy.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#19",
+  "category": "Compute",
+  "text": "Do you have a Hardware Abstraction Layer (HAL)? Has SoC swap been demonstrated or planned?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#20",
+  "category": "Compute",
+  "text": "What is the typical and peak power consumption? Provide thermal envelope.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#21",
+  "category": "Compute",
+  "text": "Describe your memory architecture — DDR bandwidth analysis, shared vs dedicated.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#22",
+  "category": "SW Arch",
+  "text": "Do you support AUTOSAR Adaptive and/or Classic? Describe integration status.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#23",
+  "category": "SW Arch",
+  "text": "What OS/RTOS does your stack run on — QNX, Linux, SafeRTOS, or other?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#24",
+  "category": "SW Arch",
+  "text": "Describe your middleware architecture. Do you support SOME/IP, DDS, or other IPC?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#25",
+  "category": "SW Arch",
+  "text": "Do you support CAN, CAN-FD, and Automotive Ethernet? Is signal mapping documented?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#26",
+  "category": "SW Arch",
+  "text": "Describe your data logging and replay framework — capacity, format, lossless capability.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#27",
+  "category": "SW Arch",
+  "text": "Describe your calibration architecture. Do you support XCP/CCP and provide A2L files?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#28",
+  "category": "Pipeline",
+  "text": "What is your end-to-end pipeline latency from camera input to actuation output? Provide measured data.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#29",
+  "category": "Pipeline",
+  "text": "What is your cold boot time to first valid output and full pipeline availability?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#30",
+  "category": "Pipeline",
+  "text": "What is your warm restart / recovery time after a watchdog reset?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#31",
+  "category": "Pipeline",
+  "text": "Describe your watchdog implementation — hardware and software levels, escalation logic.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#32",
+  "category": "Pipeline",
+  "text": "How does your system handle errors and exceptions — graceful degradation, logging?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#33",
+  "category": "Power",
+  "text": "Describe your sleep/wake behavior and ignition cycle state machine. What is parasitic draw in sleep?",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#34",
+  "category": "Power",
+  "text": "Describe your graceful shutdown sequence — safe state before power loss, NVM write protection.",
+  "section": "SECTION 2 — SYSTEM ARCHITECTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#35",
+  "category": "Sensor",
+  "text": "Which image sensor do you use? Is it AEC-Q100 automotive grade? Provide supplier and model.",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#36",
+  "category": "Sensor",
+  "text": "What sensor type do you use for forward camera and DMS — RGB, RGB-IR, or NIR? Explain the selection rationale.",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#37",
+  "category": "Sensor",
+  "text": "What is the sensor resolution and pixel size for each camera?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#38",
+  "category": "Sensor",
+  "text": "What is the dynamic range (HDR capability) of your sensor? Provide measured performance.",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#39",
+  "category": "Sensor",
+  "text": "What is the minimum lux level your system operates at — for forward camera and DMS separately?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#40",
+  "category": "Sensor",
+  "text": "Does your sensor support LED Flicker Mitigation (LFM)? Has it been tested against LED traffic signals?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#41",
+  "category": "Sensor",
+  "text": "What is the field of view (H × V × D) for each camera?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#42",
+  "category": "Sensor",
+  "text": "How do you handle rolling shutter artifacts — global shutter or RS compensation algorithm?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#43",
+  "category": "ISP",
+  "text": "Describe your ISP pipeline — on-chip or external? Is it tunable per environment?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#44",
+  "category": "ISP",
+  "text": "How does your auto exposure and auto white balance perform? What is convergence time in frames?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#45",
+  "category": "ISP",
+  "text": "How does your system handle tunnel entry and exit — adaptation time and behavior?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#46",
+  "category": "ISP",
+  "text": "How does your system handle sun glare and strong backlight conditions?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#47",
+  "category": "ISP",
+  "text": "For DMS: how does your IR cut filter / day-night switching work? What is transition time?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#48",
+  "category": "Robustness",
+  "text": "What is the operating temperature range for the sensor and ECU?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#49",
+  "category": "Robustness",
+  "text": "What is the IP rating for your camera modules — exterior and cabin?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#50",
+  "category": "Robustness",
+  "text": "What EMC/EMI compliance standards have been met? Provide test reports.",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#51",
+  "category": "Robustness",
+  "text": "What vibration and shock resistance testing has been completed?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#52",
+  "category": "Robustness",
+  "text": "Does your stack include lens contamination/blockage detection? What is coverage estimation accuracy?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#53",
+  "category": "Robustness",
+  "text": "What is the calibration drift over the product lifetime? Do you have a self-calibration algorithm?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#54",
+  "category": "Components",
+  "text": "Is your BOM transparent? Do you have a second-source strategy for key components?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#55",
+  "category": "Components",
+  "text": "Are all components AEC-Q100/Q104 qualified? Are full qualification reports available?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#56",
+  "category": "Components",
+  "text": "What is your chip shortage contingency plan — buffer stock, multi-fab sourcing?",
+  "section": "SECTION 3 — CAMERA & SENSOR SUBSYSTEM",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#57",
+  "category": "SIL/HIL",
+  "text": "Do you have a SIL (Software-in-the-Loop) capability? Can the full perception stack run on a PC?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#58",
+  "category": "SIL/HIL",
+  "text": "Do you have a HIL (Hardware-in-the-Loop) setup with real ECU and simulated sensors?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#59",
+  "category": "SIL/HIL",
+  "text": "Which simulation tools do you integrate with — IPG CarMaker, CARLA, LGSVL, NVIDIA DriveSim?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#60",
+  "category": "SIL/HIL",
+  "text": "Do you have a synthetic data generation pipeline — weather, lighting, domain randomization?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#61",
+  "category": "SIL/HIL",
+  "text": "Do you support OpenSCENARIO/ASAM scenario generation? How large is your scenario library?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#62",
+  "category": "Data",
+  "text": "Describe your replay validation framework. Is replay bit-exact or validated-equivalent?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#63",
+  "category": "Data",
+  "text": "How many total replay hours do you have available? What geographies does it cover?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#64",
+  "category": "Data",
+  "text": "How is your dataset managed — searchable, version-controlled, metadata-tagged?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#65",
+  "category": "Data",
+  "text": "Describe your annotation pipeline — tooling, multi-annotator consensus, QA sampling rate.",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#66",
+  "category": "Data",
+  "text": "Do you have an automated edge case data mining pipeline from fleet data?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#67",
+  "category": "CI/CD",
+  "text": "Do you have an automated regression framework? How frequently does it run?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#68",
+  "category": "CI/CD",
+  "text": "Is your CI/CD pipeline integrated with build, unit test, and SIL on every commit?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#69",
+  "category": "CI/CD",
+  "text": "How many automated test scenarios do you have in your regression suite?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#70",
+  "category": "CI/CD",
+  "text": "What is your test coverage per ADAS function against requirements?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#71",
+  "category": "Real-World",
+  "text": "How many test vehicles do you operate and across which markets?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#72",
+  "category": "Real-World",
+  "text": "What is your total accumulated real-world test mileage? Which geographies?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#73",
+  "category": "Real-World",
+  "text": "Do you have access to a dedicated test track for AEB and LKA testing?",
+  "section": "SECTION 8 — VALIDATION & TEST INFRASTRUCTURE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#74",
+  "category": "FuSa",
+  "text": "What ASIL level do you target per ADAS function — AEB, LKA, DMS?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#75",
+  "category": "FuSa",
+  "text": "Are all safety concepts available — TSC, FSC, HSC, SSC? Can these be shared under NDA?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#76",
+  "category": "FuSa",
+  "text": "Describe your ASIL decomposition strategy per function.",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#77",
+  "category": "FuSa",
+  "text": "Do you have FMEA and FMEDA available — hardware FMEDA with DC and SFF, SW FMEA per module?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#78",
+  "category": "FuSa",
+  "text": "What are your diagnostic coverage (DC) metrics per ASIL level?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#79",
+  "category": "Safety Arch",
+  "text": "Describe your safety monitor / supervisor architecture — is it independent from the main pipeline?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#80",
+  "category": "Safety Arch",
+  "text": "What is your fallback mechanism — fail-safe or fail-operational? What is the safe state transition time?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#81",
+  "category": "Safety Arch",
+  "text": "How does your system detect and handle sensor faults — camera open/short/blind/blocked/degraded?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#82",
+  "category": "Safety Arch",
+  "text": "What plausibility checks are applied to all AI outputs — range, rate, consistency?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#83",
+  "category": "Safety Arch",
+  "text": "What is the defined safe state per function and what is the transition time?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#84",
+  "category": "SOTIF",
+  "text": "Has a SOTIF analysis been completed? Are known and unknown triggering conditions documented?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#85",
+  "category": "SOTIF",
+  "text": "How many triggering conditions have been cataloged per function?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#86",
+  "category": "SOTIF",
+  "text": "What AI-specific SOTIF measures do you implement — ODD monitoring, confidence thresholding, fallback?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#87",
+  "category": "Fault Inject",
+  "text": "Do you have fault injection test capability — SW and HW, automated?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#88",
+  "category": "Fault Inject",
+  "text": "Has an independent third-party safety assessment been completed?",
+  "section": "SECTION 9 — FUNCTIONAL SAFETY (ISO 26262 / SOTIF)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#89",
+  "category": "Cybersec",
+  "text": "Describe your secure boot chain — root of trust, verified boot stages.",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#90",
+  "category": "Cybersec",
+  "text": "How is OTA update security implemented — signed packages, encrypted transport, rollback protection?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#91",
+  "category": "Cybersec",
+  "text": "How is communication secured internally and externally — TLS/DTLS, SecOC, MACsec?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#92",
+  "category": "Cybersec",
+  "text": "Describe your key management system — HSM-based, key rotation, per-vehicle keys?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#93",
+  "category": "Cybersec",
+  "text": "How are debug ports protected in production builds?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#94",
+  "category": "Cybersec",
+  "text": "Has a TARA (Threat Analysis & Risk Assessment) been completed per ISO 21434?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#95",
+  "category": "Cybersec",
+  "text": "Has your system been tested against camera spoofing or adversarial attacks?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#96",
+  "category": "Cybersec",
+  "text": "Has a third-party penetration test been completed? Were findings remediated?",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#97",
+  "category": "Privacy",
+  "text": "GDPR / privacy compliance (DMS/OMS data)",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": true
+ },
+ {
+  "ref": "TECH#98",
+  "category": "Privacy",
+  "text": "Data anonymization pipeline",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": true
+ },
+ {
+  "ref": "TECH#99",
+  "category": "Privacy",
+  "text": "Driver consent management",
+  "section": "SECTION 10 — CYBERSECURITY (ISO 21434)",
+  "internal_only": true
+ },
+ {
+  "ref": "TECH#100",
+  "category": "Production",
+  "text": "Describe your SOP readiness — have all production gates been passed (PPAP equivalent)?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#101",
+  "category": "Production",
+  "text": "Describe your end-of-line calibration process — automation, time per camera, tolerance.",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#102",
+  "category": "Production",
+  "text": "Describe your ECU flashing process for factory and field — reprogramming time?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#103",
+  "category": "Production",
+  "text": "How do you manage vehicle configuration variants — feature flags, variant coding, ODX-based?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#104",
+  "category": "Production",
+  "text": "Has your stack been demonstrated on more than one SoC platform? Quantify porting effort.",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#105",
+  "category": "OTA",
+  "text": "Describe your OTA update architecture — A/B partition, delta updates, rollback strategy.",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#106",
+  "category": "OTA",
+  "text": "Fleet monitoring dashboard",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": true
+ },
+ {
+  "ref": "TECH#107",
+  "category": "OTA",
+  "text": "Describe your field log collection and upload strategy — event-triggered, periodic, bandwidth-aware.",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#108",
+  "category": "OTA",
+  "text": "What remote diagnostics capability do you offer — DTCs, sensor status, SW version?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#109",
+  "category": "Lifecycle",
+  "text": "What is your spare parts strategy for camera modules — supply period, drop-in replacement?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#110",
+  "category": "Lifecycle",
+  "text": "How do you manage end-of-life and component obsolescence — last-buy notification, migration path?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#111",
+  "category": "Lifecycle",
+  "text": "What are your warranty terms and ADAS-specific liability framework?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#112",
+  "category": "Lifecycle",
+  "text": "What is the IP and model ownership arrangement — source code escrow, trained model rights?",
+  "section": "SECTION 11 — PRODUCTION READINESS & LIFECYCLE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#113",
+  "category": "SW Quality",
+  "text": "Are you MISRA-C/C++ compliant for safety code? Is a deviation log maintained?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#114",
+  "category": "SW Quality",
+  "text": "Which static analysis tool do you use? What are the current critical findings?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#115",
+  "category": "SW Quality",
+  "text": "How do you prevent memory leaks — Valgrind/ASan testing, no dynamic allocation at runtime?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#116",
+  "category": "SW Quality",
+  "text": "What is your unit test line and branch coverage percentage?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#117",
+  "category": "SW Quality",
+  "text": "Do you have MC/DC coverage for safety-critical modules as required for ASIL-B+?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#118",
+  "category": "SW Quality",
+  "text": "Has your system been validated in a long-duration stability test (>72h continuous run)?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#119",
+  "category": "SW Quality",
+  "text": "How does your system handle CPU overload — graceful frame skip, priority preserved, no crash?",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#120",
+  "category": "SW Quality",
+  "text": "Describe your crash recovery process — auto-restart, crash log, core dump preservation.",
+  "section": "SECTION 12 — SOFTWARE QUALITY & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#121",
+  "category": "HMI",
+  "text": "Describe your multi-modal alert design — visual, audio, haptic escalation ladder. Is it OEM-configurable?",
+  "section": "SECTION 16 — HMI & DRIVER INTERACTION",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#122",
+  "category": "HMI",
+  "text": "How is the driver takeover request (TOR) strategy implemented?",
+  "section": "SECTION 16 — HMI & DRIVER INTERACTION",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#123",
+  "category": "HMI",
+  "text": "How does your warning suppression logic work to avoid nuisance alerts?",
+  "section": "SECTION 16 — HMI & DRIVER INTERACTION",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#124",
+  "category": "HMI",
+  "text": "Provide your HMI integration API / interface specification — cluster, HUD, audio interfaces.",
+  "section": "SECTION 16 — HMI & DRIVER INTERACTION",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#125",
+  "category": "HMI",
+  "text": "Does your alert content support multiple languages and regions — icons, text, audio?",
+  "section": "SECTION 16 — HMI & DRIVER INTERACTION",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#126",
+  "category": "Compliance",
+  "text": "What is your readiness for Euro NCAP 2025/2026 protocols — AEB VRU, LSS, OMS, DMS?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#127",
+  "category": "Compliance",
+  "text": "What is your readiness for Bharat NCAP / GNCAP — AEB car-to-car and VRU?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#128",
+  "category": "Compliance",
+  "text": "What is your AIS-184 (India ADAS regulation) compliance status — AEBS, LDWS?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#129",
+  "category": "Compliance",
+  "text": "What is your UN R79 (steering) and UN R131 (AEBS) type approval readiness?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#130",
+  "category": "Compliance",
+  "text": "What is your EU General Safety Regulation (GSR2) readiness — ISA, DMS, EDR, AEB?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#131",
+  "category": "Compliance",
+  "text": "Which type approval test labs do you partner with? Has pre-approval testing been completed?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#132",
+  "category": "Compliance",
+  "text": "How do you handle market-specific adaptation — speed units, sign database, driving-side?",
+  "section": "SECTION 17 — REGIONAL & REGULATORY COMPLIANCE",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#133",
+  "category": "EMC/Env",
+  "text": "Has HALT/HASS testing been completed? What are the stress margins?",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#134",
+  "category": "EMC/Env",
+  "text": "Has thermal cycling testing been completed per AEC-Q100 — temperature range and cycle count?",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#135",
+  "category": "EMC/Env",
+  "text": "Has humidity and salt spray corrosion testing been completed?",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#136",
+  "category": "EMC/Env",
+  "text": "Has mechanical shock and vibration testing been completed per ISO 16750?",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#137",
+  "category": "EMC/Env",
+  "text": "Has radiated emissions testing been completed to CISPR 25 Class 5? Provide test report.",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#138",
+  "category": "EMC/Env",
+  "text": "What is your radiated immunity rating per ISO 11452?",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ },
+ {
+  "ref": "TECH#139",
+  "category": "EMC/Env",
+  "text": "What is your ESD immunity rating per ISO 10605?",
+  "section": "SECTION 18 — EMC, ENVIRONMENTAL & RELIABILITY",
+  "internal_only": false
+ }
+]
