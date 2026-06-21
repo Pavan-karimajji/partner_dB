@@ -117,7 +117,7 @@ and unused by the new UI.
 
 **Notes tab** — unchanged.
 
-## Code touch points (for implementation, not yet done)
+## Code touch points (for implementation — DONE, see Stage 2 sections below for everything built on top of this skeleton)
 
 - `static/index.html`: rename/restructure the sub-tab button row (remove
   `technical`/`perception` buttons, generate `Product N` buttons dynamically
@@ -162,7 +162,8 @@ and unused by the new UI.
 
 ## Status
 
-Plan reviewed and approved. Ready for implementation.
+DONE. Implemented and superseded by Stage 2 (real questions migrated in,
+sample qIds 1–6 dropped — see Stage 2 "Implementation — DONE" below).
 
 ## Addendum — Patents tab (added after Stage 1 implementation, before Stage 2)
 
@@ -306,7 +307,7 @@ All resolutions are baked into `docs/_extract/build_migration_md.py`
 `docs/stage2_question_migration.md` — 217/217 items now have a confirmed
 placement; 3 are marked `DROPPED (confirmed duplicate)` and pre-checked.
 
-## Schema/data model change already agreed (not yet implemented)
+## Schema/data model change already agreed — DONE (see Implementation below)
 
 - Add a **`partnerResponse`** field to the answer model (general and
   product answers), separate from the existing `remarks` field — mirrors
@@ -702,64 +703,587 @@ during testing: an intermediate run showed stale data from a race
 during rapid server stop/restart, not a real bug — resolved by
 confirming via direct API call before re-testing.)
 
-## Next steps — PLANNED for next session (not yet implemented)
+## Next steps round — DONE: radar chart, hero-tag UI, Overview hero stat
 
-User gave 3 concrete asks to pick up next time:
+All 3 asks below implemented in one pass. Decisions that the previous
+session flagged as open were resolved pragmatically rather than re-asked,
+noted per item.
 
-1. **Radar chart on Comparison, instead of the heatmap** — mirror how
-   the pre-refactor master branch had a radar/spider chart for
-   cross-partner comparison (removed in the scoring-system cleanup,
-   commit `c7a8522`). Needs design decisions before implementation:
-   - Grades are qualitative (NA/Developing/Good/Outstanding) — need a
-     numeric mapping to plot on radar axes, e.g. Developing=1, Good=2,
-     Outstanding=3, NA/ungraded=0 or excluded from that axis entirely
-     (open question: does an axis with NA still draw to the center, or
-     get visually omitted for that partner?).
-   - One radar axis per domain (5 populated domains, same set the
-     heatmap uses) — manageable axis count.
-   - Multi-partner overlay UX: a radar with many partners overlaid
-     becomes unreadable. Likely needs a partner picker (select 2-4 to
-     compare) rather than plotting every partner at once like the
-     heatmap currently does.
-   - Library: Chart.js was removed entirely in the scoring cleanup
-     (`<script src=".../chart.js">` tag deleted from index.html) — would
-     need to either re-add it (radar chart type is built in and was
-     already used pre-refactor, low risk) or build a custom SVG radar.
-     Re-adding Chart.js is probably the pragmatic choice given it
-     already worked here once.
-   - Decide: replace the heatmap entirely, or keep both (radar for
-     visual at-a-glance comparison, heatmap/table for precise per-domain
-     lookup)?
-2. **Hero product marking UI is still missing** — `heroSensors`/
-   `heroFunctions` data fields exist on each product (added earlier,
-   data-model only) but there's never been a UI to actually toggle them.
-   User wants it added "on the left side like how we added master
-   grading" — i.e. a dedicated sidebar card (page-agnostic, like
-   `domainGradingCardHtml`/`#domain-grading-card`), NOT inline per
-   product tab. Likely design: one card listing every product by name,
-   each with its checked sensors/functions shown as toggleable
-   "hero" pills (only pills for sensors/functions already checked true
-   make sense to offer as hero candidates — can't be a hero of a
-   capability the product doesn't have). Mirrors the
-   domain-grading-card precedent: render once in `renderDetailContent`,
-   independent of which Product tab is currently active.
-3. **Overview page should surface hero products and their count** —
-   the Overview page (pipeline board + stat cards) currently shows
-   Partners / Shortlisted / Products stats only. Add visibility into
-   hero-tagged capabilities — likely a new stat card (e.g. "Hero
-   Products" with a count of hero-tagged sensor/function instances
-   across all partners' products) and/or surfacing hero tags on each
-   partner card in the pipeline board. Exact metric/placement to be
-   decided next session — depends on what "their number" should count
-   (total hero tags? partners with at least one hero-tagged product?
-   distinct hero capabilities across the portfolio?).
+1. **Comparison radar chart** — added alongside the heatmap (not a
+   replacement — radar gives at-a-glance shape, heatmap gives precise
+   per-domain lookup, per the "keep both" option the previous session
+   left open). Chart.js vendored locally at `static/lib/chart.umd.min.js`
+   (not a CDN tag) so the app has no runtime internet dependency,
+   loaded in `index.html` before `app.js`.
+   - One radar axis per populated domain (same 5 domains
+     `comparisonGroups()` already returns for the heatmap columns).
+   - Grade → number mapping: `outstanding`=3, `good`=2, `developing`=1,
+     `na`/ungraded=0 — plotted at 0 rather than excluded from the axis
+     (one consistent rule instead of per-partner special-casing).
+   - Partner picker: toggle pills above the chart, max 4 selected at
+     once (`RADAR_MAX_PARTNERS`), defaults to the first 3 partners
+     alphabetically. Picking a 5th toasts an error instead of silently
+     dropping one. `State.radarSelected`/`State.radarChart` track
+     selection and the live Chart.js instance (destroyed/rebuilt on
+     every selection change).
+   - Implementation: `index.html` (`#radar-partner-picker`,
+     `#radar-chart` canvas, new card above `#comparison-body`),
+     `app.js` (`renderComparisonRadar`, `gradeToScore`, called from the
+     end of `renderComparison`).
+2. **Hero product marking UI** — new sidebar card `heroProductsCardHtml`/
+   `#hero-products-card`, mirroring `domainGradingCardHtml`'s
+   page-agnostic placement (rendered once in `renderDetailContent`,
+   sits directly below Master Category Grading, visible regardless of
+   active sub-tab). One block per product; only sensors/functions
+   already checked true on that product render as toggleable star
+   pills (`★ Radar`, `★ AEB`, etc.) — matches the data-model comment
+   that was already in `newProduct()`.
+   - Click toggles `data-toggle-hero-sensor`/`data-toggle-hero-function`
+     in `handleDetailClick`, same in-place `classList.toggle('on', …)`
+     pattern as the existing business-model pills — no card re-render
+     needed for the click itself.
+   - `refreshHeroProductsCard()` added to `refreshDetailTabsAndPanels()`
+     so the candidate-pill list stays in sync when a product is
+     added/removed or a sensor/function is toggled.
+   - **Consistency fix while implementing**: unchecking a sensor/function
+     in `tryToggleScopedField` now also strips that key out of
+     `heroSensors`/`heroFunctions` — a capability the product no longer
+     has can't stay tagged "hero". Not explicitly asked for, but the
+     plan's own wording ("can't be a hero of a capability it doesn't
+     have") implied it; silent cleanup, no confirmation dialog (separate
+     from the existing answer-data-loss confirmation, which still gates
+     on answered questions/notes same as before).
+   - CSS: `.hero-product-row`/`.hero-product-name`, `.hero-pill.on`
+     (amber/gold, distinct from the green `.toggle-pill.on` used
+     elsewhere).
+3. **Overview hero stat** — 4th stat card, "Hero Capabilities", added
+   next to Partners/Shortlisted/Products. Metric chosen: total
+   hero-tagged sensor/function instances across the whole portfolio
+   (a product with 2 hero tags counts as 2) — picked over "partners
+   with ≥1 hero tag" because a raw differentiator count is more useful
+   for "how much have we tagged" than a partner headcount that
+   duplicates the Partners card above it.
+   - Needs full partner records (hero arrays aren't in the lightweight
+     summary list `State.partnersSummary` already used for the other 3
+     cards), so it fetches separately via the same `Promise.all`
+     pattern `renderComparison` uses, async after the other 3 stats
+     render synchronously (shows "…" briefly, then the count).
+   - Implementation: `app.js` (`renderHeroStat`, called from
+     `renderOverview`).
+
+**Verified via Playwright** (`C:\tmp\pwtest\test-next-steps.js`,
+`test-radar-data.js`): hero pill toggle persists through save/reload;
+Overview stat goes from 0 → 1 after tagging one capability; radar canvas
+renders with correct per-domain values matching the heatmap exactly
+(confirmed `State.radarChart.data` directly — Hardware Capability=3
+after grading it Outstanding, all other axes 0); heatmap table still
+renders unchanged alongside the new radar card; zero console errors
+across all flows. Screenshots confirm visual placement (radar above
+heatmap on Comparison; Hero Capabilities card between Master Category
+Grading and Hard Disqualifiers on Partner Detail; 4th stat card on
+Overview).
+
+## Corrections after second review — hero scope + comparison orientation — DONE
+
+User caught two things wrong with the round above, both fixed same session:
+
+1. **Hero tagging was at the wrong granularity.** My first pass let you
+   star individual sensors/functions within a product
+   (`heroSensors`/`heroFunctions` arrays). User's actual model: hero is a
+   property of the *whole product* — e.g. partner XYZ's "Product A" (which
+   might bundle radar+camera+ACC) is itself the hero, not one piece inside
+   it. A partner with products A/B/C can have A and B both hero, C not.
+   Fixed by replacing the data model and UI entirely:
+   - `newProduct()` now sets `isHero: false` (boolean) instead of
+     `heroSensors: []`/`heroFunctions: []`.
+   - `heroProductsCardHtml()` renders one star pill per product (not per
+     capability) — "Hero Products" card, same page-agnostic sidebar slot.
+   - `handleDetailClick` has a single `data-toggle-hero-product` branch
+     replacing the two per-capability ones; the `tryToggleScopedField`
+     hero-cleanup-on-uncheck logic from the first pass was reverted (no
+     longer applicable — toggling a sensor/function doesn't touch hero
+     status now).
+   - `data/partners.json` migrated: existing `heroSensors`/`heroFunctions`
+     arrays dropped, replaced with `isHero` (the one test product that had
+     a hero sensor tagged became `isHero: true`, preserving the signal
+     that *something* on it had been marked hero rather than silently
+     losing it).
+   - Overview stat relabeled "Hero Products" (was "Hero Capabilities"),
+     now counts hero-tagged products portfolio-wide instead of
+     hero-tagged capability instances.
+2. **Comparison heatmap orientation didn't match the reference.** User
+   pointed at the pre-refactor main branch's Comparison page (`git show
+   main:static/app.js` — `renderComparison`, score-matrix table) as the
+   structure to take cues from: rows = categories (there: weighted
+   sections; now: domains), columns = partners. The version I'd built
+   had it backwards (rows = partners, columns = domains). Flipped to
+   match: `renderComparison`'s table now has one `<tr>` per domain, one
+   `<td>` per partner; partner names move to clickable `<th>` cells in
+   the header (replacing the old clickable-row-label-in-first-column
+   pattern) and still call `openDetailFor`. Did **not** pull in the old
+   sheet's other two pieces (click-to-drill-down side chart,
+   side-by-side radar+detail layout) — user's answer only confirmed the
+   row/column orientation, not those.
+   - CSS: `.hm-partner-col`/`.hm-partner-name` renamed to
+     `.hm-domain-col`/`.hm-domain-name` (now the sticky first column);
+     new `.hm-partner-header` for the clickable column headers.
+
+**Verified via Playwright** (`C:\tmp\pwtest\test-hero-v2.js`): Hero
+Products card shows exactly one pill per product (not per sensor/
+function); toggling Product 2's pill, saving, and reloading shows both
+Product 1 and Product 2 marked hero; Overview stat reads exactly 2;
+Comparison table header reads `Domain, gahan, temp` (partners as
+columns) with 5 domain rows; clicking a partner's column header
+navigates to their Partner Detail page; zero console errors. Screenshot
+confirms the table visually matches the old sheet's row/column
+structure with the radar chart still stacked above it.
+
+## Earlier "Next steps" framing (superseded — implemented, see "Next steps
+round — DONE" and the corrections section above)
+
+## Next steps — sequenced to avoid rework (2 of 6 DONE; 3 PLANNED, 1 ON HOLD)
+
+These were gathered across several follow-ups in whatever order the user
+raised them, but that's *not* a safe build order — several items would
+need rework if built before something they depend on. Re-sequenced here
+by dependency, not by when each was asked. Rule used: **anything that
+changes how questions are labeled/structured goes first; anything that
+documents or exports the finished result goes last**, so nothing has to
+be revisited once the thing it depends on lands.
+
+**Step 1 — Dotted question numbering. DONE.** Foundational: every other
+item below either displays questions (Product Comparison, the export
+refresh, How To) or adds to the question set (question authoring). Built
+first so those can show/use the real `X.Y.Z` label from day one instead
+of being built against plain `qId` and reworked later to add it.
+
+> Maps directly onto the existing 3-level hierarchy: `schema.domains`
+> (master, 6) → `detailSections` (sub-category, 34, each tagged with a
+> `domain`) → `detailQuestions` (252, each tagged with a `sectionId`).
+> `1.2.5` reads as: 1st domain, 2nd section within that domain, 5th
+> question within that section.
+> - **Computed display label, not a new stored field.** The existing
+>   global integer `qId` stays the real identifier — every
+>   `generalAnswers`/`product.answers` record is keyed on it, untouched.
+>   The dotted label is derived at render time from current
+>   domain/section/question order via a new `questionLabel(q)` helper in
+>   `app.js` (right after `questionsForSection`), which replaced the
+>   plain `q.id` previously shown in the `q-num` span of every question
+>   row (`answerRowHtml`). `.q-num`'s grid column in `style.css` was
+>   widened from 28px → 40px to fit the longer worst-case label
+>   (`2.18.26`). Verified in-browser via Playwright on a real partner's
+>   General and Product tabs — labels compute correctly across all 6
+>   domains and vary correctly per section/question (e.g. `2.10.1` on
+>   ACC Function Detail, `2.17.1`/`2.17.6` on Software Quality).
+> - **Positional, so it can drift.** If a section is reordered, or a
+>   question is inserted ahead of others in the same section instead of
+>   appended, every label after that point shifts. Matters once Step 2
+>   (question authoring) exists — new questions should append to the
+>   end of their section's question list, not insert mid-list, so
+>   existing frozen numbers don't move out from under anyone who's
+>   already referencing them (e.g. in a meeting agenda or an external
+>   doc).
+> - Domains with zero sections (Patents & Innovation) and sections with
+>   zero questions (the 6 placeholder sections noted earlier, if still
+>   empty) simply don't produce any `X.Y.Z` labels — nothing special
+>   needed for those.
+> - Consumed by Step 3 (Product Comparison row labels) and Step 6 (How
+>   To, if a numbered reference turns out to help there) — built first
+>   specifically so those don't need to retrofit it.
+
+**Step 2 — In-app question authoring, with a publish/scope choice. DONE.**
+Goes right after numbering (Step 1) for the reason above, and before
+Product Comparison/export (Steps 3-5) since both of those read the
+question list this step extends — building them first would mean
+revisiting their question source once drafts/publishing exists. Lives
+**inside each section card** (a "+ Add Question" button in the card
+body, in the existing General/Product tab UI), not a separate admin
+page.
+
+> **Two deliberate deviations from the original sketch below, found
+> while implementing:**
+> - **Draft ids are negative integers, not `"draft-<uuid>"` strings.**
+>   `handleDetailChange` parses every answer key with `parseInt(...)`
+>   (e.g. `general:42` → `ensureGeneralAnswer(parseInt("42"))`); a string
+>   id would `parseInt` to `NaN` and silently break answer storage (every
+>   keystroke pushing a new `{qId: NaN}` row instead of updating one).
+>   Negative integers round-trip through that exact same logic with zero
+>   special-casing, can never collide with a real qId (always ≥ 1), and
+>   double as the draft/published signal — `q.id < 0` ⇒ draft, so no
+>   separate `status: 'draft'` field is stored at all.
+> - **Publish auto-saves the partner immediately**, rather than staging
+>   the draft-removal/re-key for the user's next manual Save. The
+>   schema.json write is immediate and irreversible the moment Publish
+>   is clicked; leaving the partner-side bookkeeping unsaved risked a
+>   Discard afterward leaving the question live globally *and* still
+>   sitting in local drafts.
+
+   - **New question starts as a partner-local draft.** Stored on the
+     partner record (`partner.draftQuestions: [{ id, sectionId, text,
+     priority }]`), *not* in `schema.json`. Renders mixed into that
+     section's existing question table for that partner only (merged via
+     a new `questionsForSectionAll(sectionId)`, used everywhere a
+     section's questions feed into rendering, answer-clearing, or the
+     "does this section have saved data" check — so unchecking a
+     sensor/function correctly protects or clears a draft's answer
+     exactly like any published question's), with a "Draft" badge,
+     answerable through the same `partner.generalAnswers`/
+     `product.answers` mechanism keyed off the draft id.
+   - **"Publish" promotes it into the global schema** — new endpoint
+     `POST /api/schema/questions` validates `sectionId`/`text`/
+     `priority`, computes `next qId = max(existing qIds) + 1` (first
+     published question landed on 253, schema having run a clean,
+     gap-free 1–252), appends to `schema.detailQuestions` with
+     `sourceRef: null` (like the manually-authored Radar/Fusion/BSD/etc.
+     questions already are), and persists via a new `save_schema()` —
+     the exact same atomic temp-file pattern as the existing
+     `save_partners()`. Always appends, never inserts mid-array, so
+     Step 1's "existing dotted numbers never shift" guarantee holds.
+     Client-side, the draft is then removed from
+     `partner.draftQuestions` and the partner's own answer (if any) is
+     re-keyed from the draft id to the new qId, then the whole partner
+     record is immediately saved (see the auto-save note above) — both
+     verified end-to-end with Playwright: the re-keyed answer's remarks
+     survived the round trip intact.
+   - **Verified this propagates with zero extra code, exactly as
+     predicted**: published a question under "Validation & Test
+     Infrastructure" on one partner, then opened a *different* partner
+     and confirmed it appeared there immediately, unanswered, with a
+     normal dotted number (`2.1.18`) — `questionsForSection(sectionId)`
+     reads straight from the global list, so every product/partner whose
+     section scope matches just picks it up on next render.
+   - **"Keep relevant only to this partner"** = simply never publishing
+     it — no separate action needed, draft stays partner-local
+     indefinitely.
+   - **Remove a published question — DONE.** A follow-up ask: there was
+     no way to remove a question once published, and that needed to
+     apply to the original 252 default questions too, not just anything
+     authored via this step — there's no code-level distinction between
+     them once in `schema.detailQuestions`. Dotted numbering needed zero
+     new code for this: it's computed at render time from current array
+     position (Step 1), so deleting a question automatically renumbers
+     everything after it in that section on the very next render.
+     The real work was that other partners' answers to that question
+     live in their own saved records, not loaded in the current session
+     — removal has to sweep everywhere or it silently leaves orphaned
+     answers (or, worse, a later unrelated Save on this partner could
+     resurrect them from stale in-memory state). Built as: a small ✕
+     icon next to each published question's dotted number
+     (`data-remove-question`, `.q-remove-btn` in style.css — draft rows
+     keep "Discard draft" only, untouched); a `GET
+     /api/schema/questions/<id>/usage` impact check that scans every
+     partner's `generalAnswers`/`product.answers`; and a `DELETE
+     /api/schema/questions/<id>` that removes it from `schema.json` and
+     sweeps the same qId out of every partner's saved answers in one
+     pass, returning how many it cleared. **No new UI component** — the
+     confirm reuses the exact double-`confirm()` idiom already used for
+     "uncheck a sensor that has saved data" (`tryToggleScopedField`):
+     first shows the breakdown as plain text (native `confirm()` already
+     renders `\n` as line breaks — "• gahan — General", "• temp —
+     Product 2", etc.), second is the final "cannot be undone" gate; a
+     question nobody has answered just gets one plain confirm, same as
+     removing an empty product/patent. Verified end-to-end with
+     Playwright, including the actual cross-partner case: published a
+     question, answered it from two different partners, removed it from
+     a third's view, and confirmed via direct API checks that *both*
+     partners' saved records and `schema.json` no longer reference it.
+   - **Open, deliberately deferred**: editing a published question's
+     text/priority afterward (would retroactively change it for every
+     partner that already answered it, since it's one shared record —
+     not addressed here). "Unpublish" doesn't exist — one-way by design.
+     Drafts are *not* excluded from CSV/PDF export or the Comparison
+     heatmap rollup, but this is moot for now: CSV export doesn't emit
+     per-question data at all today (only partner-level summary columns),
+     and the heatmap reads domain grades, not question completion — so
+     nothing to exclude yet. No auth/roles exist in this app, so "who can
+     publish" has no gating, same as everything else.
+   - **Status filter + NA-grey — DONE.** User's
+     follow-up: keep the High/Medium/Low priority tabs exactly as they
+     are, but add a second, independent way to narrow what's showing by
+     **answer status** (NA / Yet to Start / In Progress / Accomplished /
+     Verified), plus grey out NA rows so the eye goes to what still
+     needs attention. Deliberately **filter, not sort** — the dotted
+     numbers (Step 1) are meant to read in document order, and reordering
+     rows by status would undercut that; filtering gets the same
+     "show me what I care about" value without disturbing it.
+     - **One filter control per tab, not per section.** A
+       `.toggle-pill-row` (reusing the exact pill styling already used
+       for Hero Products/business model/sensors), rendered once at the
+       top of `generalTabHtml`/`productTabHtml` — labels sourced straight
+       from `schema.answerStatuses` (`na`, `yet_to_start`, `in_progress`,
+       `accomplished`, `verified`) plus an "All" pill, so it needs no new
+       schema entry and stays in sync if that list ever changes. One
+       shared `State.statusFilter` value (default `'all'`) applies
+       across General and every Product tab — switching tabs keeps
+       whatever filter you had selected, same as `State.activeDetailTab`
+       already persists across renders.
+     - **Filtering happens inside `answerQuestionsTableHtml`**, right
+       before the existing High/Med/Low grouping (one line: when
+       `State.statusFilter !== 'all'`, drop any question whose
+       `getAnswer(q.id).status` doesn't match) — every count, every
+       empty-panel message, every existing priority-tab behavior below
+       that point is reused completely unchanged, since they already
+       just operate on whatever array they're handed. Clicking a filter
+       pill sets `State.statusFilter` and calls the existing
+       `refreshDetailTabsAndPanels()` — no new render path.
+     - **Deliberately not doing the cross-partner-data plumbing this
+       time**: `questionsForSectionAll` (the merge-in-drafts helper from
+       Step 2) stays completely unfiltered — the status filter is purely
+       a *display* concern in the rendering layer, so it must never touch
+       `sectionHasAnswerData`/`tryToggleScopedField`'s clearing logic or
+       the dotted-numbering calculation, both of which need to keep
+       seeing every question regardless of what's currently filtered
+       on-screen.
+     - **A section with zero rows left after filtering just shows the
+       existing "No {priority}-priority questions" empty state for all
+       three tabs** rather than collapsing the whole card — zero extra
+       logic, reuses what's already there. Flagged as a possible later
+       polish (collapsing fully-filtered-out section cards) if 18+ near-
+       identical empty cards turns out to be noisy in practice — not
+       solving for that pre-emptively.
+     - **Print/export reflects whatever the filter is currently set
+       to** — unlike priority tabs (which hide already-rendered panels
+       via CSS, so print can force them back with `display:block
+       !important`), the status filter drops non-matching questions
+       *before* they're ever rendered into HTML, to keep the
+       implementation to one filter line reusing the existing grouping
+       code untouched. That means filtering to "Yet to Start" and then
+       hitting Print/PDF prints only those rows — switch back to "All"
+       first for a complete printed sheet. Simpler to implement and
+       arguably more intuitive (what you see is what prints) than
+       silently expanding the printed output beyond the current screen,
+       but it's the opposite of priority tabs' existing print behavior,
+       so worth knowing about going in.
+     - **NA-grey is a separate, independent change**: add
+       `data-row-status="${ans.status}"` to every `.ans-row` (draft and
+       published alike) plus `.ans-row[data-row-status="na"] { opacity:
+       .55; }` in style.css. Needs exactly one extra line in
+       `handleDetailChange`'s existing `data-ans-status` branch to keep
+       that attribute in sync the moment the status dropdown changes,
+       mirroring how the `print-val` sibling is already kept in sync
+       there today.
+     - **Explicitly skipped for v1**: live counts on the filter pills
+       themselves (e.g. "Yet to Start (45)") — would need tallying every
+       question across every section on the current tab before the pill
+       row renders, which is a real but separable enhancement, not
+       required to deliver "filter based on my interest."
+     - **One adjustment found while building**: the "print is unaffected
+       by the filter" idea above didn't survive contact with the
+       simplest implementation — see the corrected note in that bullet.
+       Filtering removes rows before they're rendered (one line, reuses
+       all the existing grouping/counting code untouched) rather than
+       hiding already-rendered rows via CSS, so print now follows
+       whatever filter is active on screen. Verified end-to-end with
+       Playwright: NA selection greys the row live (`data-row-status`
+       synced from the status dropdown, `opacity: .55` confirmed via
+       computed style); the NA filter pill correctly narrowed a 7-row
+       section to exactly the 1 row just marked NA; the filter persisted
+       across a General → Product tab switch (shared `State.statusFilter`);
+       resetting to "All" restored all 7 rows. No console errors.
+     - **Discoverability fix after first real-world test**: the filter
+       row renders once near the top of each tab, but on a long tab
+       (18+ sections) it scrolled out of view long before reaching
+       sections like "Software Quality" — found because the user went
+       looking for a way to filter/sort right there, next to that
+       section's own STATUS column header, and couldn't find it. Fixed
+       by making `.status-filter-row` `position: sticky; top: 52px`
+       (the exact height of `.topnav`, which is already sticky at
+       `top: 0`) with an opaque `var(--gray-100)` background — same
+       page background as everywhere else — so it now stays pinned
+       just under the top nav no matter how far down the tab you've
+       scrolled. Confirmed via screenshot scrolled to "Software
+       Quality" and re-ran the filter Playwright check afterward —
+       still narrows/resets correctly. **User-confirmed working** in
+       their own browser session after a hard refresh.
+
+**Step 3 — Product Comparison.** New sub-section on the Comparison
+page, sibling to the existing partner-level heatmap/radar. Placed after
+Steps 1-2 because it displays the question list those steps shape (the
+dotted label, and potentially partner-local drafts/published questions).
+Goal: compare product-category questions/answers side by side across
+2-4 specific products (which may belong to different partners — e.g.
+Partner A's radar-only product vs. Partner B's fusion product), not
+whole partners. Approved approach, not yet built:
+   - **First** — "How many products to compare?" (2/3/4, same idea as
+     the radar partner-picker's `RADAR_MAX_PARTNERS` cap).
+   - **Then** — that many dropdowns appear, each listing every product
+     across every partner, labeled `{Partner Name} — {Product Name}`
+     (a flat product name alone is ambiguous once you're comparing
+     across partners). Source data: the same full-partner fetch
+     `renderComparison` already does via `Promise.all` — no new
+     endpoint needed, just flatten `partners[].products[]`.
+   - **Then** — table renders with the master/left column as
+     Domain → Section → Question (same ordering
+     `domainGroupedSectionsHtml` already uses on Partner Detail, just
+     flattened to rows instead of cards, and **product-category
+     sections only** — General questions don't belong to a product so
+     they're excluded here), one column per selected product showing
+     that product's answer status as a `.status-pill` (reusing the
+     badge classes added for the How To page).
+   - **Applicability / the NA-for-this-product case** — user's example:
+     a Fusion-equipped product might have ~70 applicable questions, a
+     Radar-only product ~50, with only ~40 sections in common. For a
+     (question, product) pair where the question's section doesn't
+     scope-match that product, the cell must look *visually distinct*
+     from a real "NA" answer — those mean different things (the
+     evaluator deliberately marked a question NA, vs. the question
+     plain doesn't exist for that product type) and showing both the
+     same way would be misleading. Plan: reuse the existing
+     `sectionScopeMatches(section, prod)` / `sectionHasAnswerData(section,
+     prod)` helpers (the same "sticky" logic Partner Detail already
+     uses) — if neither holds, render a grey, lower-opacity cell reading
+     "N/A — not applicable to this product" (a new `.cmp-inapplicable`
+     style, distinct from the `.status-na` pill used for a genuine
+     answered-NA).
+   - **Row volume** — product-category sections run into the hundreds of
+     questions combined, so a flat table would be unusable. Group rows
+     under collapsible Domain → Section headers, same collapse pattern
+     `.q-section-card`/`data-section-toggle-header` already uses on
+     Partner Detail, rather than inventing a new collapse mechanism.
+   - **Navigation** — clicking a product's column header jumps to that
+     product's tab on its Partner Detail page (`openDetailFor(partnerId)`
+     then set `State.activeDetailTab = 'product:' + productId`, mirroring
+     how `+ Add Product` already focuses the new product's tab).
+   - Not yet decided: whether Partner Response/L&T Remarks show inline
+     (tooltip on hover, given how much table real estate is already
+     spent on N product columns) or only on click-through to the
+     product's own tab — leaning toward click-through only, to keep
+     the comparison table itself scannable.
+
+**Step 4 — Product Grade Radar — ON HOLD, user wants to rethink the
+whole proposal.** Sits here in the sequence (right after Product
+Comparison, since it would reuse that step's `{Partner} — {Product}`
+product-picker labeling) only for reference — it's paused, not next in
+line. Was about to be a second radar next to the existing Domain Grade
+Radar on the Comparison page, scoped to products instead of partners.
+After the axis-level and grade-source decisions below got worked out,
+user said to skip it for now and rethink — so treat everything below as
+a discarded first draft, not a spec to pick back up directly. Last
+input before pausing: per-product grading control would sit either
+above "Company Background" or below each product's sensor/function spec
+section — neither confirmed, both just spitballed before the pause.
+Re-open this from scratch next time rather than resuming partway
+through, and re-decide where it actually belongs in the sequence once
+it has a real design again.
+
+   *Discarded first-draft design, kept only for reference:*
+
+   Rationale: maturity sometimes needs checking at the
+   product level rather than the company level (e.g. one partner's two
+   products can be at very different maturity, which a partner-wide
+   domain grade can't show). Design decided, not yet built:
+   - **Axis level: master domain (4 axes), not sub-category/section.**
+     Worked through the actual numbers rather than guessing:
+     - It's **4 domains, not 5/6.** Two drop out for products, not one:
+       Patents & Innovation (0 sections at all, already excluded from
+       the partner radar too) *and* Safety & Cyber Security (its only
+       member, Functional Safety & Cybersecurity, is a **General**
+       section — zero Product-scoped sections, so there's nothing
+       product-level to grade there; this is the same fact already
+       behind Product tabs never showing a Safety & Cyber Security
+       heading). Remaining: Company Background, Perception Stack &
+       Function Maturity, Regulation & Compliance, Hardware Capability.
+     - Sub-category level was rejected, not on count alone (31 product
+       sections worst case) but because the *axis set itself* isn't
+       shared across the products being compared — a radar-only
+       product has nothing meaningful under Camera Subsystem, a
+       camera-only product has nothing under Radar/Fusion. Comparing
+       largely non-overlapping axes makes the radar shape comparison
+       apples-to-oranges, and reintroduces the same ambiguity flagged
+       for Product Comparison's NA case (axis=0 because ungraded vs.
+       axis=0 because the section doesn't apply — indistinguishable on
+       a radar with no room for a third visual state per axis).
+     - Master-domain level mostly sidesteps the NA problem for free:
+       each of the 4 domains has at least one *product-common*
+       (not sensor/function-scoped) section — e.g. Hardware Capability
+       always has Compute/SW-Arch/Pipeline/Power regardless of which
+       sensors are checked — so nearly every product has *something*
+       gradable in every domain, unlike individual sections.
+   - **Data gap, resolved: manual per-product domain grading, not
+     auto-computed.** `partner.domainGrades` today is explicitly
+     partner-level only and a deliberate holistic judgment, "not
+     something to approximate mechanically from question-answer
+     counts" — there's currently no per-product domain grade to plot
+     at all. Decided to add a parallel manual grading surface
+     (`product.domainGrades`, same shape as `partner.domainGrades` but
+     scoped to just the 4 product-relevant domains) rather than
+     auto-rolling-up `product.sectionGrades`, to stay consistent with
+     that same philosophy rather than re-introducing the exact pattern
+     it rejected at partner level.
+   - **Not yet decided**: where the per-product grading control lives
+     (a mini grading card per product — inline on each Product tab vs.
+     a sidebar card like Master Category Grading, but this time one
+     per product instead of one per partner); and the product-picker
+     UX for the radar itself (reuse the same 2-4 picker pattern as the
+     partner radar, but products need the `{Partner} — {Product}` label
+     from Step 3 (Product Comparison) since names alone are ambiguous
+     across partners).
+
+**Step 5 — Redefine CSV/PDF export to match the current design.**
+Placed after Steps 1-3 deliberately: exports should reflect the
+*finished* data model, not get audited now and re-audited again once
+numbering/question-authoring/Product Comparison land. Both
+`/api/export/csv` (server-side) and the print/PDF view (client-side, the
+`print-target`/`print-val` CSS pattern) predate the
+domain/section/grading/hero-tag/patents work and likely still reflect an
+older shape. Needs an audit pass (not yet done) of:
+   - `server.py`'s CSV export columns vs. what data actually exists now
+     (domainGrades, sectionGrades, isHero, patents, partnerResponse).
+   - The print view's coverage of the same — sidebar cards
+     (`domain-grading-card`, `hero-products-card`) currently aren't
+     part of `.print-target` at all (they sit in `.detail-sidebar`,
+     need to check whether that's included in print output already or
+     needs explicit `print-val` mirrors like the rest of the form
+     fields use).
+   - Decide scope: just bring exports up to date with existing fields,
+     or also reflect whatever new fields Step 2 (question authoring)
+     introduces (drafts probably shouldn't export until published —
+     ties into that step's open question about export/heatmap
+     treatment of drafts).
+
+**Step 6 — "How To" tab, LAST on purpose.** A how-to-use page should
+document the *finished* feature set — building it earlier would mean
+rewriting it after every step above ships (numbering, question
+authoring/publish, Product Comparison, export). First pass (4 cards of
+prose + a legend table + one small box diagram) was rejected anyway:
+too much text, nobody will actually read it. Explicit correction:
+**this page has to be a full visual representation, minimal text,
+self-explanatory at a glance** — not a written explainer with a diagram
+bolted on, the diagram/visual *is* the explanation. The current
+`#page-howto` markup, the `.howto-*` CSS, and the `How To` nav tab are
+still in the codebase but should be treated as a rough draft to
+replace, not a finished feature. Re-design needed before touching code
+again — open questions for next session: a single big infographic-style
+flow (icons/color instead of paragraphs) vs. a short interactive
+click-through; how much of the status/grade taxonomies can be conveyed
+as color/icon legends alone vs. needing any words at all; whether this
+should stay a static page or become something users step through once;
+and now that it's last in the sequence, it can also show off whatever
+Steps 1-5 actually shipped (dotted numbering, drafts/publish, Product
+Comparison, the refreshed exports) instead of describing a moving
+target. The `.status-pill`/`.status-na`-family CSS classes added
+alongside the first attempt are still worth keeping regardless of how
+this page gets redesigned — they're reusable status badges, not
+specific to this page's layout.
 
 ## Other open items (lower priority, no urgency)
 
-1. Patents-in-heatmap UI still deferred — no mechanism yet for showing
-   Patents & Innovation as a heatmap/radar dimension (would need
-   different rollup logic than question-based domains, since patents
-   don't have a grade taxonomy the same way).
+
+1. **Confirmed gap: Patents & Innovation is missing from both the
+   Comparison heatmap and the radar chart.** `comparisonGroups()` only
+   returns domains with at least one mapped section (`sectionIds.length
+   > 0`); Patents & Innovation has zero (it rolls up from
+   `partner.patents[]`, not `detailQuestions`/`detailSections`) and gets
+   filtered out before either `renderComparison`'s table or
+   `renderComparisonRadar` ever see it — so the radar only ever plots 5
+   axes, never 6. Needs different rollup logic than the other domains
+   since patents don't have a grade taxonomy the same way (no
+   NA/Developing/Good/Outstanding per patent today) — e.g. a patent
+   count or a lifecycle-stage distribution instead of a single grade
+   value, which the radar's 0-3 numeric-score axis can't directly
+   represent without its own mapping. Not designed yet — deferred until
+   there's a clearer idea of what number/grade should represent a
+   partner's patent portfolio on one axis.
 2. Possible follow-up: revisit whether some of the very small sections
    (Power: 2 questions, LDW/LKA: 1 question, Pipeline Architecture: 2
    questions) should be merged into a neighboring section for less tab

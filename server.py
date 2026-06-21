@@ -54,6 +54,14 @@ def load_schema():
         return json.load(f)
 
 
+def save_schema(data):
+    # Atomic write via temp file to prevent corruption on crash
+    tmp = SCHEMA_FILE.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    shutil.move(str(tmp), str(SCHEMA_FILE))
+
+
 # ── static files ─────────────────────────────────────────────────────────────
 
 @app.route("/")
@@ -71,6 +79,95 @@ def static_files(filename):
 @app.route("/api/schema")
 def api_schema():
     return jsonify(load_schema())
+
+
+# Promotes a partner-local draft question into the global question list.
+# Always appends (never inserts mid-array) so existing questions' dotted
+# numbering (schema.domains -> detailSections -> detailQuestions order)
+# never shifts. sourceRef is null since this didn't come from a source
+# spreadsheet, same as the other manually-authored questions already in
+# schema.json.
+@app.route("/api/schema/questions", methods=["POST"])
+def api_publish_question():
+    body = request.get_json(force=True)
+    section_id = (body.get("sectionId") or "").strip()
+    text = (body.get("text") or "").strip()
+    priority = body.get("priority") or "medium"
+    if not text:
+        return jsonify({"error": "text is required"}), 400
+    if priority not in ("high", "medium", "low"):
+        priority = "medium"
+
+    schema = load_schema()
+    if not any(s["id"] == section_id for s in schema.get("detailSections", [])):
+        return jsonify({"error": "unknown sectionId"}), 400
+
+    next_id = max([q["id"] for q in schema.get("detailQuestions", [])], default=0) + 1
+    new_question = {
+        "id": next_id,
+        "sectionId": section_id,
+        "text": text,
+        "sourceRef": None,
+        "priority": priority,
+    }
+    schema["detailQuestions"].append(new_question)
+    save_schema(schema)
+    return jsonify(new_question), 201
+
+
+def _answer_has_data(a):
+    return bool(a.get("status") or (a.get("remarks") or "").strip()
+                or (a.get("partnerResponse") or "").strip())
+
+
+# Read-only impact check before a destructive removal — lets the client
+# show exactly which partners/products already answered this question
+# before the user commits to deleting it everywhere.
+@app.route("/api/schema/questions/<int:q_id>/usage", methods=["GET"])
+def api_question_usage(q_id):
+    data = load_partners()
+    usages = []
+    for p in data["partners"]:
+        for a in p.get("generalAnswers", []):
+            if a.get("qId") == q_id and _answer_has_data(a):
+                usages.append({"partnerName": p["name"], "scope": "general"})
+        for prod in p.get("products", []):
+            for a in prod.get("answers", []):
+                if a.get("qId") == q_id and _answer_has_data(a):
+                    usages.append({
+                        "partnerName": p["name"],
+                        "scope": "product",
+                        "productName": prod.get("name", "Product"),
+                    })
+    return jsonify({"usages": usages})
+
+
+# Removes a published question everywhere — from schema.detailQuestions
+# and from every partner's saved answer to it (general or per-product),
+# not just the partner currently open client-side. The client is expected
+# to have already shown the impact (via the usage endpoint above) and
+# confirmed before calling this.
+@app.route("/api/schema/questions/<int:q_id>", methods=["DELETE"])
+def api_remove_question(q_id):
+    schema = load_schema()
+    before = len(schema.get("detailQuestions", []))
+    schema["detailQuestions"] = [q for q in schema.get("detailQuestions", []) if q["id"] != q_id]
+    if len(schema["detailQuestions"]) == before:
+        abort(404)
+    save_schema(schema)
+
+    data = load_partners()
+    swept = 0
+    for p in data["partners"]:
+        before_g = len(p.get("generalAnswers", []))
+        p["generalAnswers"] = [a for a in p.get("generalAnswers", []) if a.get("qId") != q_id]
+        swept += before_g - len(p["generalAnswers"])
+        for prod in p.get("products", []):
+            before_p = len(prod.get("answers", []))
+            prod["answers"] = [a for a in prod.get("answers", []) if a.get("qId") != q_id]
+            swept += before_p - len(prod["answers"])
+    save_partners(data)
+    return jsonify({"ok": True, "answersRemoved": swept})
 
 
 # ── partners list ─────────────────────────────────────────────────────────────
@@ -123,6 +220,7 @@ def api_create_partner():
         "businessModel": [],
         "products": [],
         "generalAnswers": [],
+        "draftQuestions": [],
         "sectionGrades": [],
         "domainGrades": [],
         "patents": [],

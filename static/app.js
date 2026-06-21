@@ -22,6 +22,9 @@ const State = {
   detailPartner: null,   // full partner object loaded for detail view
   detailDirty: false,
   activeDetailTab: 'general',
+  statusFilter: 'all',   // answer-status filter shared across General/every Product tab
+  radarSelected: [],     // partner ids picked for the Comparison radar chart
+  radarChart: null,      // current Chart.js instance, destroyed/rebuilt on selection change
 };
 
 // ── Brand colours ─────────────────────────────────────────────────────────
@@ -127,7 +130,13 @@ function renderOverview() {
       <div class="stat-value">${totalProducts}</div>
       <div class="stat-sub">across all partners</div>
     </div>
+    <div class="stat-card" id="stat-hero">
+      <div class="stat-label">Hero Products</div>
+      <div class="stat-value">…</div>
+      <div class="stat-sub">differentiating products</div>
+    </div>
   `;
+  renderHeroStat(partners);
 
   // Pipeline board
   const board = document.getElementById('pipeline-board');
@@ -155,6 +164,28 @@ function renderOverview() {
       openDetailFor(card.dataset.id);
     });
   });
+}
+
+// isHero lives on each product in the full partner record, not the
+// lightweight summary list, so this stat needs its own fetch — same
+// Promise.all pattern renderComparison uses. Counts hero-tagged products
+// across the whole portfolio (a partner with 2 hero products counts as 2).
+async function renderHeroStat(partners) {
+  const cell = document.getElementById('stat-hero');
+  if (!cell) return;
+  if (partners.length === 0) {
+    cell.querySelector('.stat-value').textContent = '0';
+    return;
+  }
+  try {
+    const fullPartners = await Promise.all(partners.map(p => api('GET', `/api/partners/${p.id}`)));
+    const heroCount = fullPartners.reduce((sum, p) => {
+      return sum + (p.products || []).filter(prod => prod.isHero).length;
+    }, 0);
+    if (cell.isConnected) cell.querySelector('.stat-value').textContent = String(heroCount);
+  } catch (e) {
+    if (cell.isConnected) cell.querySelector('.stat-value').textContent = '—';
+  }
 }
 
 function renderPartnerCard(p) {
@@ -209,26 +240,25 @@ async function renderComparison() {
 
   const fullPartners = await Promise.all(summary.map(p => api('GET', `/api/partners/${p.id}`)));
   const groups = comparisonGroups();
+  fullPartners.sort((a, b) => a.name.localeCompare(b.name));
 
-  const rows = fullPartners.map(p => {
-    const grades = groups.map(g => (p.domainGrades || []).find(x => x.domainId === g.id) || { grade: '' });
-    return { partner: p, grades };
-  });
-  rows.sort((a, b) => a.partner.name.localeCompare(b.partner.name));
+  const gradeFor = (partner, group) => (partner.domainGrades || []).find(x => x.domainId === group.id) || { grade: '' };
 
+  // Rows = domains, columns = partners (matches the row=category /
+  // column=partner orientation of the old main-branch score-matrix sheet).
   body.innerHTML = `
     <table class="comparison-table">
       <thead>
         <tr>
-          <th class="hm-partner-col">Partner</th>
-          ${groups.map(g => `<th>${esc(g.label)}</th>`).join('')}
+          <th class="hm-domain-col">Domain</th>
+          ${fullPartners.map(p => `<th class="hm-partner-header" data-open-partner="${p.id}">${esc(p.name)}</th>`).join('')}
         </tr>
       </thead>
       <tbody>
-        ${rows.map(r => `
+        ${groups.map(g => `
           <tr>
-            <td class="hm-partner-name" data-open-partner="${r.partner.id}">${esc(r.partner.name)}</td>
-            ${r.grades.map(g => heatmapCellHtml(g.grade)).join('')}
+            <td class="hm-domain-name">${esc(g.label)}</td>
+            ${fullPartners.map(p => heatmapCellHtml(gradeFor(p, g).grade)).join('')}
           </tr>
         `).join('')}
       </tbody>
@@ -237,6 +267,99 @@ async function renderComparison() {
 
   body.querySelectorAll('[data-open-partner]').forEach(el => {
     el.addEventListener('click', () => openDetailFor(el.dataset.openPartner));
+  });
+
+  renderComparisonRadar(fullPartners, groups);
+}
+
+// ── Comparison radar chart ──────────────────────────────────────────────────
+// Plots up to 4 partners' Master Category Grades on one radar, one axis per
+// domain. Grades are qualitative (NA/Developing/Good/Outstanding) so they're
+// mapped to 0-3 for plotting; NA/ungraded is plotted at 0 rather than
+// excluded from the axis, for a single consistent rule instead of
+// per-partner special-casing. Kept alongside the heatmap rather than
+// replacing it — the radar gives an at-a-glance shape comparison, the
+// heatmap gives the precise per-domain grade lookup the radar can't show.
+const RADAR_MAX_PARTNERS = 4;
+const GRADE_SCORE = { outstanding: 3, good: 2, developing: 1 };
+function gradeToScore(grade) {
+  return GRADE_SCORE[grade] || 0;
+}
+
+function renderComparisonRadar(partners, groups) {
+  const picker = document.getElementById('radar-partner-picker');
+  const canvas = document.getElementById('radar-chart');
+  if (!picker || !canvas) return;
+
+  if (!State.radarSelected) State.radarSelected = [];
+  // Default selection: first 3 partners (alphabetical, matches table order).
+  if (State.radarSelected.length === 0) {
+    State.radarSelected = partners.slice(0, 3).map(p => p.id);
+  }
+  // Drop any selected ids that no longer exist (e.g. partner deleted).
+  State.radarSelected = State.radarSelected.filter(id => partners.some(p => p.id === id));
+
+  picker.innerHTML = partners.map(p => {
+    const on = State.radarSelected.includes(p.id);
+    return `<span class="toggle-pill${on ? ' on' : ''}" data-radar-pick="${p.id}">${esc(p.name)}</span>`;
+  }).join('');
+
+  picker.querySelectorAll('[data-radar-pick]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.radarPick;
+      const idx = State.radarSelected.indexOf(id);
+      if (idx >= 0) {
+        State.radarSelected.splice(idx, 1);
+      } else {
+        if (State.radarSelected.length >= RADAR_MAX_PARTNERS) {
+          toast(`Pick at most ${RADAR_MAX_PARTNERS} partners to compare on the radar.`, true);
+          return;
+        }
+        State.radarSelected.push(id);
+      }
+      renderComparisonRadar(partners, groups);
+    });
+  });
+
+  const selected = partners.filter(p => State.radarSelected.includes(p.id));
+  const datasets = selected.map((p, i) => {
+    const color = COLORS.chartPalette[i % COLORS.chartPalette.length];
+    const data = groups.map(g => {
+      const dg = (p.domainGrades || []).find(x => x.domainId === g.id);
+      return gradeToScore(dg && dg.grade);
+    });
+    return {
+      label: p.name,
+      data,
+      borderColor: color,
+      backgroundColor: color + '33',
+      pointBackgroundColor: color,
+      borderWidth: 2,
+    };
+  });
+
+  if (State.radarChart) {
+    State.radarChart.destroy();
+    State.radarChart = null;
+  }
+  if (selected.length === 0) return;
+
+  State.radarChart = new Chart(canvas.getContext('2d'), {
+    type: 'radar',
+    data: { labels: groups.map(g => g.label), datasets },
+    options: {
+      scales: {
+        r: {
+          min: 0,
+          max: 3,
+          ticks: {
+            stepSize: 1,
+            callback: v => ({ 0: 'NA', 1: 'Developing', 2: 'Good', 3: 'Outstanding' }[v] ?? v),
+          },
+        },
+      },
+      plugins: { legend: { position: 'bottom' } },
+    },
   });
 }
 
@@ -338,6 +461,8 @@ function renderDetailContent(p) {
         </div>
 
         ${domainGradingCardHtml(p)}
+
+        ${heroProductsCardHtml(p)}
 
         <!-- Hard Disqualifiers -->
         <div class="card">
@@ -443,6 +568,8 @@ function handleDetailChange(e) {
       if (ans) ans.status = el.value;
     }
     if (pv && pv.classList.contains('print-val')) pv.textContent = answerStatusLabel(el.value);
+    const row = el.closest('.ans-row');
+    if (row) row.dataset.rowStatus = el.value;
     return;
   }
 
@@ -469,6 +596,34 @@ function handleDetailChange(e) {
       const ans = ensureProductAnswer(a, parseInt(b));
       if (ans) ans.remarks = el.value;
     }
+    return;
+  }
+
+  // Draft question text (unpublished, partner-local) — the generic
+  // print-val sync at the top of this function already mirrors it.
+  if (el.dataset.draftText) {
+    markDirty();
+    const draft = (State.detailPartner.draftQuestions || []).find(d => d.id === parseInt(el.dataset.draftText, 10));
+    if (draft) draft.text = el.value;
+    return;
+  }
+
+  // Draft question priority — moves it between High/Medium/Low tabs, so
+  // the section needs to re-render (same reasoning as patentRelevanceType
+  // below). Jump the card to the new tab afterward, same as adding a
+  // draft — otherwise the row you just edited can vanish into a tab that
+  // isn't the one shown by default after refresh.
+  if (el.dataset.draftPriority) {
+    markDirty();
+    const draftId = parseInt(el.dataset.draftPriority, 10);
+    const draft = (State.detailPartner.draftQuestions || []).find(d => d.id === draftId);
+    if (!draft) return;
+    const newPriority = el.value;
+    draft.priority = newPriority;
+    const panelId = el.closest('.detail-tab-panel')?.id;
+    const sectionId = draft.sectionId;
+    refreshDetailTabsAndPanels();
+    jumpSectionCardToPriorityTab(panelId, sectionId, newPriority);
     return;
   }
 
@@ -584,11 +739,11 @@ function newProduct(schema, ordinal) {
   (schema.productSocs || []).forEach(c => { socs[c.key] = false; });
   const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
     : 'p' + Date.now().toString(16) + Math.random().toString(16).slice(2);
-  // heroSensors/heroFunctions: subset of checked sensors/functions marked as
-  // this product's differentiating capabilities (there can be more than
-  // one) -- used by the customer-meeting-prep view to elevate priority
-  // regardless of a question's static tag. No UI to set these yet.
-  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, heroSensors: [], heroFunctions: [], sectionGrades: [] };
+  // isHero: this whole product is one of the partner's differentiating
+  // products (a partner with products A/B/C can have A and B both hero,
+  // C not) -- used by the customer-meeting-prep view to elevate priority
+  // regardless of a question's static tag.
+  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, isHero: false, sectionGrades: [] };
 }
 
 function computePortfolio(products, schema) {
@@ -668,6 +823,19 @@ function refreshDetailTabsAndPanels() {
   panels.innerHTML = detailPanelsHtml(p, activeTab);
   bindDetailTabSwitching();
   autoGrowAll(panels);
+  refreshHeroProductsCard();
+}
+
+// The hero card's candidate pills depend on which sensors/functions are
+// currently checked, so it needs re-rendering whenever a product is
+// added/removed or a sensor/function is toggled — refreshDetailTabsAndPanels
+// already runs on all of those, so piggyback on it rather than adding new
+// call sites.
+function refreshHeroProductsCard() {
+  const card = document.getElementById('hero-products-card');
+  if (!card) return;
+  const p = State.detailPartner;
+  card.outerHTML = heroProductsCardHtml(p);
 }
 
 function answerStatusLabel(key) {
@@ -675,12 +843,25 @@ function answerStatusLabel(key) {
   return s ? s.label : '';
 }
 
+// A draft's id is always a negative integer (see newDraftQuestion) — that
+// sign alone marks it as unpublished, swapping the # column for a "Draft"
+// badge and the read-only question text for an editable textarea, plus an
+// actions row (priority / Publish / Discard) underneath. Everything else
+// (status/response/remarks) is identical to a published question's row
+// since answer storage is already qId-type-agnostic.
 function answerRowHtml(q, ans, key) {
   const schema = State.schema;
+  const isDraft = q.id < 0;
+  const numCell = isDraft
+    ? `<span class="draft-badge">Draft</span>`
+    : `<span class="q-num">${questionLabel(q)}<button class="q-remove-btn" type="button" data-remove-question="${q.id}" title="Remove this question">✕</button></span>`;
+  const textCell = isDraft
+    ? `<textarea class="q-remarks-input q-draft-text" rows="2" placeholder="Type the new question…" data-draft-text="${q.id}">${esc(q.text)}</textarea><span class="print-val">${esc(q.text)}</span>`
+    : `<div class="q-text">${esc(q.text)}</div>`;
   return `
-    <div class="ans-row">
-      <span class="q-num">${q.id}</span>
-      <div class="q-text">${esc(q.text)}</div>
+    <div class="ans-row${isDraft ? ' ans-row-draft' : ''}" data-row-status="${esc(ans.status || '')}">
+      ${numCell}
+      ${textCell}
       <select class="q-score-select" data-ans-status="${key}">
         <option value="">— Select —</option>
         ${schema.answerStatuses.map(s => `<option value="${s.key}"${ans.status === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
@@ -691,6 +872,7 @@ function answerRowHtml(q, ans, key) {
       <textarea class="q-remarks-input" rows="2" placeholder="L&amp;T remarks…" data-ans-remarks="${key}">${esc(ans.remarks || '')}</textarea>
       <span class="print-val">${esc(ans.remarks || '')}</span>
     </div>
+    ${isDraft ? draftActionsRowHtml(q) : ''}
   `;
 }
 
@@ -699,6 +881,23 @@ const PRIORITY_TABS = [
   { key: 'medium', label: 'Medium' },
   { key: 'low', label: 'Low' },
 ];
+
+// Priority select + Publish/Discard, rendered as a full-width sibling
+// below a draft's .ans-row (not a grid child of it) so it doesn't disturb
+// the 5-column answer grid.
+function draftActionsRowHtml(q) {
+  return `
+    <div class="draft-row-actions">
+      <label class="text-muted">Priority
+        <select class="q-score-select" data-draft-priority="${q.id}">
+          ${PRIORITY_TABS.map(p => `<option value="${p.key}"${q.priority === p.key ? ' selected' : ''}>${p.label}</option>`).join('')}
+        </select>
+      </label>
+      <button class="btn btn-secondary btn-sm" type="button" data-publish-draft-question="${q.id}">Publish</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-remove-draft-question="${q.id}">Discard draft</button>
+    </div>
+  `;
+}
 
 function priorityPanelHtml(priorityKey, questions, getAnswer, keyFor) {
   if (questions.length === 0) {
@@ -731,10 +930,19 @@ function sectionGradeRowHtml(sectionGrade, gradeKey) {
   `;
 }
 
-function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveNote, sectionGrade, gradeKey) {
+function answerQuestionsTableHtml(sectionId, title, questions, getAnswer, keyFor, inactiveNote, sectionGrade, gradeKey) {
   sectionGrade = sectionGrade || { grade: '', justification: '' };
+  // Status filter is a display-only concern — it narrows what's grouped
+  // into the High/Med/Low tabs below, but `questions.length` (used to
+  // decide "is this section empty") stays based on the unfiltered count,
+  // so a fully-filtered-out section still shows its normal tabs with
+  // "No {priority}-priority questions" rather than the misleading
+  // "No questions defined for this section yet."
+  const filtered = State.statusFilter === 'all'
+    ? questions
+    : questions.filter(q => (getAnswer(q.id).status || '') === State.statusFilter);
   const byPriority = { high: [], medium: [], low: [] };
-  questions.forEach(q => { (byPriority[q.priority] || byPriority.medium).push(q); });
+  filtered.forEach(q => { (byPriority[q.priority] || byPriority.medium).push(q); });
   const firstNonEmpty = PRIORITY_TABS.find(p => byPriority[p.key].length > 0) || PRIORITY_TABS[0];
 
   const tabsHtml = questions.length === 0 ? '' : `
@@ -763,6 +971,9 @@ function answerQuestionsTableHtml(title, questions, getAnswer, keyFor, inactiveN
         ${gradeKey ? sectionGradeRowHtml(sectionGrade, gradeKey) : ''}
         ${tabsHtml}
         ${panelsHtml}
+        <div class="q-section-footer">
+          <button class="btn btn-secondary btn-sm" type="button" data-add-draft-question="${sectionId}">+ Add Question</button>
+        </div>
       </div>
     </div>
   `;
@@ -781,6 +992,51 @@ function sectionsForCategory(category) {
 
 function questionsForSection(sectionId) {
   return (State.schema.detailQuestions || []).filter(q => q.sectionId === sectionId);
+}
+
+// Schema questions plus this partner's unpublished drafts for the section,
+// merged so they render/answer/clear identically. A draft's id is always a
+// negative integer (see newDraftQuestion) -- that sign is the only signal
+// distinguishing it from a published question, so it never needs its own
+// "is draft" field, and it's excluded from questionLabel's dotted
+// numbering on purpose (drafts show a "Draft" badge instead).
+function questionsForSectionAll(sectionId) {
+  const drafts = (State.detailPartner.draftQuestions || []).filter(d => d.sectionId === sectionId);
+  return questionsForSection(sectionId).concat(drafts);
+}
+
+// After refreshDetailTabsAndPanels() resets every section card back to its
+// own firstNonEmpty priority tab, a draft that was just added or just
+// changed priority can land in a tab that isn't the one shown by default
+// — switch that one section's card to the right tab so the row the user
+// is looking at doesn't appear to vanish. A scoped product section can be
+// rendered on more than one product tab at once (all tabs exist in the
+// DOM simultaneously, just hidden), so the lookup is scoped to panelId.
+function jumpSectionCardToPriorityTab(panelId, sectionId, priorityKey) {
+  if (!panelId) return;
+  const card = document.querySelector(`#${panelId} [data-add-draft-question="${CSS.escape(sectionId)}"]`)?.closest('.q-section-card');
+  if (!card) return null;
+  card.querySelectorAll('[data-priority-tab]').forEach(b => b.classList.toggle('active', b.dataset.priorityTab === priorityKey));
+  card.querySelectorAll('[data-priority-panel]').forEach(p => { p.style.display = p.dataset.priorityPanel === priorityKey ? '' : 'none'; });
+  return card;
+}
+
+// Dotted question numbering ("1.2.5" = 1st domain, 2nd section within that
+// domain, 5th question within that section) — a computed display label
+// only. The real identifier every answer is keyed on stays q.id (the global
+// integer). Positional, so it's derived fresh from current schema order
+// every render rather than stored: reordering sections/questions shifts the
+// label, same as it would on a printed sheet (see plan.md Step 1).
+function questionLabel(q) {
+  const schema = State.schema;
+  const section = (schema.detailSections || []).find(s => s.id === q.sectionId);
+  if (!section) return String(q.id);
+  const domainNum = (schema.domains || []).findIndex(d => d.id === section.domain) + 1;
+  const sectionNum = (schema.detailSections || []).filter(s => s.domain === section.domain)
+    .findIndex(s => s.id === section.id) + 1;
+  const questionNum = questionsForSection(q.sectionId).findIndex(qq => qq.id === q.id) + 1;
+  if (domainNum <= 0 || sectionNum <= 0 || questionNum <= 0) return String(q.id);
+  return `${domainNum}.${sectionNum}.${questionNum}`;
 }
 
 // Maps a scope type to the product field it reads/writes.
@@ -804,7 +1060,7 @@ function sectionScopeMatches(section, prod) {
 // or remarks recorded for this product — unchecking the underlying
 // sensor/function/SoC must never make that data silently disappear.
 function sectionHasAnswerData(section, prod) {
-  return questionsForSection(section.id).some(q => {
+  return questionsForSectionAll(section.id).some(q => {
     const a = (prod.answers || []).find(x => x.qId === q.id);
     return !!(a && (a.status || (a.remarks && a.remarks.trim()) || (a.partnerResponse && a.partnerResponse.trim())));
   });
@@ -840,7 +1096,7 @@ function tryToggleScopedField(prod, type, key) {
       if (!confirm(`${label} data has already been filled in for "${prod.name || 'this product'}". Unchecking ${label} will remove the ${label} section and its saved ${what}.\n\nContinue?`)) return false;
       if (!confirm(`Are you sure? This cannot be undone once you Save.`)) return false;
       if (section) {
-        const qIds = questionsForSection(section.id).map(q => q.id);
+        const qIds = questionsForSectionAll(section.id).map(q => q.id);
         prod.answers = (prod.answers || []).filter(a => !qIds.includes(a.qId));
       }
       if (hasNotes) prod.sensorNotes[key] = '';
@@ -908,6 +1164,57 @@ function domainGradingCardHtml(p) {
   `;
 }
 
+// Sidebar card for tagging which of a partner's products are themselves
+// the differentiating "hero" product(s) — rendered once per partner,
+// independent of which sub-tab is active, mirroring the
+// domain-grading-card precedent above. Whole-product flag, not a
+// per-sensor/function one: a partner with products A/B/C can have A and B
+// both marked hero while C isn't.
+function heroProductsCardHtml(p) {
+  const products = p.products || [];
+  if (products.length === 0) {
+    return `
+      <div class="card" id="hero-products-card">
+        <div class="card-header"><span class="card-title">Hero Products</span></div>
+        <div class="card-body">
+          <div class="text-muted" style="font-size:.8125rem;">No products yet — add one first.</div>
+        </div>
+      </div>
+    `;
+  }
+  return `
+    <div class="card" id="hero-products-card">
+      <div class="card-header"><span class="card-title">Hero Products</span></div>
+      <div class="card-body">
+        ${products.map(prod => `
+          <div class="hero-product-row">
+            <span class="toggle-pill hero-pill${prod.isHero ? ' on' : ''}" data-toggle-hero-product="${prod.id}">★ ${esc(prod.name || 'Product')}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// One filter control per tab (not per section) — a single shared
+// State.statusFilter applies across General and every Product tab, so
+// switching tabs keeps whatever filter you had selected, same as
+// State.activeDetailTab already persists. Labels come straight from
+// schema.answerStatuses, so this needs no new schema entry and stays in
+// sync if that list ever changes.
+function statusFilterRowHtml() {
+  const statuses = State.schema.answerStatuses || [];
+  return `
+    <div class="status-filter-row">
+      <span class="text-muted" style="font-size:.75rem;margin-right:6px;">Filter by status:</span>
+      <div class="toggle-pill-row" style="display:inline-flex;">
+        <span class="toggle-pill${State.statusFilter === 'all' ? ' on' : ''}" data-status-filter="all">All</span>
+        ${statuses.map(s => `<span class="toggle-pill${State.statusFilter === s.key ? ' on' : ''}" data-status-filter="${s.key}">${esc(s.label)}</span>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function generalTabHtml(p) {
   const schema = State.schema;
   const products = p.products || [];
@@ -941,9 +1248,10 @@ function generalTabHtml(p) {
         ${products.length === 0 ? '<div class="text-muted" style="font-size:.8125rem;margin-top:8px;">No products added yet — use "+ Add Product" above.</div>' : ''}
       </div>
     </div>
+    ${statusFilterRowHtml()}
     ${domainGroupedSectionsHtml(
       sections.map(sec => ({ section: sec })),
-      ({ section }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
+      ({ section }) => answerQuestionsTableHtml(section.id, section.label, questionsForSectionAll(section.id),
         qId => (p.generalAnswers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
         qId => `general:${qId}`,
         null,
@@ -958,9 +1266,10 @@ function productTabHtml(prod) {
   const sections = sectionsForProduct(prod);
   return `
     ${productCardHtml(prod, schema)}
+    ${statusFilterRowHtml()}
     ${domainGroupedSectionsHtml(
       sections.map(({ section, active }) => ({ section, active })),
-      ({ section, active }) => answerQuestionsTableHtml(section.label, questionsForSection(section.id),
+      ({ section, active }) => answerQuestionsTableHtml(section.id, section.label, questionsForSectionAll(section.id),
         qId => (prod.answers || []).find(x => x.qId === qId) || { status: '', remarks: '' },
         qId => `product:${prod.id}:${qId}`,
         active ? null : 'Sensor unchecked — kept visible because it has saved answers',
@@ -1205,7 +1514,7 @@ function productCardHtml(prod, schema) {
   `;
 }
 
-function handleDetailClick(e) {
+async function handleDetailClick(e) {
   // Collapsible question-table sections — click the heading to toggle.
   // Checked first since the header sits outside the other data-* targets.
   const sectionHeader = e.target.closest('[data-section-toggle-header]');
@@ -1229,7 +1538,7 @@ function handleDetailClick(e) {
     return;
   }
 
-  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc],[data-add-patent],[data-remove-patent]');
+  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc],[data-toggle-hero-product],[data-add-patent],[data-remove-patent],[data-add-draft-question],[data-remove-draft-question],[data-publish-draft-question],[data-remove-question],[data-status-filter]');
   if (!el) return;
 
   if (el.dataset.businessModel !== undefined) {
@@ -1285,6 +1594,15 @@ function handleDetailClick(e) {
     return;
   }
 
+  if (el.dataset.toggleHeroProduct) {
+    const prod = findProduct(el.dataset.toggleHeroProduct);
+    if (!prod) return;
+    markDirty();
+    prod.isHero = !prod.isHero;
+    el.classList.toggle('on', prod.isHero);
+    return;
+  }
+
   if (el.dataset.addPatent !== undefined) {
     markDirty();
     const patents = State.detailPartner.patents || (State.detailPartner.patents = []);
@@ -1299,6 +1617,103 @@ function handleDetailClick(e) {
     if (!confirm(`Remove "${title}"? This cannot be undone once you Save.`)) return;
     markDirty();
     State.detailPartner.patents = (State.detailPartner.patents || []).filter(x => x.id !== el.dataset.removePatent);
+    refreshDetailTabsAndPanels();
+    return;
+  }
+
+  if (el.dataset.addDraftQuestion !== undefined) {
+    markDirty();
+    const sectionId = el.dataset.addDraftQuestion;
+    const panelId = el.closest('.detail-tab-panel')?.id;
+    const drafts = State.detailPartner.draftQuestions || (State.detailPartner.draftQuestions = []);
+    const nextId = Math.min(0, ...drafts.map(d => d.id)) - 1;
+    drafts.push({ id: nextId, sectionId, text: '', priority: 'medium' });
+    refreshDetailTabsAndPanels();
+    // New drafts default to Medium priority — jump that section's card to
+    // the Medium tab so the new (still-empty) row is visible immediately,
+    // regardless of which priority tab happened to be active before.
+    const card = jumpSectionCardToPriorityTab(panelId, sectionId, 'medium');
+    if (card) {
+      const textarea = card.querySelector(`[data-draft-text="${nextId}"]`);
+      if (textarea) { textarea.focus(); autoGrowTextarea(textarea); }
+    }
+    return;
+  }
+
+  if (el.dataset.removeDraftQuestion) {
+    const draftId = parseInt(el.dataset.removeDraftQuestion, 10);
+    if (!confirm('Discard this draft question? Any answer recorded against it will be lost once you Save.')) return;
+    markDirty();
+    State.detailPartner.draftQuestions = (State.detailPartner.draftQuestions || []).filter(d => d.id !== draftId);
+    State.detailPartner.generalAnswers = (State.detailPartner.generalAnswers || []).filter(a => a.qId !== draftId);
+    (State.detailPartner.products || []).forEach(prod => {
+      prod.answers = (prod.answers || []).filter(a => a.qId !== draftId);
+    });
+    refreshDetailTabsAndPanels();
+    return;
+  }
+
+  if (el.dataset.publishDraftQuestion) {
+    const draftId = parseInt(el.dataset.publishDraftQuestion, 10);
+    const draft = (State.detailPartner.draftQuestions || []).find(d => d.id === draftId);
+    if (!draft) return;
+    if (!draft.text.trim()) { toast('Add question text before publishing', true); return; }
+    if (!confirm(`Publish "${draft.text.trim()}"? It will be added to the master question list and appear on every matching product across every partner. This cannot be undone.`)) return;
+
+    try {
+      const published = await api('POST', '/api/schema/questions', {
+        sectionId: draft.sectionId, text: draft.text.trim(), priority: draft.priority || 'medium',
+      });
+      State.schema.detailQuestions.push(published);
+      State.detailPartner.draftQuestions = State.detailPartner.draftQuestions.filter(d => d.id !== draftId);
+      // Re-key this partner's existing answer (general or per-product) from
+      // the draft id to the new real qId so it isn't lost.
+      (State.detailPartner.generalAnswers || []).forEach(a => { if (a.qId === draftId) a.qId = published.id; });
+      (State.detailPartner.products || []).forEach(prod => {
+        (prod.answers || []).forEach(a => { if (a.qId === draftId) a.qId = published.id; });
+      });
+      markDirty();
+      refreshDetailTabsAndPanels();
+      await saveDetail();
+      toast('Published — now visible on every matching product and partner.');
+    } catch (err) {
+      toast('Publish failed: ' + err.message, true);
+    }
+    return;
+  }
+
+  if (el.dataset.removeQuestion) {
+    const qId = parseInt(el.dataset.removeQuestion, 10);
+    try {
+      const { usages } = await api('GET', `/api/schema/questions/${qId}/usage`);
+      if (usages.length === 0) {
+        if (!confirm('Remove this question? This cannot be undone.')) return;
+      } else {
+        const lines = usages.map(u => `• ${u.partnerName} — ${u.scope === 'general' ? 'General' : u.productName}`).join('\n');
+        if (!confirm(`This question has already been answered in:\n\n${lines}\n\nRemoving it will permanently delete all of these answers too. Continue?`)) return;
+        if (!confirm('Are you sure? This cannot be undone.')) return;
+      }
+      const result = await api('DELETE', `/api/schema/questions/${qId}`);
+      State.schema.detailQuestions = State.schema.detailQuestions.filter(q => q.id !== qId);
+      // Mirror the server's sweep in this partner's own in-memory copy too
+      // — otherwise a later normal Save would PUT the stale answer right
+      // back (same staleness risk Publish already solves the same way).
+      State.detailPartner.generalAnswers = (State.detailPartner.generalAnswers || []).filter(a => a.qId !== qId);
+      (State.detailPartner.products || []).forEach(prod => {
+        prod.answers = (prod.answers || []).filter(a => a.qId !== qId);
+      });
+      markDirty();
+      refreshDetailTabsAndPanels();
+      await saveDetail();
+      toast(`Question removed${result.answersRemoved ? ` — cleared ${result.answersRemoved} saved answer(s) across other partners` : ''}.`);
+    } catch (err) {
+      toast('Remove failed: ' + err.message, true);
+    }
+    return;
+  }
+
+  if (el.dataset.statusFilter !== undefined) {
+    State.statusFilter = el.dataset.statusFilter;
     refreshDetailTabsAndPanels();
     return;
   }

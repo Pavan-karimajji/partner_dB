@@ -17,6 +17,7 @@
   </div>
   <div class="topnav-tabs" role="tablist">
     <button class="topnav-tab active" data-tab="overview"    role="tab">Overview</button>
+    <button class="topnav-tab"        data-tab="howto"       role="tab">How To</button>
     <button class="topnav-tab"        data-tab="comparison"  role="tab">Comparison</button>
     <button class="topnav-tab"        data-tab="detail"      role="tab">Partner Detail</button>
     <button class="topnav-tab"        data-tab="decisions"   role="tab">Decision Log</button>
@@ -42,6 +43,130 @@
   </div>
 </div>
 
+<!-- How To -->
+<div class="page" id="page-howto">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <div class="page-title">How to Use This Tool</div>
+        <div class="page-subtitle">How a partner's evaluation is structured, and how to fill it in</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><span class="card-title">1. Structure: Partner → General / Products → Sections</span></div>
+      <div class="card-body">
+        <div class="howto-diagram">
+          <div class="howto-col">
+            <div class="howto-box howto-box-root">Partner</div>
+          </div>
+          <div class="howto-arrow">→</div>
+          <div class="howto-col">
+            <div class="howto-box">General</div>
+            <div class="howto-box">Product 1</div>
+            <div class="howto-box">Product 2</div>
+            <div class="howto-box howto-box-muted">… Product N</div>
+          </div>
+          <div class="howto-arrow">→</div>
+          <div class="howto-col">
+            <div class="howto-box howto-box-sub">Section<br><span class="text-muted" style="font-size:.6875rem;">e.g. Company Overview</span></div>
+            <div class="howto-box howto-box-sub">Section<br><span class="text-muted" style="font-size:.6875rem;">e.g. Camera Subsystem</span></div>
+            <div class="howto-box howto-box-sub howto-box-muted">… more sections, grouped under 6 master Domains</div>
+          </div>
+        </div>
+        <p class="text-muted" style="font-size:.8125rem;margin-top:14px;">
+          Every partner has exactly one <strong>General</strong> tab (answered once,
+          company-wide — things like company background, safety/cybersecurity
+          posture) and one tab per <strong>Product</strong> they offer (one set of
+          answers per product — sensors, functions, and product-specific
+          questions like camera/radar subsystem detail). Use
+          <strong>+ Add Product</strong> on the Partner Detail page for each
+          additional product. A <strong>Patents</strong> tab and a <strong>Notes</strong>
+          tab sit alongside General/Product N for IP tracking and free-text
+          meeting notes.
+        </p>
+        <p class="text-muted" style="font-size:.8125rem;margin-top:8px;">
+          A Product tab only shows the sections relevant to it — checking the
+          "Camera" sensor pill reveals the Camera Subsystem/Perception
+          sections, checking "AEB" reveals the AEB Function Detail section,
+          and so on. Unchecking a sensor/function hides its section again,
+          unless you've already answered questions in it — those stay
+          visible (with a confirmation prompt) so saved work is never lost
+          silently.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><span class="card-title">2. Rating a question</span></div>
+      <div class="card-body">
+        <p class="text-muted" style="font-size:.8125rem;">
+          Inside each section's question table, every question gets a
+          <strong>Status</strong>, a <strong>Partner Response</strong>
+          (what the vendor told you) and <strong>L&amp;T Remarks</strong>
+          (your own internal note) — kept as two separate fields on
+          purpose, mirroring the source evaluation sheets' "Vendor
+          Response" vs. "L&amp;T Judgement" columns.
+        </p>
+        <table class="howto-taxonomy-table">
+          <tr><td><span class="status-pill status-na">NA</span></td><td>Not applicable to this partner/product.</td></tr>
+          <tr><td><span class="status-pill status-yet-to-start">Yet to Start</span></td><td>Partner hasn't begun this yet.</td></tr>
+          <tr><td><span class="status-pill status-in-progress">In Progress</span></td><td>Partially done / underway.</td></tr>
+          <tr><td><span class="status-pill status-accomplished">Accomplished</span></td><td>Partner <em>claims</em> this is complete (self-reported).</td></tr>
+          <tr><td><span class="status-pill status-verified">Verified</span></td><td>L&amp;T has seen evidence (test report, demo, doc) confirming it.</td></tr>
+        </table>
+        <p class="text-muted" style="font-size:.8125rem;margin-top:10px;">
+          Questions within a section are split into <strong>High / Medium /
+          Low</strong> priority sub-tabs — High is what to cover live in the
+          first customer meeting, Low is fine to leave as a written
+          follow-up. Use these to focus a meeting agenda instead of working
+          through a section top-to-bottom.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><span class="card-title">3. Grading a section, and the master domains</span></div>
+      <div class="card-body">
+        <p class="text-muted" style="font-size:.8125rem;">
+          Question status tracks <em>completion</em>. Grading tracks
+          <em>quality</em> — a section can be fully Verified question-by-
+          question yet still graded "Developing" in substance, or vice
+          versa. Two independent grading levels, both with a free-text
+          justification field:
+        </p>
+        <ul style="font-size:.8125rem;color:var(--gray-600);line-height:1.6;margin:8px 0 8px 18px;">
+          <li><strong>Section grade</strong> — inside each section's card, just under its question table. General sections grade once per partner; Product sections grade once per product.</li>
+          <li><strong>Domain grade</strong> — the <strong>Master Category Grading</strong> card in the left sidebar of Partner Detail. One holistic grade per partner per domain (Company Background, Perception Stack &amp; Function Maturity, Regulation &amp; Compliance, Safety &amp; Cyber Security, Hardware Capability, Patents &amp; Innovation) — a deliberate independent judgment call, not auto-averaged from the sections underneath it.</li>
+        </ul>
+        <table class="howto-taxonomy-table">
+          <tr><td><span class="status-pill status-na">NA</span></td><td>Not applicable / not assessed.</td></tr>
+          <tr><td><span class="status-pill hm-low">Developing</span></td><td>Early stage, significant gaps.</td></tr>
+          <tr><td><span class="status-pill hm-mid">Good</span></td><td>Solid, meets expectations.</td></tr>
+          <tr><td><span class="status-pill hm-high">Outstanding</span></td><td>Best-in-class, a clear strength.</td></tr>
+        </table>
+        <p class="text-muted" style="font-size:.8125rem;margin-top:10px;">
+          Domain grades are what shows up on the <strong>Comparison</strong>
+          page's heatmap table and radar chart — grade a partner's domains
+          here first, then go compare.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><span class="card-title">4. Hero Products, Patents, and comparing partners</span></div>
+      <div class="card-body">
+        <ul style="font-size:.8125rem;color:var(--gray-600);line-height:1.6;margin:0 0 0 18px;">
+          <li><strong>Hero Products</strong> card (left sidebar, below Master Category Grading) — star-tag whichever of a partner's products are its differentiating ones. A partner can have more than one hero product.</li>
+          <li><strong>Patents</strong> tab — track IP per partner (title, status from Not Filed through Granted/Expired, what sensor/function/area it relates to). Not part of the question/grading flow — pure metadata.</li>
+          <li><strong>Comparison</strong> page — a heatmap table (rows = the 6 domains, columns = partners, color-coded by domain grade) plus a radar chart overlaying up to 4 partners at once on the same domains. Both read the domain grades you set in step 3 — nothing here is computed from question completion %.</li>
+          <li><strong>Decision Log</strong> page — the running record of Shortlisted/Hold/Rejected calls and their rationale, set from the Decision card on Partner Detail.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Comparison -->
 <div class="page" id="page-comparison">
   <div class="container">
@@ -51,6 +176,15 @@
         <div class="page-subtitle">Master Category Grading heatmap — set per partner on their Partner Detail page</div>
       </div>
       <a class="btn btn-secondary btn-sm" href="/api/export/csv" download>Export CSV</a>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header"><span class="card-title">Domain Grade Radar</span></div>
+      <div class="card-body">
+        <div id="radar-partner-picker" class="toggle-pill-row" style="margin-bottom:16px;"></div>
+        <div style="max-width:640px;margin:0 auto;">
+          <canvas id="radar-chart" height="360"></canvas>
+        </div>
+      </div>
     </div>
     <div class="card">
       <div class="card-body" style="overflow-x:auto;" id="comparison-body">
@@ -166,6 +300,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <!-- ── Scripts ─────────────────────────────────────────────────────────── -->
+<script src="/static/lib/chart.umd.min.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

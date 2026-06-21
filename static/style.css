@@ -342,6 +342,11 @@ input, textarea, select { font: inherit; }
 .domain-grade-sidebar-row .form-select { margin-bottom: 6px; }
 .domain-grade-sidebar-row .form-textarea { min-height: 44px; font-size: .8125rem; }
 
+/* Hero Products sidebar card — one toggleable star pill per product */
+.hero-product-row { margin-bottom: 8px; }
+.hero-product-row:last-child { margin-bottom: 0; }
+.hero-pill.on { background: #fef3c7; border-color: #d97706; color: #92400e; }
+
 /* Per-section grade row inside an expanded section's card-body */
 .section-grade-row {
   display: flex;
@@ -385,7 +390,37 @@ input, textarea, select { font: inherit; }
   border-bottom: 1px solid var(--gray-200);
 }
 .q-num { color: var(--gray-500); font-size: .75rem; padding-top: 2px; }
+.q-remove-btn {
+  border: none; background: none; cursor: pointer;
+  color: var(--gray-400); font-size: .6875rem; padding: 0 0 0 4px;
+}
+.q-remove-btn:hover { color: var(--red); }
 .q-text { color: var(--gray-700); line-height: 1.4; }
+.draft-badge {
+  display: inline-block;
+  font-size: .625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.draft-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 10px 50px;
+  font-size: .75rem;
+  color: var(--gray-500);
+}
+.draft-row-actions .q-score-select { width: auto; display: inline-block; margin-left: 4px; }
+.q-section-footer {
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid var(--gray-100);
+}
 .q-score-select {
   padding: 4px 6px;
   border: 1px solid var(--gray-300);
@@ -418,7 +453,7 @@ input, textarea, select { font: inherit; }
    Columns: # | Question | Status | Partner Response | L&T Remarks */
 .ans-row {
   display: grid;
-  grid-template-columns: 28px minmax(140px, 280px) 140px 1fr 1fr;
+  grid-template-columns: 40px minmax(140px, 280px) 140px 1fr 1fr;
   gap: 10px;
   align-items: start;
   padding: 8px 0;
@@ -426,6 +461,16 @@ input, textarea, select { font: inherit; }
   font-size: .8125rem;
 }
 .ans-row:last-child { border-bottom: none; }
+.ans-row[data-row-status="na"] { opacity: .55; }
+.status-filter-row {
+  margin: 4px 0 16px;
+  position: sticky;
+  top: 52px;
+  z-index: 50;
+  background: var(--gray-100);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
 
 /* Perception questions */
 .p-row {
@@ -499,26 +544,66 @@ input, textarea, select { font: inherit; }
   text-transform: uppercase;
   letter-spacing: .03em;
 }
-.comparison-table th.hm-partner-col, .comparison-table td.hm-partner-name {
+.comparison-table th.hm-domain-col, .comparison-table td.hm-domain-name {
   text-align: left;
   position: sticky;
   left: 0;
   background: var(--white);
   z-index: 1;
 }
-.comparison-table th.hm-partner-col { background: var(--light-blue); z-index: 2; }
-.comparison-table td.hm-partner-name {
-  font-weight: 600;
-  color: var(--navy);
-  cursor: pointer;
-}
-.comparison-table td.hm-partner-name:hover { text-decoration: underline; }
+.comparison-table th.hm-domain-col { background: var(--light-blue); z-index: 2; }
+.comparison-table td.hm-domain-name { font-weight: 600; color: var(--navy); }
+.comparison-table th.hm-partner-header { cursor: pointer; }
+.comparison-table th.hm-partner-header:hover { text-decoration: underline; }
 .comparison-table tr:last-child td { border-bottom: none; }
 .hm-cell { font-weight: 600; }
 .hm-empty { color: var(--gray-500); background: var(--gray-50); font-weight: 400; }
 .hm-low   { background: #fee2e2; color: #991b1b; }
 .hm-mid   { background: #fef3c7; color: #92400e; }
 .hm-high  { background: #d1fae5; color: #065f46; }
+
+/* ── Status/grade pills (How To legend; reusable wherever a status badge
+   is needed) ─────────────────────────────────────────────────────────── */
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: .75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-na             { background: var(--gray-100); color: var(--gray-600); }
+.status-yet-to-start   { background: #fee2e2; color: #991b1b; }
+.status-in-progress    { background: #fef3c7; color: #92400e; }
+.status-accomplished   { background: #dbeafe; color: #1e40af; }
+.status-verified       { background: #d1fae5; color: #065f46; }
+
+/* ── How To page diagram ───────────────────────────────────────────────── */
+.howto-diagram {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+}
+.howto-col { display: flex; flex-direction: column; gap: 8px; }
+.howto-arrow { font-size: 1.5rem; color: var(--mid-navy); flex-shrink: 0; }
+.howto-box {
+  border: 2px solid var(--navy);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--light-blue);
+  text-align: center;
+}
+.howto-box-root { background: var(--navy); color: var(--white); }
+.howto-box-sub { font-weight: 400; }
+.howto-box-muted { color: var(--gray-500); border-color: var(--gray-300); background: var(--gray-50); font-weight: 400; }
+.howto-taxonomy-table { border-collapse: collapse; margin-top: 8px; }
+.howto-taxonomy-table td { padding: 5px 10px; font-size: .8125rem; color: var(--gray-700); vertical-align: middle; }
+.howto-taxonomy-table td:first-child { white-space: nowrap; }
 
 /* ── Modal ───────────────────────────────────────────────────────────────── */
 .modal-overlay {
@@ -635,7 +720,8 @@ input, textarea, select { font: inherit; }
   [data-accordion] .accordion-chevron { display: none !important; }
   [data-detail-tab] { display: none !important; }
   select, .q-score-select, .q-remarks-input, .p-response-area,
-  .p-judgement-select, .p-judgement-label, .form-textarea { display: none !important; }
+  .p-judgement-select, .p-judgement-label, .form-textarea,
+  .draft-row-actions, .q-section-footer, .q-remove-btn { display: none !important; }
 
   /* Show only the currently active page */
   .page { display: none !important; }
@@ -647,6 +733,7 @@ input, textarea, select { font: inherit; }
   .q-section-card .card-body { display: block !important; }
   .q-section-card .accordion-chevron { display: none !important; }
   .priority-tab-row { display: none !important; }
+  .status-filter-row { display: none !important; }
   .priority-panel { display: block !important; }
 
   /* Show all detail sub-tabs */
