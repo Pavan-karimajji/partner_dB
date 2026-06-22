@@ -18,6 +18,14 @@
       "label": "Fusion"
     },
     {
+      "key": "lidar",
+      "label": "LiDAR"
+    },
+    {
+      "key": "uss",
+      "label": "USS"
+    },
+    {
       "key": "soc",
       "label": "SoC"
     }
@@ -58,6 +66,10 @@
     {
       "key": "DMS",
       "label": "DMS"
+    },
+    {
+      "key": "FUNC",
+      "label": "func"
     }
   ],
   "productSocs": [
@@ -549,6 +561,18 @@
       "label": "Known Limitations & India Readiness",
       "domain": "regulation-compliance",
       "scope": null
+    },
+    {
+      "id": "prod-func-func",
+      "category": "product",
+      "label": "func Function Detail",
+      "domain": "perception-function",
+      "scope": {
+        "type": "function",
+        "keys": [
+          "FUNC"
+        ]
+      }
     }
   ],
   "detailQuestions": [

@@ -297,22 +297,15 @@ input, textarea, select { font: inherit; }
 .q-section-card.collapsed .accordion-chevron { transform: rotate(-90deg); }
 .q-section-card.collapsed .card-body { display: none; }
 
-/* High/Medium/Low priority sub-tabs within an expanded section */
-.priority-tab-row { display: flex; gap: 6px; margin-bottom: 12px; }
-.priority-tab {
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--gray-300);
-  background: var(--white);
-  font-size: .75rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--gray-600);
-}
-.priority-tab:hover { background: var(--gray-50); }
-.priority-tab.active.priority-tab-high   { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
-.priority-tab.active.priority-tab-medium { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
-.priority-tab.active.priority-tab-low    { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+/* Each question row's priority (High/Medium/Low) as a colour-coded left
+   edge — replaces the old per-section High/Med/Low sub-tabs now that the
+   global "Filter by priority" row covers that need, across every section
+   on the tab at once instead of one section at a time. inset box-shadow
+   (not border-left) so it doesn't add layout width and throw the columns
+   out of alignment with the header row above. */
+.ans-row[data-priority="high"]   { box-shadow: inset 3px 0 0 0 #fca5a5; }
+.ans-row[data-priority="medium"] { box-shadow: inset 3px 0 0 0 #fcd34d; }
+.ans-row[data-priority="low"]    { box-shadow: inset 3px 0 0 0 #6ee7b7; }
 
 /* Master-domain group headings on General/Product tabs — groups the
    section cards under the 6 management-facing domains (schema.domains) */
@@ -462,7 +455,7 @@ input, textarea, select { font: inherit; }
 }
 .ans-row:last-child { border-bottom: none; }
 .ans-row[data-row-status="na"] { opacity: .55; }
-.status-filter-row {
+.detail-filter-row {
   margin: 4px 0 16px;
   position: sticky;
   top: 52px;
@@ -470,6 +463,9 @@ input, textarea, select { font: inherit; }
   background: var(--gray-100);
   padding: 8px 0;
   border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
 }
 
 /* Perception questions */
@@ -747,12 +743,18 @@ input, textarea, select { font: inherit; }
   .topnav, .save-bar, .toast-wrap, .modal-overlay { display: none !important; }
   .btn-secondary[onclick], .btn-primary { display: none !important; }
   .page-header .btn, #detail-partner-select, .topnav-actions { display: none !important; }
-  #btn-edit-meta { display: none !important; }
+  #btn-edit-meta, #btn-detail-edit, #btn-remove-partner { display: none !important; }
   [data-accordion] .accordion-chevron { display: none !important; }
   [data-detail-tab] { display: none !important; }
   select, .q-score-select, .q-remarks-input, .p-response-area,
   .p-judgement-select, .p-judgement-label, .form-textarea,
   .draft-row-actions, .q-section-footer, .q-remove-btn { display: none !important; }
+
+  /* Print always shows the true data at full opacity, regardless of
+     whether the page happened to be in read-only mode on screen */
+  .detail-readonly .toggle-pill, .detail-readonly .hard-disqualifier-item {
+    pointer-events: auto; opacity: 1;
+  }
 
   /* Show only the currently active page */
   .page { display: none !important; }
@@ -763,9 +765,8 @@ input, textarea, select { font: inherit; }
   .accordion-header { border-radius: var(--radius) !important; }
   .q-section-card .card-body { display: block !important; }
   .q-section-card .accordion-chevron { display: none !important; }
-  .priority-tab-row { display: none !important; }
-  .status-filter-row { display: none !important; }
-  .priority-panel { display: block !important; }
+  .detail-filter-row { display: none !important; }
+  .readonly-banner { display: none !important; }
 
   /* Show all detail sub-tabs */
   .detail-tab-panel { display: block !important; }
@@ -855,6 +856,18 @@ input, textarea, select { font: inherit; }
 .toggle-pill.readonly { cursor: default; }
 .toggle-pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
 
+/* Partner Detail in view mode (before "Edit" is clicked) -- form
+   elements are disabled directly in their templates (browser-enforced);
+   pills and the hard-disqualifier list can't be disabled that way since
+   they're plain spans/list items, so they're dimmed and click-disabled
+   here instead, matching handleDetailClick's matching JS-level guard. */
+.detail-readonly .toggle-pill:not(.readonly) { pointer-events: none; opacity: .6; }
+.detail-readonly .hard-disqualifier-item { pointer-events: none; opacity: .6; }
+/* ...except the status/priority filter pills, which are view-only and
+   must keep working in read-only mode (handleDetailClick's allowlist
+   already exempts them on the JS side) -- higher-specificity override. */
+.detail-readonly .detail-filter-row .toggle-pill { pointer-events: auto !important; opacity: 1 !important; }
+
 /* ── Products tab ───────────────────────────────────────────────────────── */
 .portfolio-summary {
   display: grid;
@@ -877,3 +890,27 @@ input, textarea, select { font: inherit; }
   color: var(--navy);
   font-size: .9375rem;
 }
+
+/* Hard to miss — every field/button is silently inert in read-only mode,
+   so this has to make "click Edit" the obvious next step, not something
+   you have to notice the small header button to discover. */
+.readonly-banner {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: .875rem;
+}
+.readonly-banner #btn-detail-edit-banner {
+  background: #92400e;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 3px 10px;
+  font-size: .8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.readonly-banner #btn-detail-edit-banner:hover { background: #78350f; }

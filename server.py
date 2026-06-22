@@ -8,6 +8,7 @@ import csv
 import io
 import json
 import os
+import re
 import sys
 import uuid
 import shutil
@@ -168,6 +169,45 @@ def api_remove_question(q_id):
             swept += before_p - len(prod["answers"])
     save_partners(data)
     return jsonify({"ok": True, "answersRemoved": swept})
+
+
+# Adds a brand-new function (e.g. "Surround View") to the shared schema,
+# plus a matching empty product-scoped section -- mirrors "AEB Function
+# Detail" exactly (category "product", scope {type: "function", keys:
+# [key]}), so it picks up every existing rendering/scope-matching code
+# path with no extra propagation logic, same reasoning as publishing a
+# question. Starts with zero questions on purpose -- partners add their
+# own via the existing draft -> Publish flow once the function is real.
+@app.route("/api/schema/functions", methods=["POST"])
+def api_add_function():
+    body = request.get_json(force=True)
+    label = (body.get("label") or "").strip()
+    if not label:
+        return jsonify({"error": "label is required"}), 400
+
+    key = re.sub(r"[^A-Z0-9]+", "_", label.upper()).strip("_")
+    if not key:
+        return jsonify({"error": "could not derive a valid key from that name"}), 400
+
+    schema = load_schema()
+    if any(f["key"] == key for f in schema.get("productFunctions", [])):
+        return jsonify({"error": f'a function named "{label}" already exists'}), 400
+
+    section_id = "prod-func-" + key.lower().replace("_", "-")
+    if any(s["id"] == section_id for s in schema.get("detailSections", [])):
+        return jsonify({"error": "a section with that id already exists"}), 400
+
+    new_section = {
+        "id": section_id,
+        "category": "product",
+        "label": f"{label} Function Detail",
+        "domain": "perception-function",
+        "scope": {"type": "function", "keys": [key]},
+    }
+    schema["productFunctions"].append({"key": key, "label": label})
+    schema["detailSections"].append(new_section)
+    save_schema(schema)
+    return jsonify({"key": key, "label": label, "section": new_section}), 201
 
 
 # ── partners list ─────────────────────────────────────────────────────────────

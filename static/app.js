@@ -21,8 +21,10 @@ const State = {
   partnersSummary: [],   // lightweight list (from GET /api/partners)
   detailPartner: null,   // full partner object loaded for detail view
   detailDirty: false,
+  detailEditMode: false, // Partner Detail is read-only until this is true (see "Edit" button)
   activeDetailTab: 'general',
   statusFilter: 'all',   // answer-status filter shared across General/every Product tab
+  priorityFilter: 'all', // priority filter (combines with statusFilter via AND), same scope
   radarSelected: [],     // partner ids picked for the Comparison radar chart
   radarChart: null,      // current Chart.js instance, destroyed/rebuilt on selection change
   comparisonView: 'partners',       // 'partners' | 'products' sub-tab on the Comparison page
@@ -60,6 +62,14 @@ function comparisonGroups() {
       sectionIds: (schema.detailSections || []).filter(s => s.domain === d.id).map(s => s.id),
     }))
     .filter(g => g.sectionIds.length > 0);
+}
+
+// Partner Detail is read-only until State.detailEditMode is true (see the
+// "Edit" button). Dropped directly into every form element's template
+// string -- browser-enforced (a disabled element can't fire input/change),
+// so handleDetailChange needs no parallel gating for these.
+function editAttr() {
+  return State.detailEditMode ? '' : 'disabled';
 }
 
 // ── API helpers ────────────────────────────────────────────────────────────
@@ -613,6 +623,9 @@ async function openDetailFor(partnerId) {
 
 async function loadDetailPartner(partnerId) {
   if (!partnerId) {
+    State.detailPartner = null;
+    State.detailEditMode = false;
+    clearDirty();
     document.getElementById('detail-content').innerHTML =
       '<div class="select-partner-hint">Select a partner from the dropdown above.</div>';
     return;
@@ -623,6 +636,7 @@ async function loadDetailPartner(partnerId) {
     const partner = await api('GET', `/api/partners/${partnerId}`);
     State.detailPartner = JSON.parse(JSON.stringify(partner));
     State.activeDetailTab = 'general';
+    State.detailEditMode = false;
     clearDirty();
     renderDetailContent(partner);
   } catch (e) {
@@ -635,13 +649,22 @@ function renderDetailContent(p) {
   const schema = State.schema;
   const content = document.getElementById('detail-content');
   content.innerHTML = `
-    <div class="detail-layout print-target">
+    ${State.detailEditMode ? '' : `
+      <div class="readonly-banner" id="readonly-banner">
+        Viewing in read-only mode — every field and button is intentionally
+        inert until you <button type="button" id="btn-detail-edit-banner">click here to Edit</button>.
+      </div>
+    `}
+    <div class="detail-layout print-target${State.detailEditMode ? '' : ' detail-readonly'}">
       <!-- Sidebar -->
       <div class="detail-sidebar">
         <div class="card">
           <div class="card-header">
             <span class="card-title" id="detail-name-display">${esc(p.name)}</span>
-            <button class="btn btn-secondary btn-sm" id="btn-edit-meta">Edit Info</button>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" id="btn-edit-meta" ${editAttr()}>Edit Info</button>
+              <button class="btn btn-danger btn-sm" id="btn-remove-partner" ${editAttr()}>Remove</button>
+            </div>
           </div>
           <div class="card-body">
             <div class="info-block">
@@ -649,7 +672,7 @@ function renderDetailContent(p) {
               <div class="info-row"><span class="label">Product / Version</span><span class="value" id="di-version">${esc(p.productVersion || '—')}</span></div>
               <div class="info-row"><span class="label">Eval Date</span><span class="value" id="di-date">${esc(p.evaluationDate || '—')}</span></div>
               <div class="info-row"><span class="label">Stage</span><span class="value">
-                <select class="q-score-select" id="di-stage" style="width:auto;font-size:.8125rem;" data-field="stage">
+                <select class="q-score-select" id="di-stage" style="width:auto;font-size:.8125rem;" data-field="stage" ${editAttr()}>
                   ${STAGES.map(s => `<option value="${s}"${p.stage === s ? ' selected' : ''}>${s}</option>`).join('')}
                 </select>
                 <span class="print-val">${esc(p.stage || '')}</span>
@@ -673,7 +696,7 @@ function renderDetailContent(p) {
           <div class="card-body">
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label">Status</label>
-              <select class="form-select" id="di-decision-status" data-decision-field="status">
+              <select class="form-select" id="di-decision-status" data-decision-field="status" ${editAttr()}>
                 <option value="">— select —</option>
                 ${['Shortlisted','Hold','Rejected'].map(s =>
                   `<option value="${s}"${(p.decision||{}).status === s ? ' selected' : ''}>${s}</option>`
@@ -683,18 +706,18 @@ function renderDetailContent(p) {
             </div>
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label">Rationale</label>
-              <textarea class="form-textarea" rows="4" id="di-decision-rationale" data-decision-field="rationale"
+              <textarea class="form-textarea" rows="4" id="di-decision-rationale" data-decision-field="rationale" ${editAttr()}
                 placeholder="Describe the reasoning for this decision…">${esc((p.decision||{}).rationale || '')}</textarea>
               <div class="print-val">${esc((p.decision||{}).rationale || '')}</div>
             </div>
             <div class="form-group" style="margin-bottom:10px;">
               <label class="form-label">Reviewer</label>
-              <input class="form-input" id="di-decision-reviewer" type="text"
+              <input class="form-input" id="di-decision-reviewer" type="text" ${editAttr()}
                 value="${esc((p.decision||{}).reviewer || '')}" data-decision-field="reviewer" placeholder="Name / team" />
             </div>
             <div class="form-group">
               <label class="form-label">Decision Date</label>
-              <input class="form-input" id="di-decision-date" type="date"
+              <input class="form-input" id="di-decision-date" type="date" ${editAttr()}
                 value="${esc((p.decision||{}).date || '')}" data-decision-field="date" />
             </div>
           </div>
@@ -739,6 +762,7 @@ function renderDetailContent(p) {
   // Hard disqualifier toggles
   content.querySelectorAll('.hard-disqualifier-item').forEach(item => {
     item.addEventListener('click', () => {
+      if (!State.detailEditMode) return;
       markDirty();
       const hd = item.dataset.hd;
       const list = State.detailPartner.hardDisqualifiers || [];
@@ -788,6 +812,34 @@ function renderDetailContent(p) {
   document.getElementById('btn-edit-meta').addEventListener('click', () => {
     openEditMetaModal(p);
   });
+
+  // Remove partner
+  document.getElementById('btn-remove-partner').addEventListener('click', () => {
+    removePartner(p);
+  });
+
+  // Read-only banner's inline Edit shortcut -- reuses the same toggle the
+  // header's #btn-detail-edit button already runs, just one click closer
+  // when you've scrolled past the header.
+  const bannerEditBtn = document.getElementById('btn-detail-edit-banner');
+  if (bannerEditBtn) bannerEditBtn.addEventListener('click', () => document.getElementById('btn-detail-edit').click());
+}
+
+async function removePartner(p) {
+  if (!confirm(`Remove "${p.name}"? This permanently deletes the partner and all of its evaluation data. This cannot be undone.`)) return;
+  try {
+    await api('DELETE', `/api/partners/${p.id}`);
+    toast(`"${p.name}" removed`);
+    State.detailPartner = null;
+    clearDirty();
+    await refreshPartnersSummary();
+    populateDetailSelect();
+    document.getElementById('detail-partner-select').value = '';
+    document.getElementById('detail-content').innerHTML =
+      '<div class="select-partner-hint">Select a partner from the dropdown above to view their evaluation detail.</div>';
+  } catch (e) {
+    toast('Remove failed: ' + e.message, true);
+  }
 }
 
 function handleDetailChange(e) {
@@ -848,22 +900,14 @@ function handleDetailChange(e) {
     return;
   }
 
-  // Draft question priority — moves it between High/Medium/Low tabs, so
-  // the section needs to re-render (same reasoning as patentRelevanceType
-  // below). Jump the card to the new tab afterward, same as adding a
-  // draft — otherwise the row you just edited can vanish into a tab that
-  // isn't the one shown by default after refresh.
+  // Draft question priority — just changes the row's colour-coded edge
+  // now (see answerRowHtml), no tab to jump to anymore.
   if (el.dataset.draftPriority) {
     markDirty();
     const draftId = parseInt(el.dataset.draftPriority, 10);
     const draft = (State.detailPartner.draftQuestions || []).find(d => d.id === draftId);
-    if (!draft) return;
-    const newPriority = el.value;
-    draft.priority = newPriority;
-    const panelId = el.closest('.detail-tab-panel')?.id;
-    const sectionId = draft.sectionId;
+    if (draft) draft.priority = el.value;
     refreshDetailTabsAndPanels();
-    jumpSectionCardToPriorityTab(panelId, sectionId, newPriority);
     return;
   }
 
@@ -930,6 +974,14 @@ function handleDetailChange(e) {
     return;
   }
 
+  // Product general notes (distinct from per-sensor notes above)
+  if (el.dataset.productNotes) {
+    markDirty();
+    const prod = findProduct(el.dataset.productNotes);
+    if (prod) prod.notes = el.value;
+    return;
+  }
+
   // Notes
   if (el.id === 'di-notes') {
     markDirty();
@@ -983,7 +1035,7 @@ function newProduct(schema, ordinal) {
   // products (a partner with products A/B/C can have A and B both hero,
   // C not) -- used by the customer-meeting-prep view to elevate priority
   // regardless of a question's static tag.
-  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, isHero: false, sectionGrades: [] };
+  return { id, name: 'Product ' + ordinal, sensors, functions, socs, sensorNotes, notes: '', isHero: false, sectionGrades: [] };
 }
 
 function computePortfolio(products, schema) {
@@ -1021,7 +1073,7 @@ function detailTabButtonsHtml(p, activeTab) {
     const key = 'product:' + prod.id;
     html += `<button class="detail-subtab${activeTab === key ? ' active' : ''}" data-detail-tab="${key}">${esc(prod.name || 'Product')}</button>`;
   });
-  html += `<button class="btn btn-secondary btn-sm" data-add-product type="button">+ Add Product</button>`;
+  html += `<button class="btn btn-secondary btn-sm" data-add-product type="button" ${editAttr()}>+ Add Product</button>`;
   html += `<button class="detail-subtab${activeTab === 'patents' ? ' active' : ''}" data-detail-tab="patents">Patents</button>`;
   html += `<button class="detail-subtab${activeTab === 'notes' ? ' active' : ''}" data-detail-tab="notes">Notes</button>`;
   return html;
@@ -1094,22 +1146,22 @@ function answerRowHtml(q, ans, key) {
   const isDraft = q.id < 0;
   const numCell = isDraft
     ? `<span class="draft-badge">Draft</span>`
-    : `<span class="q-num">${questionLabel(q)}<button class="q-remove-btn" type="button" data-remove-question="${q.id}" title="Remove this question">✕</button></span>`;
+    : `<span class="q-num">${questionLabel(q)}<button class="q-remove-btn" type="button" data-remove-question="${q.id}" title="Remove this question" ${editAttr()}>✕</button></span>`;
   const textCell = isDraft
-    ? `<textarea class="q-remarks-input q-draft-text" rows="2" placeholder="Type the new question…" data-draft-text="${q.id}">${esc(q.text)}</textarea><span class="print-val">${esc(q.text)}</span>`
+    ? `<textarea class="q-remarks-input q-draft-text" rows="2" placeholder="Type the new question…" data-draft-text="${q.id}" ${editAttr()}>${esc(q.text)}</textarea><span class="print-val">${esc(q.text)}</span>`
     : `<div class="q-text">${esc(q.text)}</div>`;
   return `
-    <div class="ans-row${isDraft ? ' ans-row-draft' : ''}" data-row-status="${esc(ans.status || '')}">
+    <div class="ans-row${isDraft ? ' ans-row-draft' : ''}" data-row-status="${esc(ans.status || '')}" data-priority="${esc(q.priority || 'medium')}">
       ${numCell}
       ${textCell}
-      <select class="q-score-select" data-ans-status="${key}">
+      <select class="q-score-select" data-ans-status="${key}" ${editAttr()}>
         <option value="">— Select —</option>
         ${schema.answerStatuses.map(s => `<option value="${s.key}"${ans.status === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
       </select>
       <span class="print-val">${esc(answerStatusLabel(ans.status))}</span>
-      <textarea class="q-remarks-input" rows="2" placeholder="Partner response…" data-ans-partner-response="${key}">${esc(ans.partnerResponse || '')}</textarea>
+      <textarea class="q-remarks-input" rows="2" placeholder="Partner response…" data-ans-partner-response="${key}" ${editAttr()}>${esc(ans.partnerResponse || '')}</textarea>
       <span class="print-val">${esc(ans.partnerResponse || '')}</span>
-      <textarea class="q-remarks-input" rows="2" placeholder="L&amp;T remarks…" data-ans-remarks="${key}">${esc(ans.remarks || '')}</textarea>
+      <textarea class="q-remarks-input" rows="2" placeholder="L&amp;T remarks…" data-ans-remarks="${key}" ${editAttr()}>${esc(ans.remarks || '')}</textarea>
       <span class="print-val">${esc(ans.remarks || '')}</span>
     </div>
     ${isDraft ? draftActionsRowHtml(q) : ''}
@@ -1129,42 +1181,33 @@ function draftActionsRowHtml(q) {
   return `
     <div class="draft-row-actions">
       <label class="text-muted">Priority
-        <select class="q-score-select" data-draft-priority="${q.id}">
+        <select class="q-score-select" data-draft-priority="${q.id}" ${editAttr()}>
           ${PRIORITY_TABS.map(p => `<option value="${p.key}"${q.priority === p.key ? ' selected' : ''}>${p.label}</option>`).join('')}
         </select>
       </label>
-      <button class="btn btn-secondary btn-sm" type="button" data-publish-draft-question="${q.id}">Publish</button>
-      <button class="btn btn-ghost btn-sm" type="button" data-remove-draft-question="${q.id}">Discard draft</button>
+      <button class="btn btn-secondary btn-sm" type="button" data-publish-draft-question="${q.id}" ${editAttr()}>Publish</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-remove-draft-question="${q.id}" ${editAttr()}>Discard draft</button>
     </div>
   `;
 }
 
-function priorityPanelHtml(priorityKey, questions, getAnswer, keyFor) {
-  if (questions.length === 0) {
-    return `<div class="text-muted" style="font-size:.8125rem;padding:8px 0;">No ${priorityKey}-priority questions in this section.</div>`;
-  }
-  return `
-    <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Partner Response</span><span>L&amp;T Remarks</span></div>
-    ${questions.map(q => answerRowHtml(q, getAnswer(q.id), keyFor(q.id))).join('')}
-  `;
-}
-
-// Each section's questions are split into High/Med/Low sub-tabs — High =
-// cover live in the first customer meeting, Low = fine as a written
-// follow-up (see schema.detailQuestions[].priority). Defaults to the
-// first non-empty tab so a section with no High questions doesn't open
-// on an empty panel.
+// Each question's priority (High/Medium/Low — see
+// schema.detailQuestions[].priority) shows as a colour-coded left border
+// on its row (see .ans-row[data-priority] in style.css) rather than a
+// per-section sub-tab — narrowing to one priority at a time is what the
+// global "Filter by priority" row (shared across every section on the
+// tab) is for now.
 function sectionGradeRowHtml(sectionGrade, gradeKey) {
   const schema = State.schema;
   return `
     <div class="section-grade-row">
       <label class="form-label">Section Grade</label>
-      <select class="q-score-select section-grade-select" data-section-grade="${gradeKey}">
+      <select class="q-score-select section-grade-select" data-section-grade="${gradeKey}" ${editAttr()}>
         <option value="">— select —</option>
         ${schema.gradeStatuses.map(g => `<option value="${g.key}"${sectionGrade.grade === g.key ? ' selected' : ''}>${esc(g.label)}</option>`).join('')}
       </select>
       <span class="print-val">${esc(gradeStatusLabel(sectionGrade.grade))}</span>
-      <textarea class="q-remarks-input" rows="2" placeholder="Justification for this grade…" data-section-grade-justification="${gradeKey}">${esc(sectionGrade.justification || '')}</textarea>
+      <textarea class="q-remarks-input" rows="2" placeholder="Justification for this grade…" data-section-grade-justification="${gradeKey}" ${editAttr()}>${esc(sectionGrade.justification || '')}</textarea>
       <span class="print-val">${esc(sectionGrade.justification || '')}</span>
     </div>
   `;
@@ -1172,34 +1215,32 @@ function sectionGradeRowHtml(sectionGrade, gradeKey) {
 
 function answerQuestionsTableHtml(sectionId, title, questions, getAnswer, keyFor, inactiveNote, sectionGrade, gradeKey) {
   sectionGrade = sectionGrade || { grade: '', justification: '' };
-  // Status filter is a display-only concern — it narrows what's grouped
-  // into the High/Med/Low tabs below, but `questions.length` (used to
-  // decide "is this section empty") stays based on the unfiltered count,
-  // so a fully-filtered-out section still shows its normal tabs with
-  // "No {priority}-priority questions" rather than the misleading
-  // "No questions defined for this section yet."
-  const filtered = State.statusFilter === 'all'
-    ? questions
-    : questions.filter(q => (getAnswer(q.id).status || '') === State.statusFilter);
-  const byPriority = { high: [], medium: [], low: [] };
-  filtered.forEach(q => { (byPriority[q.priority] || byPriority.medium).push(q); });
-  const firstNonEmpty = PRIORITY_TABS.find(p => byPriority[p.key].length > 0) || PRIORITY_TABS[0];
+  // Status + priority filters are a display-only concern (combined via
+  // AND) — `questions.length` (used to decide "is this section empty")
+  // stays based on the unfiltered count, so a fully-filtered-out section
+  // still shows "No questions match the current filter" rather than the
+  // misleading "No questions defined for this section yet."
+  // Drafts (q.id < 0) are always exempt from both filters — you're
+  // actively authoring them, not reviewing existing answers, so a
+  // restrictive filter must never make "+ Add Question" look like it
+  // silently does nothing (found via a real bug report: a draft
+  // defaults to medium priority, so a "Low" priority filter hid it
+  // completely even though it really was added).
+  const filtered = questions.filter(q => {
+    if (q.id < 0) return true;
+    if (State.statusFilter !== 'all' && (getAnswer(q.id).status || '') !== State.statusFilter) return false;
+    if (State.priorityFilter !== 'all' && q.priority !== State.priorityFilter) return false;
+    return true;
+  });
 
-  const tabsHtml = questions.length === 0 ? '' : `
-    <div class="priority-tab-row">
-      ${PRIORITY_TABS.map(p => `
-        <button class="priority-tab priority-tab-${p.key}${p.key === firstNonEmpty.key ? ' active' : ''}" data-priority-tab="${p.key}" type="button">${p.label} (${byPriority[p.key].length})</button>
-      `).join('')}
-    </div>
-  `;
-
-  const panelsHtml = questions.length === 0
+  const bodyHtml = questions.length === 0
     ? `<div class="text-muted" style="font-size:.8125rem;">No questions defined for this section yet.</div>`
-    : PRIORITY_TABS.map(p => `
-        <div class="priority-panel" data-priority-panel="${p.key}"${p.key === firstNonEmpty.key ? '' : ' style="display:none;"'}>
-          ${priorityPanelHtml(p.key, byPriority[p.key], getAnswer, keyFor)}
-        </div>
-      `).join('');
+    : filtered.length === 0
+    ? `<div class="text-muted" style="font-size:.8125rem;">No questions match the current filter.</div>`
+    : `
+      <div class="ans-row q-table-header"><span>#</span><span>Question</span><span>Status</span><span>Partner Response</span><span>L&amp;T Remarks</span></div>
+      ${filtered.map(q => answerRowHtml(q, getAnswer(q.id), keyFor(q.id))).join('')}
+    `;
 
   return `
     <div class="card q-section-card">
@@ -1209,10 +1250,9 @@ function answerQuestionsTableHtml(sectionId, title, questions, getAnswer, keyFor
       </div>
       <div class="card-body">
         ${gradeKey ? sectionGradeRowHtml(sectionGrade, gradeKey) : ''}
-        ${tabsHtml}
-        ${panelsHtml}
+        ${bodyHtml}
         <div class="q-section-footer">
-          <button class="btn btn-secondary btn-sm" type="button" data-add-draft-question="${sectionId}">+ Add Question</button>
+          <button class="btn btn-secondary btn-sm" type="button" data-add-draft-question="${sectionId}" ${editAttr()}>+ Add Question</button>
         </div>
       </div>
     </div>
@@ -1243,22 +1283,6 @@ function questionsForSection(sectionId) {
 function questionsForSectionAll(sectionId) {
   const drafts = (State.detailPartner.draftQuestions || []).filter(d => d.sectionId === sectionId);
   return questionsForSection(sectionId).concat(drafts);
-}
-
-// After refreshDetailTabsAndPanels() resets every section card back to its
-// own firstNonEmpty priority tab, a draft that was just added or just
-// changed priority can land in a tab that isn't the one shown by default
-// — switch that one section's card to the right tab so the row the user
-// is looking at doesn't appear to vanish. A scoped product section can be
-// rendered on more than one product tab at once (all tabs exist in the
-// DOM simultaneously, just hidden), so the lookup is scoped to panelId.
-function jumpSectionCardToPriorityTab(panelId, sectionId, priorityKey) {
-  if (!panelId) return;
-  const card = document.querySelector(`#${panelId} [data-add-draft-question="${CSS.escape(sectionId)}"]`)?.closest('.q-section-card');
-  if (!card) return null;
-  card.querySelectorAll('[data-priority-tab]').forEach(b => b.classList.toggle('active', b.dataset.priorityTab === priorityKey));
-  card.querySelectorAll('[data-priority-panel]').forEach(p => { p.style.display = p.dataset.priorityPanel === priorityKey ? '' : 'none'; });
-  return card;
 }
 
 // Dotted question numbering ("1.2.5" = 1st domain, 2nd section within that
@@ -1389,12 +1413,12 @@ function domainGradingCardHtml(p) {
           return `
             <div class="domain-grade-sidebar-row">
               <div class="domain-grade-sidebar-label">${esc(d.label)}</div>
-              <select class="form-select" data-domain-grade="${d.id}">
+              <select class="form-select" data-domain-grade="${d.id}" ${editAttr()}>
                 <option value="">— select —</option>
                 ${schema.gradeStatuses.map(g => `<option value="${g.key}"${dg.grade === g.key ? ' selected' : ''}>${esc(g.label)}</option>`).join('')}
               </select>
               <span class="print-val">${esc(gradeStatusLabel(dg.grade))}</span>
-              <textarea class="form-textarea" rows="2" placeholder="Justification…" data-domain-grade-justification="${d.id}">${esc(dg.justification || '')}</textarea>
+              <textarea class="form-textarea" rows="2" placeholder="Justification…" data-domain-grade-justification="${d.id}" ${editAttr()}>${esc(dg.justification || '')}</textarea>
               <div class="print-val">${esc(dg.justification || '')}</div>
             </div>
           `;
@@ -1442,14 +1466,23 @@ function heroProductsCardHtml(p) {
 // State.activeDetailTab already persists. Labels come straight from
 // schema.answerStatuses, so this needs no new schema entry and stays in
 // sync if that list ever changes.
-function statusFilterRowHtml() {
+function detailFilterRowHtml() {
   const statuses = State.schema.answerStatuses || [];
   return `
-    <div class="status-filter-row">
-      <span class="text-muted" style="font-size:.75rem;margin-right:6px;">Filter by status:</span>
-      <div class="toggle-pill-row" style="display:inline-flex;">
-        <span class="toggle-pill${State.statusFilter === 'all' ? ' on' : ''}" data-status-filter="all">All</span>
-        ${statuses.map(s => `<span class="toggle-pill${State.statusFilter === s.key ? ' on' : ''}" data-status-filter="${s.key}">${esc(s.label)}</span>`).join('')}
+    <div class="detail-filter-row">
+      <div>
+        <span class="text-muted" style="font-size:.75rem;margin-right:6px;">Filter by status:</span>
+        <div class="toggle-pill-row" style="display:inline-flex;">
+          <span class="toggle-pill${State.statusFilter === 'all' ? ' on' : ''}" data-status-filter="all">All</span>
+          ${statuses.map(s => `<span class="toggle-pill${State.statusFilter === s.key ? ' on' : ''}" data-status-filter="${s.key}">${esc(s.label)}</span>`).join('')}
+        </div>
+      </div>
+      <div>
+        <span class="text-muted" style="font-size:.75rem;margin-right:6px;">Filter by priority:</span>
+        <div class="toggle-pill-row" style="display:inline-flex;">
+          <span class="toggle-pill${State.priorityFilter === 'all' ? ' on' : ''}" data-priority-filter="all">All</span>
+          ${PRIORITY_TABS.map(p => `<span class="toggle-pill${State.priorityFilter === p.key ? ' on' : ''}" data-priority-filter="${p.key}">${p.label}</span>`).join('')}
+        </div>
       </div>
     </div>
   `;
@@ -1488,7 +1521,7 @@ function generalTabHtml(p) {
         ${products.length === 0 ? '<div class="text-muted" style="font-size:.8125rem;margin-top:8px;">No products added yet — use "+ Add Product" above.</div>' : ''}
       </div>
     </div>
-    ${statusFilterRowHtml()}
+    ${detailFilterRowHtml()}
     ${domainGroupedSectionsHtml(
       sections.map(sec => ({ section: sec })),
       ({ section }) => answerQuestionsTableHtml(section.id, section.label, questionsForSectionAll(section.id),
@@ -1506,7 +1539,7 @@ function productTabHtml(prod) {
   const sections = sectionsForProduct(prod);
   return `
     ${productCardHtml(prod, schema)}
-    ${statusFilterRowHtml()}
+    ${detailFilterRowHtml()}
     ${domainGroupedSectionsHtml(
       sections.map(({ section, active }) => ({ section, active })),
       ({ section, active }) => answerQuestionsTableHtml(section.id, section.label, questionsForSectionAll(section.id),
@@ -1524,7 +1557,7 @@ function notesTabHtml(p) {
     <div class="card">
       <div class="card-header"><span class="card-title">General Notes</span></div>
       <div class="card-body">
-        <textarea class="form-textarea" style="min-height:300px;" id="di-notes"
+        <textarea class="form-textarea" style="min-height:300px;" id="di-notes" ${editAttr()}
           placeholder="Any general notes, meeting summaries, open questions…">${esc(p.notes || '')}</textarea>
         <div class="print-val">${esc(p.notes || '')}</div>
       </div>
@@ -1559,58 +1592,58 @@ function patentCardHtml(pt, schema) {
   let relevanceControl = '<div class="text-muted" style="font-size:.8125rem;padding-top:8px;">—</div>';
   if (relevanceType === 'sensor') {
     relevanceControl = `
-      <select class="form-select" data-patent-field="${pt.id}:relevanceKey">
+      <select class="form-select" data-patent-field="${pt.id}:relevanceKey" ${editAttr()}>
         <option value="">— select sensor —</option>
         ${schema.productSensors.map(s => `<option value="${s.key}"${pt.relevanceKey === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
       </select>`;
   } else if (relevanceType === 'function') {
     relevanceControl = `
-      <select class="form-select" data-patent-field="${pt.id}:relevanceKey">
+      <select class="form-select" data-patent-field="${pt.id}:relevanceKey" ${editAttr()}>
         <option value="">— select function —</option>
         ${schema.productFunctions.map(f => `<option value="${f.key}"${pt.relevanceKey === f.key ? ' selected' : ''}>${esc(f.label)}</option>`).join('')}
       </select>`;
   } else if (relevanceType) {
     relevanceControl = `
-      <input class="form-input" type="text" placeholder="What is this relevant to?"
+      <input class="form-input" type="text" placeholder="What is this relevant to?" ${editAttr()}
         data-patent-field="${pt.id}:relevanceLabel" value="${esc(pt.relevanceLabel || '')}" />`;
   }
 
   return `
     <div class="card patent-card" data-patent-id="${pt.id}">
       <div class="card-header">
-        <input class="form-input" style="font-weight:600;max-width:280px;"
+        <input class="form-input" style="font-weight:600;max-width:280px;" ${editAttr()}
           data-patent-field="${pt.id}:title" value="${esc(pt.title || '')}" />
-        <button class="btn btn-danger btn-sm" data-remove-patent="${pt.id}" type="button">Remove</button>
+        <button class="btn btn-danger btn-sm" data-remove-patent="${pt.id}" type="button" ${editAttr()}>Remove</button>
       </div>
       <div class="card-body">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
           <div class="form-group">
             <label class="form-label">Patent ID / Application No.</label>
-            <input class="form-input" type="text" placeholder="e.g. US17/123,456"
+            <input class="form-input" type="text" placeholder="e.g. US17/123,456" ${editAttr()}
               data-patent-field="${pt.id}:patentId" value="${esc(pt.patentId || '')}" />
           </div>
           <div class="form-group">
             <label class="form-label">Status</label>
-            <select class="form-select" data-patent-field="${pt.id}:status">
+            <select class="form-select" data-patent-field="${pt.id}:status" ${editAttr()}>
               <option value="">— select —</option>
               ${schema.patentStatuses.map(s => `<option value="${s.key}"${pt.status === s.key ? ' selected' : ''}>${esc(s.label)}</option>`).join('')}
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Jurisdiction</label>
-            <input class="form-input" type="text" placeholder="e.g. India, US, EU"
+            <input class="form-input" type="text" placeholder="e.g. India, US, EU" ${editAttr()}
               data-patent-field="${pt.id}:jurisdiction" value="${esc(pt.jurisdiction || '')}" />
           </div>
           <div class="form-group">
             <label class="form-label">Granted By</label>
-            <input class="form-input" type="text" placeholder="e.g. USPTO, IPO India"
+            <input class="form-input" type="text" placeholder="e.g. USPTO, IPO India" ${editAttr()}
               data-patent-field="${pt.id}:grantedBy" value="${esc(pt.grantedBy || '')}" />
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;">
           <div class="form-group">
             <label class="form-label">Relevant To</label>
-            <select class="form-select" data-patent-relevance-type="${pt.id}">
+            <select class="form-select" data-patent-relevance-type="${pt.id}" ${editAttr()}>
               <option value="">— none —</option>
               ${schema.patentRelevanceTypes.map(r => `<option value="${r.key}"${relevanceType === r.key ? ' selected' : ''}>${esc(r.label)}</option>`).join('')}
             </select>
@@ -1622,7 +1655,7 @@ function patentCardHtml(pt, schema) {
         </div>
         <div class="form-group">
           <label class="form-label">Notes</label>
-          <textarea class="form-textarea" rows="2" placeholder="Notes…"
+          <textarea class="form-textarea" rows="2" placeholder="Notes…" ${editAttr()}
             data-patent-field="${pt.id}:notes">${esc(pt.notes || '')}</textarea>
         </div>
       </div>
@@ -1635,7 +1668,7 @@ function patentsTabHtml(p) {
   const patents = p.patents || [];
   return `
     <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-      <button class="btn btn-secondary btn-sm" data-add-patent type="button">+ Add Patent</button>
+      <button class="btn btn-secondary btn-sm" data-add-patent type="button" ${editAttr()}>+ Add Patent</button>
     </div>
     ${patents.length === 0
       ? '<div class="text-muted" style="font-size:.8125rem;">No patents added yet.</div>'
@@ -1708,9 +1741,9 @@ function productCardHtml(prod, schema) {
   return `
     <div class="card product-card" data-product-id="${prod.id}">
       <div class="card-header">
-        <input class="form-input" style="font-weight:600;max-width:280px;"
+        <input class="form-input" style="font-weight:600;max-width:280px;" ${editAttr()}
           data-product-name="${prod.id}" value="${esc(prod.name || '')}" />
-        <button class="btn btn-danger btn-sm" data-remove-product="${prod.id}" type="button">Remove</button>
+        <button class="btn btn-danger btn-sm" data-remove-product="${prod.id}" type="button" ${editAttr()}>Remove</button>
       </div>
       <div class="card-body">
         <div class="product-toggle-label">Sensors</div>
@@ -1729,26 +1762,40 @@ function productCardHtml(prod, schema) {
           return `
           <div class="product-note-group">
             <label class="form-label">${esc(s.label)} notes — spec, details…${checked ? '' : ' <span class="text-muted" style="font-weight:400;">(sensor unchecked — kept because it has saved notes)</span>'}</label>
-            <textarea class="form-textarea" rows="2" placeholder="${esc(s.label)} spec / notes…"
+            <textarea class="form-textarea" rows="2" placeholder="${esc(s.label)} spec / notes…" ${editAttr()}
               data-product-note="${prod.id}:${s.key}">${esc((prod.sensorNotes && prod.sensorNotes[s.key]) || '')}</textarea>
             <div class="print-val">${esc((prod.sensorNotes && prod.sensorNotes[s.key]) || '')}</div>
           </div>
         `;
         }).join('')}
-        <div class="product-toggle-label" style="margin-top:14px;">Functions</div>
+        <div class="product-toggle-label" style="margin-top:14px;display:flex;align-items:center;gap:8px;">
+          Functions
+          <button class="btn btn-secondary btn-sm" type="button" data-add-function style="padding:1px 8px;font-size:.6875rem;font-weight:600;text-transform:none;letter-spacing:0;" ${editAttr()}>+ Add Function</button>
+        </div>
         <div class="toggle-pill-row" style="margin-bottom:8px;">
           ${schema.productFunctions.map(f => {
             const on = !!(prod.functions && prod.functions[f.key]);
             return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-function="${prod.id}:${f.key}">${esc(f.label)}</span>`;
           }).join('')}
         </div>
-        <div class="product-toggle-label" style="margin-top:14px;">SoCs</div>
-        <div class="toggle-pill-row">
-          ${(schema.productSocs || []).map(c => {
-            const on = !!(prod.socs && prod.socs[c.key]);
-            return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-soc="${prod.id}:${c.key}">${esc(c.label)}</span>`;
-          }).join('')}
-        </div>
+        ${(() => {
+          const socChecked = !!(prod.sensors && prod.sensors.soc);
+          const hasSocSelected = (schema.productSocs || []).some(c => prod.socs && prod.socs[c.key]);
+          if (!socChecked && !hasSocSelected) return '';
+          return `
+            <div class="product-toggle-label" style="margin-top:14px;">SoCs${socChecked ? '' : ' <span class="text-muted" style="font-weight:400;">(SoC unchecked — kept because a type is already selected)</span>'}</div>
+            <div class="toggle-pill-row">
+              ${(schema.productSocs || []).map(c => {
+                const on = !!(prod.socs && prod.socs[c.key]);
+                return `<span class="toggle-pill${on ? ' on' : ''}" data-toggle-soc="${prod.id}:${c.key}">${esc(c.label)}</span>`;
+              }).join('')}
+            </div>
+          `;
+        })()}
+        <div class="product-toggle-label" style="margin-top:14px;">Notes</div>
+        <textarea class="form-textarea" rows="3" placeholder="General notes for this product — anything that doesn't fit a specific sensor/function…" ${editAttr()}
+          data-product-notes="${prod.id}">${esc(prod.notes || '')}</textarea>
+        <div class="print-val">${esc(prod.notes || '')}</div>
       </div>
     </div>
   `;
@@ -1764,22 +1811,16 @@ async function handleDetailClick(e) {
     return;
   }
 
-  // High/Medium/Low priority sub-tabs within a section's card-body.
-  const priorityTabBtn = e.target.closest('[data-priority-tab]');
-  if (priorityTabBtn) {
-    const card = priorityTabBtn.closest('.q-section-card');
-    if (card) {
-      const key = priorityTabBtn.dataset.priorityTab;
-      card.querySelectorAll('[data-priority-tab]').forEach(b => b.classList.toggle('active', b === priorityTabBtn));
-      card.querySelectorAll('[data-priority-panel]').forEach(p => {
-        p.style.display = p.dataset.priorityPanel === key ? '' : 'none';
-      });
-    }
-    return;
-  }
-
-  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc],[data-toggle-hero-product],[data-add-patent],[data-remove-patent],[data-add-draft-question],[data-remove-draft-question],[data-publish-draft-question],[data-remove-question],[data-status-filter]');
+  const el = e.target.closest('[data-business-model],[data-add-product],[data-remove-product],[data-toggle-sensor],[data-toggle-function],[data-toggle-soc],[data-toggle-hero-product],[data-add-patent],[data-remove-patent],[data-add-draft-question],[data-remove-draft-question],[data-publish-draft-question],[data-remove-question],[data-status-filter],[data-priority-filter],[data-add-function]');
   if (!el) return;
+
+  // Every action reachable here mutates partner data except the status
+  // and priority filters (view-only display toggles) -- buttons in this
+  // list already get `disabled` baked into their template when not in
+  // edit mode, but the pill-style toggles (sensors/functions/SoCs/
+  // hero-products/business model) are plain <span>s, which can't be
+  // disabled, so they need this explicit guard instead.
+  if (!State.detailEditMode && el.dataset.statusFilter === undefined && el.dataset.priorityFilter === undefined) return;
 
   if (el.dataset.businessModel !== undefined) {
     markDirty();
@@ -1864,17 +1905,20 @@ async function handleDetailClick(e) {
   if (el.dataset.addDraftQuestion !== undefined) {
     markDirty();
     const sectionId = el.dataset.addDraftQuestion;
+    // A scoped product section can be rendered on more than one product
+    // tab at once (all tabs exist in the DOM simultaneously, just
+    // hidden), so the re-query below is scoped to the panel this click
+    // came from.
     const panelId = el.closest('.detail-tab-panel')?.id;
     const drafts = State.detailPartner.draftQuestions || (State.detailPartner.draftQuestions = []);
     const nextId = Math.min(0, ...drafts.map(d => d.id)) - 1;
     drafts.push({ id: nextId, sectionId, text: '', priority: 'medium' });
     refreshDetailTabsAndPanels();
-    // New drafts default to Medium priority — jump that section's card to
-    // the Medium tab so the new (still-empty) row is visible immediately,
-    // regardless of which priority tab happened to be active before.
-    const card = jumpSectionCardToPriorityTab(panelId, sectionId, 'medium');
-    if (card) {
-      const textarea = card.querySelector(`[data-draft-text="${nextId}"]`);
+    // Focus the new draft's text box — every priority renders in one
+    // flat list now, so there's no tab to jump to first.
+    if (panelId) {
+      const card = document.querySelector(`#${panelId} [data-add-draft-question="${CSS.escape(sectionId)}"]`)?.closest('.q-section-card');
+      const textarea = card?.querySelector(`[data-draft-text="${nextId}"]`);
       if (textarea) { textarea.focus(); autoGrowTextarea(textarea); }
     }
     return;
@@ -1957,6 +2001,27 @@ async function handleDetailClick(e) {
     refreshDetailTabsAndPanels();
     return;
   }
+
+  if (el.dataset.priorityFilter !== undefined) {
+    State.priorityFilter = el.dataset.priorityFilter;
+    refreshDetailTabsAndPanels();
+    return;
+  }
+
+  if (el.dataset.addFunction !== undefined) {
+    const label = (prompt('New function name (e.g. "Surround View"):') || '').trim();
+    if (!label) return;
+    try {
+      const result = await api('POST', '/api/schema/functions', { label });
+      State.schema.productFunctions.push({ key: result.key, label: result.label });
+      State.schema.detailSections.push(result.section);
+      refreshDetailTabsAndPanels();
+      toast(`Function "${result.label}" added — now available on every product across every partner.`);
+    } catch (err) {
+      toast('Add function failed: ' + err.message, true);
+    }
+    return;
+  }
 }
 
 // ── Edit Meta modal ────────────────────────────────────────────────────────
@@ -2009,9 +2074,11 @@ function markDirty() {
   const indicator = document.getElementById('detail-dirty-indicator');
   const btnSave    = document.getElementById('btn-detail-save');
   const btnDiscard = document.getElementById('btn-detail-discard');
+  const btnEdit    = document.getElementById('btn-detail-edit');
   if (indicator) indicator.style.display = '';
   if (btnSave)    btnSave.style.display   = '';
   if (btnDiscard) btnDiscard.style.display = '';
+  if (btnEdit)    btnEdit.style.display    = 'none'; // Save/Discard take over while dirty
 }
 
 function clearDirty() {
@@ -2022,6 +2089,19 @@ function clearDirty() {
   if (indicator) indicator.style.display = 'none';
   if (btnSave)    btnSave.style.display   = 'none';
   if (btnDiscard) btnDiscard.style.display = 'none';
+  refreshEditButtonLabel();
+}
+
+// Partner Detail is read-only until this button is clicked. Shown as
+// "Edit" (not in edit mode) or "Done" (in edit mode, no unsaved changes --
+// markDirty() above hides this in favor of Save/Discard once there's
+// something to commit).
+function refreshEditButtonLabel() {
+  const btnEdit = document.getElementById('btn-detail-edit');
+  if (!btnEdit) return;
+  if (!State.detailPartner) { btnEdit.style.display = 'none'; return; }
+  btnEdit.style.display = '';
+  btnEdit.textContent = State.detailEditMode ? 'Done' : 'Edit';
 }
 
 async function saveDetail() {
@@ -2040,6 +2120,11 @@ async function saveDetail() {
     await refreshPartnersSummary();
     const opt = document.querySelector(`#detail-partner-select option[value="${State.detailPartner.id}"]`);
     if (opt) opt.textContent = State.detailPartner.name;
+    // Back to read-only after a successful save, same as a fresh load --
+    // editing again requires clicking Edit, consistent everywhere.
+    State.detailEditMode = false;
+    renderDetailContent(State.detailPartner);
+    refreshEditButtonLabel();
   } catch (e) {
     // Restore dirty so the user knows the save failed and can retry
     markDirty();
@@ -2262,6 +2347,14 @@ async function boot() {
   document.getElementById('btn-detail-discard').addEventListener('click', async () => {
     if (!State.detailPartner) return;
     await discardDetail();
+  });
+
+  // Edit / Done toggle — Partner Detail is read-only until this is clicked
+  document.getElementById('btn-detail-edit').addEventListener('click', () => {
+    if (!State.detailPartner) return;
+    State.detailEditMode = !State.detailEditMode;
+    renderDetailContent(State.detailPartner);
+    refreshEditButtonLabel();
   });
 
   // Browser close / refresh warning

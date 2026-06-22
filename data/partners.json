@@ -12,8 +12,35 @@
         "date": "2026-06-17",
         "rationale": "Strong company track record and production readiness. Cybersecurity posture needs improvement before SOP. Functional safety documentation gaps to be resolved.",
         "reviewer": "ADAS Architecture Team",
-        "status": "Shortlisted"
+        "status": ""
       },
+      "domainGrades": [
+        {
+          "domainId": "company-background",
+          "grade": "developing",
+          "justification": ""
+        },
+        {
+          "domainId": "perception-function",
+          "grade": "good",
+          "justification": ""
+        },
+        {
+          "domainId": "regulation-compliance",
+          "grade": "outstanding",
+          "justification": ""
+        },
+        {
+          "domainId": "hardware-capability",
+          "grade": "developing",
+          "justification": ""
+        },
+        {
+          "domainId": "patents-innovation",
+          "grade": "na",
+          "justification": ""
+        }
+      ],
       "evaluationDate": "2026-06-17",
       "evaluator": "L&T ADAS Team",
       "generalAnswers": [],
@@ -36,8 +63,12 @@
             "MOIS": false,
             "RCTA": false
           },
+          "heroFunctions": [],
+          "heroSensors": [],
           "id": "87228a63-a5a5-4032-a55b-a63bd9343d83",
+          "isHero": true,
           "name": "Product 1",
+          "sectionGrades": [],
           "sensorNotes": {
             "camera": "",
             "fusion": "",
@@ -47,12 +78,10 @@
           "sensors": {
             "camera": false,
             "fusion": false,
+            "lidar": false,
             "radar": true,
             "soc": true
-          },
-          "heroSensors": [],
-          "heroFunctions": [],
-          "sectionGrades": []
+          }
         },
         {
           "answers": [],
@@ -66,8 +95,152 @@
             "MOIS": false,
             "RCTA": false
           },
+          "heroFunctions": [],
+          "heroSensors": [],
           "id": "3a9c2c80-1584-4965-965f-a815c3cce1c5",
           "name": "Product 2",
+          "sectionGrades": [],
+          "sensorNotes": {
+            "camera": "",
+            "fusion": "",
+            "radar": "",
+            "soc": ""
+          },
+          "sensors": {
+            "camera": true,
+            "fusion": false,
+            "radar": false,
+            "soc": false
+          }
+        }
+      ],
+      "sectionGrades": [],
+      "shortName": "CO",
+      "stage": "Shortlisted"
+    },
+    {
+      "addedDate": "2026-06-22",
+      "businessModel": [
+        "Component Supplier",
+        "Software Stack Provider"
+      ],
+      "decision": {
+        "date": "",
+        "rationale": "",
+        "reviewer": "",
+        "status": ""
+      },
+      "domainGrades": [],
+      "draftQuestions": [
+        {
+          "id": -1,
+          "sectionId": "prod-production-lifecycle",
+          "text": "",
+          "priority": "medium"
+        }
+      ],
+      "evaluationDate": "",
+      "evaluator": "pavan",
+      "generalAnswers": [
+        {
+          "qId": 1,
+          "status": "accomplished",
+          "partnerResponse": "",
+          "remarks": ""
+        }
+      ],
+      "hardDisqualifiers": [],
+      "id": "f8e13aef-b0c6-484f-83ca-ce126244eef7",
+      "name": "novus",
+      "notes": "",
+      "patents": [
+        {
+          "id": "1ec5eef4-e599-4716-af9c-867b823be0fa",
+          "title": "Patent 1",
+          "patentId": "hjjjjhk",
+          "status": "filed",
+          "grantedBy": "IPO INDIA",
+          "jurisdiction": "INDIA",
+          "relevanceType": "perception",
+          "relevanceKey": "",
+          "relevanceLabel": "",
+          "notes": "VHVJV"
+        }
+      ],
+      "productVersion": "v1.0.0",
+      "products": [
+        {
+          "functions": {
+            "ACC": false,
+            "AEB": false,
+            "BSD": false,
+            "DMS": true,
+            "LCA": false,
+            "LDW": false,
+            "LKA": false,
+            "MOIS": false,
+            "RCTA": false
+          },
+          "id": "4718331b-5cf6-4a02-8294-3919c0db025c",
+          "isHero": false,
+          "name": "novus cam dms",
+          "sectionGrades": [],
+          "sensorNotes": {
+            "camera": "",
+            "fusion": "",
+            "radar": "",
+            "soc": ""
+          },
+          "sensors": {
+            "camera": true,
+            "fusion": false,
+            "radar": false,
+            "soc": true
+          },
+          "socs": {
+            "ambarella_cv2": false,
+            "ambarella_cv22": false,
+            "nxp_s32g": false,
+            "nxp_s32v234": false,
+            "qcom_sa6155p": false,
+            "qcom_sa8155p": false,
+            "renesas_v3h": false,
+            "renesas_v3m": false,
+            "ti_sitara": true,
+            "ti_tda4vl": false,
+            "ti_tda4vm": false
+          }
+        },
+        {
+          "answers": [
+            {
+              "partnerResponse": "",
+              "qId": 209,
+              "remarks": "",
+              "status": "yet_to_start"
+            }
+          ],
+          "functions": {
+            "ACC": true,
+            "AEB": true,
+            "BSD": false,
+            "DMS": false,
+            "LCA": true,
+            "LDW": true,
+            "LKA": false,
+            "MOIS": false,
+            "RCTA": false
+          },
+          "id": "b5aca0eb-79b4-4d9f-bba7-4a0f33f27d39",
+          "isHero": false,
+          "name": "novus cam aebs",
+          "sectionGrades": [
+            {
+              "grade": "good",
+              "justification": "",
+              "sectionId": "prod-production-lifecycle"
+            }
+          ],
           "sensorNotes": {
             "camera": "",
             "fusion": "",
@@ -80,37 +253,66 @@
             "radar": false,
             "soc": false
           },
-          "heroSensors": [],
-          "heroFunctions": [],
-          "sectionGrades": []
+          "socs": {
+            "ambarella_cv2": false,
+            "ambarella_cv22": false,
+            "nxp_s32g": false,
+            "nxp_s32v234": false,
+            "qcom_sa6155p": false,
+            "qcom_sa8155p": false,
+            "renesas_v3h": false,
+            "renesas_v3m": false,
+            "ti_sitara": true,
+            "ti_tda4vl": false,
+            "ti_tda4vm": false
+          }
+        },
+        {
+          "functions": {
+            "ACC": false,
+            "AEB": true,
+            "BSD": false,
+            "DMS": false,
+            "LCA": false,
+            "LDW": false,
+            "LKA": false,
+            "MOIS": false,
+            "RCTA": false
+          },
+          "id": "84a2536e-14ff-46b1-acc6-3bb1efced668",
+          "isHero": false,
+          "name": "novus radar",
+          "sectionGrades": [],
+          "sensorNotes": {
+            "camera": "",
+            "fusion": "",
+            "radar": "",
+            "soc": ""
+          },
+          "sensors": {
+            "camera": false,
+            "fusion": false,
+            "radar": true,
+            "soc": false
+          },
+          "socs": {
+            "ambarella_cv2": false,
+            "ambarella_cv22": false,
+            "nxp_s32g": false,
+            "nxp_s32v234": false,
+            "qcom_sa6155p": false,
+            "qcom_sa8155p": false,
+            "renesas_v3h": false,
+            "renesas_v3m": false,
+            "ti_sitara": true,
+            "ti_tda4vl": false,
+            "ti_tda4vm": false
+          }
         }
       ],
-      "shortName": "CO",
-      "stage": "Under Evaluation",
       "sectionGrades": [],
-      "domainGrades": []
-    },
-    {
-      "addedDate": "2026-06-17",
-      "decision": {
-        "date": "",
-        "rationale": "",
-        "reviewer": "",
-        "status": ""
-      },
-      "evaluationDate": "",
-      "evaluator": "pavan",
-      "generalAnswers": [],
-      "patents": [],
-      "hardDisqualifiers": [],
-      "id": "c7ef0371-3164-47c6-b728-51acfdbce0dc",
-      "name": "temp",
-      "notes": "",
-      "productVersion": "",
-      "shortName": "temp",
-      "stage": "Under Evaluation",
-      "sectionGrades": [],
-      "domainGrades": []
+      "shortName": "novus",
+      "stage": "Under Evaluation"
     }
   ]
 }

@@ -1095,6 +1095,63 @@ page.
        Quality" and re-ran the filter Playwright check afterward —
        still narrows/resets correctly. **User-confirmed working** in
        their own browser session after a hard refresh.
+   - **Priority filter (extends the status filter) — DONE.** Same idea
+     as the status filter, on `q.priority` instead of answer status,
+     combined via AND (e.g. "High priority AND Yet to Start" at once).
+     - Folded into the **same** sticky row as the status filter, renamed
+       `.status-filter-row` → `.detail-filter-row` (now `display:flex`
+       with two independent filter groups side by side) rather than a
+       second sticky row needing its own `top` offset.
+     - Pills sourced from the existing `PRIORITY_TABS` constant — no new
+       data needed.
+     - Both conditions live in one filter line in `answerQuestionsTableHtml`.
+     - Added to the edit-mode allowlist in `handleDetailClick` alongside
+       `data-status-filter`, exactly as planned.
+     - **Real bug caught by testing in read-only mode specifically**: the
+       CSS dimming rule for pills (`.detail-readonly .toggle-pill:not(.readonly)
+       { pointer-events: none }`, added for item 4 above) is broad enough
+       to also catch the filter pills, since they're plain `.toggle-pill`
+       spans too — this silently blocked clicking *either* filter while
+       read-only (the default state!), even though the JS allowlist
+       already correctly permitted it. Never caught earlier because the
+       status filter shipped *before* read-only-by-default existed, so
+       the combination was never exercised until now. Fixed with a
+       higher-specificity override: `.detail-readonly .detail-filter-row
+       .toggle-pill { pointer-events: auto !important; opacity: 1 !important; }`.
+     - Verified via Playwright in both read-only and edit mode: Low
+       narrowed 7 rows to 4; combining with an NA status filter narrowed
+       further (AND logic confirmed); resetting both restored all 7;
+       clicking either filter while read-only no longer blocked and
+       didn't kick the page into edit mode; clicking while editing didn't
+       drop any in-progress edits. No console errors.
+     - Per-section High/Med/Low tabs degrade exactly as predicted (e.g.
+       "High (7) Medium (0) Low (0)" when filtered to High) — confirmed
+       visually, not a new edge case.
+   - **Follow-up, same day — removed the per-section High/Med/Low
+     sub-tabs entirely. DONE.** Now that the global priority filter
+     covers that need across every section on the tab at once, the old
+     per-section tabs (one section at a time, "(N)" counts) were pure
+     redundancy. `answerQuestionsTableHtml` collapsed from a
+     tab+panel-switching structure to one flat list per section (still
+     respecting both filters); `priorityPanelHtml` and
+     `jumpSectionCardToPriorityTab` deleted outright (the latter only
+     ever existed to handle a newly-added/changed draft landing in a
+     tab that wasn't active — moot with no tabs left), along with the
+     dead `[data-priority-tab]`/`[data-priority-panel]` branch in
+     `handleDetailClick` and the now-unused `.priority-tab`/
+     `.priority-panel` CSS. Each row keeps its priority visible via a
+     colour-coded left edge instead (`.ans-row[data-priority="high|
+     medium|low"]`, `box-shadow: inset` rather than `border-left` so it
+     doesn't add layout width and throw the columns out of alignment
+     with the header row above). Verified via Playwright: a 19-question
+     section (7 High + 8 Medium + 4 Low) now renders as one list with
+     the edge colour present on every row; the global priority filter
+     still narrows it correctly (Low → 4); a newly-added draft appears
+     immediately with focus, no tab-jump needed; changing a draft's
+     priority updates its edge colour in place without the row
+     vanishing. No leftover references to the removed code anywhere in
+     `app.js`/`style.css`/`index.html` (confirmed by grep). No console
+     errors.
 
 **Step 3 — Product Comparison. DONE.** New sub-section on the Comparison
 page, sibling to the existing partner-level heatmap/radar. Placed after
@@ -1204,6 +1261,152 @@ whole partners.
      the collapsed-by-default section cards and the visual distinction
      between an inapplicable cell (grey italic) and an applicable-but-
      unanswered one (muted dash).
+
+## Teammate review batch — DONE, before Step 4 onwards (6 of 6 DONE)
+
+Six fixes/asks from teammates who reviewed the app, gathered in one
+sitting before starting the next branch. Not part of the original
+Step 1-6 dependency chain (those were about question-numbering/
+authoring order specifically), so this batch is inserted ahead of
+Step 4 rather than renumbered into that sequence.
+
+**1. Remove partner. DONE.** `DELETE /api/partners/<id>` already existed
+server-side; added a `btn-danger` "Remove" button next to "Edit Info" in
+the sidebar header, mirroring `data-remove-product`/`data-remove-patent`
+exactly. On confirm: `api('DELETE', ...)`, clears `State.detailPartner`,
+refreshes the partner list/dropdown, and falls back to the
+"select a partner" hint (no forced tab navigation needed — staying on
+Partner Detail with nothing selected already reads correctly). Verified
+with a disposable test partner via Playwright; `gahan`/`novus` untouched.
+
+**2. SoC picker shown unconditionally. DONE.** Wrapped the SoC chip row
+in the same checked-or-has-data condition sensor notes already use
+(`socChecked || hasSocSelected`, where the latter checks whether any
+`prod.socs[key]` is already true) — shows a muted "(SoC unchecked — kept
+because a type is already selected)" note when sticky, exactly mirroring
+the sensor-notes wording pattern. Verified via Playwright: hidden on a
+fresh product, appears on checking SoC, stays visible (with the sticky
+note) after unchecking SoC while a chip is still selected, disappears
+once the chip is also deselected.
+
+**3. Product-level notes. DONE.** New `product.notes` field (defaulted
+`''` in `newProduct()`), rendered as a textarea at the bottom of
+`productCardHtml` with the standard `.print-val` sibling, new
+`data-product-notes` branch in `handleDetailChange` (distinct from the
+existing per-sensor `data-product-note`, singular). Verified persistence
+across a save + reload via Playwright.
+
+**4. Read-only by default, explicit Edit button. DONE.** Largest item in
+this batch, as expected — touched nearly every editable element on
+Partner Detail.
+   - `State.detailEditMode`, defaults `false` on every fresh
+     `loadDetailPartner()` call (including the "no partner selected"
+     branch, which previously left stale state behind — fixed as part of
+     this). A new `#btn-detail-edit` button (next to Print/PDF) toggles
+     it; label reads "Edit" or "Done" via `refreshEditButtonLabel()`.
+     Clicking "Done" with no pending changes reverts to read-only
+     immediately, no Save required. Resets to `false` automatically
+     after a successful Save *or* Discard (added one line to each).
+     `markDirty()` hides the Edit/Done button entirely while
+     dirty — Save/Discard are the only way out of edit mode once
+     something's actually changed.
+   - Confirmed persists across tab switches within the same partner,
+     same as planned.
+   - **Forms**: a single `editAttr()` helper (`State.detailEditMode ? ''
+     : 'disabled'`) dropped into every select/input/textarea *and*
+     button's template across `answerRowHtml`, `draftActionsRowHtml`,
+     `sectionGradeRowHtml`, `domainGradingCardHtml`, `productCardHtml`,
+     `patentCardHtml`, decision fields, the stage select, the notes
+     textarea, the "+ Add Product/Patent/Question/Function" and every
+     "Remove"/"✕" button. Browser-enforced — confirmed via a full grep
+     sweep that every form element and button in the Partner Detail
+     render tree carries it (the Comparison page's own product-picker
+     selects are correctly untouched, unrelated state).
+   - **Pill-style toggles and the Hard Disqualifiers list** (`<span>`s
+     and `<li>`s — can't take `disabled`): a single guard at the top of
+     `handleDetailClick` (`if (!State.detailEditMode &&
+     el.dataset.statusFilter === undefined) return;` — status filter is
+     the one view-only action reachable through that dispatcher) plus a
+     matching one-line guard on the Hard Disqualifiers' separately-bound
+     click listener. Paired with CSS (`.detail-readonly .toggle-pill,
+     .hard-disqualifier-item { pointer-events: none; opacity: .6 }`) so
+     read-only mode is visibly, not just silently, non-interactive —
+     **explicitly overridden back to full opacity in the print
+     stylesheet**, so a PDF exported while the page happens to be in
+     read-only mode never looks faded.
+   - The existing unsaved-changes guard is unchanged, as planned.
+   - Verified extensively via Playwright on a disposable partner: every
+     field/button disabled by default; a pill click while read-only is a
+     true no-op (no dirty indicator); Edit enables everything and flips
+     the label to "Done"; Done-with-no-changes reverts without Save;
+     Save and Discard both correctly return to read-only afterward; edit
+     mode survives a General → Product tab switch. Screenshots confirm
+     the visual states. No console errors across the whole pass.
+   - **Follow-up bug report, same day — "+ Add Question isn't working."
+     DONE.** Two distinct causes, both real:
+     1. A draft defaults to medium priority with no status; if a status
+        or priority filter was active, the new draft was created (it's
+        really in `State.detailPartner.draftQuestions`) but didn't
+        render, since it didn't match the active filter — looked exactly
+        like the button silently did nothing. Fixed: drafts (`q.id < 0`)
+        are now unconditionally exempt from both filters in
+        `answerQuestionsTableHtml` — you're actively authoring them, not
+        reviewing existing answers, so a review filter must never hide
+        work in progress.
+     2. The real culprit, confirmed directly by the user: forgetting to
+        click "Edit" first. A disabled button gives zero feedback when
+        clicked — no toast, no error, nothing — which is indistinguishable
+        from "broken" if you don't already know read-only mode exists
+        (a brand-new concept as of item 4 above). Fixed with a hard-to-miss
+        amber `.readonly-banner` at the very top of Partner Detail
+        whenever `!State.detailEditMode`, with its own inline "click here
+        to Edit" button (`#btn-detail-edit-banner`, just calls the
+        existing `#btn-detail-edit`'s click rather than duplicating its
+        logic) — so the next person who forgets doesn't have to
+        rediscover this by filing a bug.
+     - Verified via Playwright: a draft now renders immediately
+       regardless of which status/priority filter is active; the banner
+       shows on every fresh read-only load and disappears the moment
+       either Edit button is clicked, and reappears after "Done" with no
+       changes. Screenshot confirms the visual. No console errors.
+
+**5. New Function "+", with an auto-created *empty* section. DONE.** A
+"+ Add Function" button next to the Functions label in `productCardHtml`
+prompts for a name (native `prompt()` — matches no existing "add with a
+name" pattern in this app exactly, but fits the weight of a global,
+one-way action better than a blank inline stub you'd rename after).
+   - `POST /api/schema/functions` derives a key by upper-casing and
+     slugifying the name (`"Surround View"` → `SURROUND_VIEW`, rejecting
+     duplicates), appends `{key, label}` to `schema.productFunctions`
+     *and* a matching `detailSections` entry — category `'product'`,
+     label `"{name} Function Detail"`, domain `perception-function`
+     (every existing function-scoped section's domain — no UI exists to
+     pick a different one, and none was needed), `scope: {type:
+     'function', keys: [key]}`. Persisted via the existing
+     `save_schema()` from Step 2.
+   - **No pre-authored questions** — starts completely empty, as agreed.
+   - **Propagates automatically with zero extra code** — confirmed via
+     Playwright: published the new function/section from one disposable
+     partner, added a draft question to it through the existing Step 2
+     flow, then opened a *different*, pre-existing partner/product and
+     confirmed the new function pill appears there too, unchecked, with
+     zero special-casing needed.
+   - Scoped to functions only, per item 6's explicit decision.
+   - Test artifact (`QA_TEST_FUNCTION` + its section) manually removed
+     from `schema.json` afterward — there's no "remove function" UI
+     (intentionally out of scope, same one-way reasoning as Step 2's
+     Publish), so cleanup for a real mistake here means hand-editing
+     `schema.json`.
+
+**6. Two new static sensors: LiDAR, USS. DONE.** Two new `{key, label}`
+entries in `schema.productSensors`, same shape as the existing four — no
+dynamic "+", no dedicated sections, per the explicit decision to keep
+sensors static for now. Live immediately with no server restart (schema
+is read fresh per request); verified on an *existing* product
+(`gahan` / Product 1, never otherwise touched) that both new pills
+render correctly, default unchecked, and persist correctly when toggled
+— confirming no migration is needed for products created before these
+existed.
 
 **Step 4 — Product Grade Radar — ON HOLD, user wants to rethink the
 whole proposal.** Sits here in the sequence (right after Product
