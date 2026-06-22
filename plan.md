@@ -1408,74 +1408,131 @@ render correctly, default unchecked, and persist correctly when toggled
 — confirming no migration is needed for products created before these
 existed.
 
-**Step 4 — Product Grade Radar — ON HOLD, user wants to rethink the
-whole proposal.** Sits here in the sequence (right after Product
-Comparison, since it would reuse that step's `{Partner} — {Product}`
-product-picker labeling) only for reference — it's paused, not next in
-line. Was about to be a second radar next to the existing Domain Grade
-Radar on the Comparison page, scoped to products instead of partners.
-After the axis-level and grade-source decisions below got worked out,
-user said to skip it for now and rethink — so treat everything below as
-a discarded first draft, not a spec to pick back up directly. Last
-input before pausing: per-product grading control would sit either
-above "Company Background" or below each product's sensor/function spec
-section — neither confirmed, both just spitballed before the pause.
-Re-open this from scratch next time rather than resuming partway
-through, and re-decide where it actually belongs in the sequence once
-it has a real design again.
+**Step 4 — Split General/Product master categories, add per-product
+domain grading, and a Product Grade Radar. RE-DESIGNED FROM SCRATCH,
+ready to build.** The original proposal (discarded — see git history of
+this file if the old draft text is ever needed) tried to plot products
+on the *existing* 6 master domains. Rethinking surfaced the actual root
+problem: those 6 domains each mix **general** (company-wide, one truth
+per partner) and **product** (varies per product) sections together,
+so a single domain grade can't mean one consistent thing — e.g.
+`company-background` blends "founding year/headcount" (general) with
+"production lifecycle" (product); `perception-function` blends one
+general validation-infra section with 18 product sections; `safety-cyber`
+is tagged general today even though 20+ of its 26 questions are
+explicitly per-function/per-SoC/per-sensor (ASIL per function, secure
+boot per SoC, camera spoofing, DMS privacy/consent) and only reads as
+"general" because nobody had split it yet. Fix: stop sharing domains
+between general and product. Every master category is now purely one
+or the other.
 
-   *Discarded first-draft design, kept only for reference:*
+   **Final category list — 10 total (was 6 mixed):**
 
-   Rationale: maturity sometimes needs checking at the
-   product level rather than the company level (e.g. one partner's two
-   products can be at very different maturity, which a partner-wide
-   domain grade can't show). Design decided, not yet built:
-   - **Axis level: master domain (4 axes), not sub-category/section.**
-     Worked through the actual numbers rather than guessing:
-     - It's **4 domains, not 5/6.** Two drop out for products, not one:
-       Patents & Innovation (0 sections at all, already excluded from
-       the partner radar too) *and* Safety & Cyber Security (its only
-       member, Functional Safety & Cybersecurity, is a **General**
-       section — zero Product-scoped sections, so there's nothing
-       product-level to grade there; this is the same fact already
-       behind Product tabs never showing a Safety & Cyber Security
-       heading). Remaining: Company Background, Perception Stack &
-       Function Maturity, Regulation & Compliance, Hardware Capability.
-     - Sub-category level was rejected, not on count alone (31 product
-       sections worst case) but because the *axis set itself* isn't
-       shared across the products being compared — a radar-only
-       product has nothing meaningful under Camera Subsystem, a
-       camera-only product has nothing under Radar/Fusion. Comparing
-       largely non-overlapping axes makes the radar shape comparison
-       apples-to-oranges, and reintroduces the same ambiguity flagged
-       for Product Comparison's NA case (axis=0 because ungraded vs.
-       axis=0 because the section doesn't apply — indistinguishable on
-       a radar with no room for a third visual state per axis).
-     - Master-domain level mostly sidesteps the NA problem for free:
-       each of the 4 domains has at least one *product-common*
-       (not sensor/function-scoped) section — e.g. Hardware Capability
-       always has Compute/SW-Arch/Pipeline/Power regardless of which
-       sensors are checked — so nearly every product has *something*
-       gradable in every domain, unlike individual sections.
-   - **Data gap, resolved: manual per-product domain grading, not
-     auto-computed.** `partner.domainGrades` today is explicitly
-     partner-level only and a deliberate holistic judgment, "not
-     something to approximate mechanically from question-answer
-     counts" — there's currently no per-product domain grade to plot
-     at all. Decided to add a parallel manual grading surface
-     (`product.domainGrades`, same shape as `partner.domainGrades` but
-     scoped to just the 4 product-relevant domains) rather than
-     auto-rolling-up `product.sectionGrades`, to stay consistent with
-     that same philosophy rather than re-introducing the exact pattern
-     it rejected at partner level.
-   - **Not yet decided**: where the per-product grading control lives
-     (a mini grading card per product — inline on each Product tab vs.
-     a sidebar card like Master Category Grading, but this time one
-     per product instead of one per partner); and the product-picker
-     UX for the radar itself (reuse the same 2-4 picker pattern as the
-     partner radar, but products need the `{Partner} — {Product}` label
-     from Step 3 (Product Comparison) since names alone are ambiguous
-     across partners).
+   *General (5) — one grade per partner, numbered `category.question`:*
+   | # | Category | Sections |
+   |---|---|---|
+   | 1 | Company Overview | `gen-company-overview` (history, team, headcount, geography, leadership, roadmap, positioning) minus the 3 questions moving to #3 below |
+   | 2 | Tooling & Infra | `gen-validation-test` (renamed — SIL/HIL, sim tooling, data pipelines, CI/CD, test fleet) |
+   | 3 | Quality & Process Maturity | NEW section — ASPICE level, IATF 16949, field failure/warranty data, moved out of Company Overview |
+   | 4 | Commercial & Engagement Model | NEW section, NEW questions (none existed) — see starter list below |
+   | 5 | Patents & Innovation | `partner.patents[]` — unchanged, no `detailQuestions`, stays outside the numbering scheme entirely |
+
+   *Product (5) — graded separately per product, numbered `category.subcategory.question`:*
+   | # | Category | Sub-categories (sections) |
+   |---|---|---|
+   | 1 | Production & Lifecycle | `prod-production-lifecycle` |
+   | 2 | Perception & Function Maturity | 7 camera-perception sections + 9 function sections (AEB/ACC/LDW-LKA/LCA/BSD/RCTA/MOIS/DMS/FUNC) + `prod-sw-quality` + `prod-hmi` |
+   | 3 | Regulation & Compliance | `prod-compliance`, `prod-emc-env`, `prod-limitations-india` |
+   | 4 | Hardware Capability | compute/sw-arch/pipeline/power + 3 camera-hardware sections + radar + fusion + hw-robustness |
+   | 5 | Safety & Cyber Security | `gen-funcsafety-cyber` recategorized — **moved wholesale, not split**: ships as one flat product sub-category with no scope (shows on every product tab, same pattern as Hardware Capability's unscoped sections). Splitting the camera-spoofing/DMS-privacy questions into their own sensor/function-scoped sub-sections is an explicit later refinement, not part of this pass — decided to ship the simple version first. |
+
+   **Numbering rule change:** `questionLabel()` ([app.js:1294](static/app.js#L1294))
+   needs a branch on `section.category`: `general` → emit just
+   `${categoryNum}.${questionNum}` (2 levels, since every general
+   category is exactly one section — no sub-category layer exists or is
+   needed); `product` → keep the existing 3-level
+   `${domainNum}.${sectionNum}.${questionNum}` logic completely
+   unchanged, since product categories genuinely have multiple
+   sub-sections.
+
+   **Schema changes needed (`schema.json`):**
+   - Add `category: 'general' | 'product'` to every entry in `domains[]`
+     — lets `comparisonGroups()` and the new product-radar equivalent
+     each filter to the right 5, and lets the partner-level vs
+     per-product grading cards each show only their own 5 categories.
+   - Split `company-background` into a general domain (Company Overview)
+     and a product domain (Production & Lifecycle); split
+     `perception-function` into a general domain (Tooling & Infra) and a
+     product domain (Perception & Function Maturity). `regulation-
+     compliance` and `hardware-capability` stay as-is, just tagged
+     `category: 'product'`.
+   - Move 3 questions (ASPICE, IATF 16949, field failure/warranty) from
+     `gen-company-overview` into a new `gen-quality-process` section
+     under the new Quality & Process Maturity domain — re-pointing
+     `sectionId` only, ids/answers untouched, so no partner data breaks.
+   - Recategorize `gen-funcsafety-cyber`: `category: 'general'` →
+     `'product'`, domain moves from `safety-cyber` (general) to a
+     product-tagged `safety-cyber` domain, `scope` stays unset (always
+     shown).
+   - New `gen-commercial-engagement` section + domain, seeded with
+     starter questions (none existed before):
+     1. "What is your pricing/licensing model — per-unit royalty,
+        one-time license fee, NRE + royalty, or a hybrid?"
+     2. "Who retains IP ownership of the delivered software/hardware —
+        full transfer, license-only, or source-code escrow?"
+     3. "What is your support & maintenance commitment post-SOP — SLA
+        terms, bug-fix turnaround, and version support lifecycle?"
+     4. "Do you offer multi-source rights, or is the engagement
+        exclusive? Are there minimum volume commitments?"
+     5. "What dedicated engineering support do you provide during
+        integration and SOP ramp-up?"
+     6. "What are your standard warranty terms and liability caps for
+        field issues?"
+     (Draft list — confirm/edit wording before adding to schema.json;
+     not yet finalized.)
+
+   **Per-product domain grading (new data + new UI):**
+   - New `product.domainGrades` array, same shape as
+     `partner.domainGrades` (`{domainId, grade, justification}`,
+     NA/Developing/Good/Outstanding), scoped to just the 5 product
+     domains. Starts blank for every product, new and existing alike —
+     manual judgment only, no auto-computation from `sectionGrades`,
+     consistent with why `partner.domainGrades` already works this way.
+   - Lives as an **inline grading card at the top of each Product tab**
+     (Product 1, Product 2, ...) — same control style as the existing
+     partner-level Master Category Grading sidebar card, just scoped to
+     that one product and placed inline rather than in the sidebar.
+   - **Old data cleanup, explicit:** delete every existing
+     `partner.domainGrades` entry for `gahan` and `novus` — all 5
+     current entries (`company-background`, `perception-function`,
+     `regulation-compliance`, `hardware-capability`, `safety-cyber`),
+     not just the 3 user confirmed directly. Applying it uniformly
+     because the other 2 (`company-background`, `perception-function`)
+     *split* rather than move wholesale — their general remnant
+     (Company Overview / Tooling & Infra) is narrower than what the old
+     grade actually judged, so carrying the old value forward would
+     silently misrepresent it. Both partners re-grade all 5 general
+     categories from scratch; harmless since grading is a quick manual
+     step, not data entry.
+
+   **Comparison page implication (existing partner heatmap/radar):**
+   `comparisonGroups()` ([app.js:56](static/app.js#L56)) currently
+   returns every domain with `sectionIds.length > 0`, mixing general and
+   product. Once domains carry `category`, it needs to filter to
+   `category === 'general'` only — the existing partner-level
+   heatmap+radar should compare the 5 general categories, since
+   `partner.domainGrades` is now purely general-level. Patents &
+   Innovation's existing separate-rollup gap (item 1 under "Other open
+   items" below) is unaffected by this change.
+
+   **New Product Grade Radar:** second radar on the Comparison page,
+   5 axes = the 5 product categories, sourced from `product.domainGrades`
+   instead of `partner.domainGrades`. Reuses Step 3's 2-4
+   product-picker pattern and `{Partner} — {Product}` labeling (names
+   alone are ambiguous across partners). Exact placement on the page
+   (alongside the existing radar vs. its own sub-tab) not yet decided —
+   revisit once the per-product grading card exists and there's real
+   data to plot.
 
 **Step 5 — Redefine CSV/PDF export to match the current design.**
 Placed after Steps 1-3 deliberately: exports should reflect the
