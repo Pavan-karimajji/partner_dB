@@ -841,7 +841,7 @@ structure with the radar chart still stacked above it.
 ## Earlier "Next steps" framing (superseded — implemented, see "Next steps
 round — DONE" and the corrections section above)
 
-## Next steps — sequenced to avoid rework (3 of 6 DONE; 2 PLANNED, 1 ON HOLD)
+## Next steps — sequenced to avoid rework (3 of 7 DONE; 4 PLANNED)
 
 These were gathered across several follow-ups in whatever order the user
 raised them, but that's *not* a safe build order — several items would
@@ -887,7 +887,7 @@ of being built against plain `qId` and reworked later to add it.
 >   zero questions (the 6 placeholder sections noted earlier, if still
 >   empty) simply don't produce any `X.Y.Z` labels — nothing special
 >   needed for those.
-> - Consumed by Step 3 (Product Comparison row labels) and Step 6 (How
+> - Consumed by Step 3 (Product Comparison row labels) and Step 5 (How
 >   To, if a numbered reference turns out to help there) — built first
 >   specifically so those don't need to retrofit it.
 
@@ -1534,10 +1534,97 @@ or the other.
    revisit once the per-product grading card exists and there's real
    data to plot.
 
-**Step 5 — Redefine CSV/PDF export to match the current design.**
-Placed after Steps 1-3 deliberately: exports should reflect the
-*finished* data model, not get audited now and re-audited again once
-numbering/question-authoring/Product Comparison land. Both
+**Step 5 — "How To" tab.** A how-to-use page should document the
+*finished* feature set — building it earlier would mean rewriting it
+after every step above ships (numbering, question authoring/publish,
+Product Comparison, the general/product category split). First pass (4
+cards of prose + a legend table + one small box diagram) was rejected
+anyway: too much text, nobody will actually read it. Explicit
+correction: **this page has to be a full visual representation, minimal
+text, self-explanatory at a glance** — not a written explainer with a
+diagram bolted on, the diagram/visual *is* the explanation. The current
+`#page-howto` markup, the `.howto-*` CSS, and the `How To` nav tab are
+still in the codebase but should be treated as a rough draft to
+replace, not a finished feature. Re-design needed before touching code
+again — open questions for next session: a single big infographic-style
+flow (icons/color instead of paragraphs) vs. a short interactive
+click-through; how much of the status/grade taxonomies can be conveyed
+as color/icon legends alone vs. needing any words at all; whether this
+should stay a static page or become something users step through once.
+The `.status-pill`/`.status-na`-family CSS classes added alongside the
+first attempt are still worth keeping regardless of how this page gets
+redesigned — they're reusable status badges, not specific to this
+page's layout. **No longer last in the sequence** (Steps 6 and 7 follow
+it) — it'll document Steps 1-4 + the teammate review batch at the point
+it's built, but won't yet reflect Step 6 (customer export/import) or
+Step 7 (refreshed exports); a follow-up touch-up once those ship is
+expected, not a flaw in building this now.
+
+**Step 6 — Customer-facing Excel export/import. Discussed, not
+designed in code yet.** Different problem from the partner-to-partner
+JSON idea under "Further ideas" below — that one assumes both sides
+have the tool; here the company being evaluated doesn't have it at all,
+so data has to leave the tool, get filled in externally, and come back.
+
+   - **Export format: real `.xlsx`, not CSV.** CSV can't do cell
+     locking or dropdown validation, both needed here — requires adding
+     `openpyxl` as a new dependency (changes the "flask alone is
+     enough" fact from earlier in this project; same library covers
+     both writing the export and reading the import).
+   - **Only `partnerResponse` goes out (and maybe `status`) — never**
+     L&T-internal remarks, grades, justifications, decision/rationale,
+     or hard-disqualifier data. Whether `status` belongs in the sheet
+     at all is unresolved — it reads today like an internal L&T
+     tracking field, not a partner self-assessment; if it does go out,
+     its values must come from a locked dropdown sourced from
+     `answerStatuses`, not free text, or returned values won't match
+     the app's taxonomy.
+   - **Locked sheet, two editable columns.** Question Number, Question
+     Text, and a hidden `qId` column are protected; only Partner
+     Response (and maybe Status, via dropdown) are editable. Sheet
+     protection must also disable row insert/delete, not just cell
+     editing — and it's a soft guardrail either way (Unprotect Sheet
+     has no real barrier), so import should re-validate rather than
+     blindly trust the locked columns weren't touched.
+   - **Import matches by `qId`, never the dotted number.** Dotted
+     numbers are computed from array position at render time and shift
+     if a question is *removed* between export and import (the existing
+     remove-question sweep does exactly that); published questions only
+     ever *append*, so additions don't shift numbering, but removals do.
+     The dotted number can stay in the sheet for the human to read, but
+     the real match key has to be the immutable `qId`.
+   - **New tool-side questions not present in the returned file are
+     simply left unanswered** — no special handling needed, same as any
+     unanswered question today. Conversely, a row whose `qId` no longer
+     exists in the current schema (question removed in the meantime)
+     should be silently dropped on import.
+   - **Open, undecided:**
+     1. Sensor/function chicken-and-egg — per-product sections normally
+        only show once a sensor/function is checked on that product,
+        but the customer may be the one telling you what sensors exist.
+        Either pre-set sensors/functions before export based on what's
+        already known, or send that as its own first question and
+        accept the rest of the sheet can't be pre-filtered by scope.
+     2. Overwrite vs. merge on re-import — if a refreshed sheet is sent
+        out later and only partially filled, should import blank out
+        existing answers wherever the new file has an empty cell, or
+        only write cells that are actually non-empty? Leaning toward
+        "only write non-empty cells" so a partial re-send can't erase
+        earlier answers, but not committed.
+     3. No preview-before-commit yet. This app already has a pattern for
+        exactly this kind of risk — question removal shows impact via
+        `GET /api/schema/questions/<id>/usage` before the destructive
+        `DELETE`. Import should probably follow the same shape: show a
+        diff ("this will update N answers across Product X") before
+        writing to `data/partners.json`, not commit blind.
+     4. One sheet per General + per relevant product, or one combined
+        workbook — not decided.
+
+**Step 7 — Redefine CSV/PDF export to match the current design.**
+Moved to last in the sequence (was Step 5) — exports should reflect the
+*truly* finished data model, including Step 4's per-product domain
+grades and whatever Step 6's customer-import flow adds, not get audited
+now and re-audited again after each step above lands. Both
 `/api/export/csv` (server-side) and the print/PDF view (client-side, the
 `print-target`/`print-val` CSS pattern) predate the
 domain/section/grading/hero-tag/patents work and likely still reflect an
@@ -1555,31 +1642,6 @@ older shape. Needs an audit pass (not yet done) of:
      introduces (drafts probably shouldn't export until published —
      ties into that step's open question about export/heatmap
      treatment of drafts).
-
-**Step 6 — "How To" tab, LAST on purpose.** A how-to-use page should
-document the *finished* feature set — building it earlier would mean
-rewriting it after every step above ships (numbering, question
-authoring/publish, Product Comparison, export). First pass (4 cards of
-prose + a legend table + one small box diagram) was rejected anyway:
-too much text, nobody will actually read it. Explicit correction:
-**this page has to be a full visual representation, minimal text,
-self-explanatory at a glance** — not a written explainer with a diagram
-bolted on, the diagram/visual *is* the explanation. The current
-`#page-howto` markup, the `.howto-*` CSS, and the `How To` nav tab are
-still in the codebase but should be treated as a rough draft to
-replace, not a finished feature. Re-design needed before touching code
-again — open questions for next session: a single big infographic-style
-flow (icons/color instead of paragraphs) vs. a short interactive
-click-through; how much of the status/grade taxonomies can be conveyed
-as color/icon legends alone vs. needing any words at all; whether this
-should stay a static page or become something users step through once;
-and now that it's last in the sequence, it can also show off whatever
-Steps 1-5 actually shipped (dotted numbering, drafts/publish, Product
-Comparison, the refreshed exports) instead of describing a moving
-target. The `.status-pill`/`.status-na`-family CSS classes added
-alongside the first attempt are still worth keeping regardless of how
-this page gets redesigned — they're reusable status badges, not
-specific to this page's layout.
 
 ## Other open items (lower priority, no urgency)
 
@@ -1606,3 +1668,34 @@ specific to this page's layout.
 3. Noted but not actioned: user feels the pre-refactor master-branch UX
    was more visually polished/appealing than the current rebuild. A
    general UI-polish pass is a separate, not-yet-scoped task.
+
+## Further ideas (not scheduled — just notes for later)
+
+1. **Import/export of full partner details.** Discussed, not designed,
+   not in the step sequence — revisit some time after Step 4. The
+   partner-JSON side is nearly free (each partner object is already
+   self-contained, and `server.py`'s `PUT`/`POST` already do
+   passthrough writes with no schema validation, so most of the
+   plumbing exists). The real loophole is **schema drift**: every
+   partner references `schema.json` by id/key — `qId`, `sectionId`,
+   `domainId`, and sensor/function key strings — and this app lets each
+   install's schema drift independently (publish-question picks
+   `qId = max+1` per install, "+ Add Function" derives keys from
+   whatever label a user types locally, Step 4 is about to restructure
+   section/domain ids again). Importing a partner exported from one
+   install into another with a different schema either silently
+   orphans an answer (qId doesn't exist target-side) or silently
+   misattributes it (qId exists but means something else) — no schema
+   version stamp exists today to even detect the mismatch. Before
+   building this, need to decide: (a) bundle the relevant schema slice
+   with the export and diff it against the target on import, or (b)
+   treat one canonical, git-synced `schema.json` as the source of truth
+   across installs and local schema edits as the exception. Whichever
+   is chosen changes the shape of the feature.
+
+   Related but distinct from **Step 6** (customer-facing Excel
+   export/import, in the main sequence above): that one round-trips a
+   single install's *own* schema out to a non-tool-user and back, so it
+   mostly sidesteps this cross-install drift problem — the only drift
+   risk there is the schema changing between one install's own export
+   and its own later import, not two installs diverging independently.
