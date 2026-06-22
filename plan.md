@@ -841,7 +841,7 @@ structure with the radar chart still stacked above it.
 ## Earlier "Next steps" framing (superseded — implemented, see "Next steps
 round — DONE" and the corrections section above)
 
-## Next steps — sequenced to avoid rework (2 of 6 DONE; 3 PLANNED, 1 ON HOLD)
+## Next steps — sequenced to avoid rework (3 of 6 DONE; 2 PLANNED, 1 ON HOLD)
 
 These were gathered across several follow-ups in whatever order the user
 raised them, but that's *not* a safe build order — several items would
@@ -1096,16 +1096,22 @@ page.
        still narrows/resets correctly. **User-confirmed working** in
        their own browser session after a hard refresh.
 
-**Step 3 — Product Comparison.** New sub-section on the Comparison
+**Step 3 — Product Comparison. DONE.** New sub-section on the Comparison
 page, sibling to the existing partner-level heatmap/radar. Placed after
 Steps 1-2 because it displays the question list those steps shape (the
 dotted label, and potentially partner-local drafts/published questions).
 Goal: compare product-category questions/answers side by side across
 2-4 specific products (which may belong to different partners — e.g.
 Partner A's radar-only product vs. Partner B's fusion product), not
-whole partners. Approved approach, not yet built:
+whole partners.
    - **First** — "How many products to compare?" (2/3/4, same idea as
-     the radar partner-picker's `RADAR_MAX_PARTNERS` cap).
+     the radar partner-picker's `RADAR_MAX_PARTNERS` cap). **Confirmed:
+     count + N dropdowns, not the radar's toggle-pill multi-select** —
+     product labels are long (`Partner Name — Product Name`) and the
+     full cross-partner product list could span many partners, so a
+     long pill row would scan worse than clean per-slot dropdowns, even
+     though it's a different interaction pattern than the radar picker
+     on the same page.
    - **Then** — that many dropdowns appear, each listing every product
      across every partner, labeled `{Partner Name} — {Product Name}`
      (a flat product name alone is ambiguous once you're comparing
@@ -1144,11 +1150,60 @@ whole partners. Approved approach, not yet built:
      product's tab on its Partner Detail page (`openDetailFor(partnerId)`
      then set `State.activeDetailTab = 'product:' + productId`, mirroring
      how `+ Add Product` already focuses the new product's tab).
-   - Not yet decided: whether Partner Response/L&T Remarks show inline
-     (tooltip on hover, given how much table real estate is already
-     spent on N product columns) or only on click-through to the
-     product's own tab — leaning toward click-through only, to keep
-     the comparison table itself scannable.
+   - **Confirmed: Partner Response/L&T Remarks show via hover tooltip**
+     on the status pill, not click-through-only — chosen over the
+     simpler click-through option despite the added complexity (won't
+     work on touch or in print/PDF, both acceptable tradeoffs here since
+     this table is a screen-only comparison view, not part of the
+     per-partner exported record).
+   - **Confirmed: lives as a new sub-tab/toggle on the Comparison page**
+     (e.g. "Partners" / "Products"), not stacked below the existing
+     heatmap+radar — keeps the partner-level and product-level views
+     each focused instead of one page that mixes both plus a
+     hundreds-of-rows product table.
+   - **Implementation notes.** `renderComparison()` now caches
+     `{ fullPartners, groups }` in a module-level `comparisonCache` so
+     toggling the new "Partners"/"Products" sub-tab never re-fetches —
+     only a fresh page visit does (verified via Playwright: 0 network
+     calls during a sub-tab switch). The existing heatmap+radar logic
+     was extracted unchanged into `renderComparisonPartnersView`, called
+     from both the initial render and every switch back to "Partners."
+   - **Drafts deliberately excluded** — section rows use
+     `questionsForSection` (schema-only), not `questionsForSectionAll`.
+     Drafts are partner-local with ids generated independently per
+     partner (negative integers starting at -1 each), so the same id can
+     mean two unrelated questions on two different partners — comparing
+     across partners by id would be actively wrong here. Caught a related
+     bug while building: `sectionHasAnswerData` (the shared "sticky"
+     helper) internally calls `questionsForSectionAll`, which reads
+     `State.detailPartner.draftQuestions` — exactly the partner currently
+     open on *Partner Detail*, not whichever partner a given Product
+     Comparison column belongs to. Used a local `cmpSectionHasAnswerData`
+     (schema-only) for this table's applicability check instead of the
+     shared helper, rather than risk cross-partner draft leakage.
+   - **Found another naming mismatch while wiring up real status pills**
+     (their first dynamic use — they only existed in the static How-To
+     mockup before): `schema.answerStatuses` keys use underscores
+     (`yet_to_start`) but the `.status-pill` CSS classes use hyphens
+     (`status-yet-to-start`). New `statusPillClass(key)` helper converts
+     between them. Verified via Playwright with the one key that actually
+     has an underscore — confirmed `status-yet-to-start` applied, not a
+     literal (wrong) `status-yet_to_start`.
+   - **Tooltip is a plain `title` attribute** (Response/Remarks, omitted
+     entirely if both are blank), not a custom hover-card — simplest
+     thing that satisfies "show it on hover," confirmed showing the right
+     text via Playwright's `getAttribute('title')`.
+   - Verified end-to-end: applicability inverts correctly between a
+     Camera-only and a Radar-only product (Camera section greys out for
+     the radar product and vice versa, confirmed via cell class
+     assertions both directions); count-pill resize (2→4→3) preserves
+     already-filled slots and pads/truncates the rest; clicking a
+     product's column header lands on that exact product's tab on
+     Partner Detail; sub-tab/picker selections survive navigating away
+     to Partner Detail and back. No console errors. Screenshot confirms
+     the collapsed-by-default section cards and the visual distinction
+     between an inapplicable cell (grey italic) and an applicable-but-
+     unanswered one (muted dash).
 
 **Step 4 — Product Grade Radar — ON HOLD, user wants to rethink the
 whole proposal.** Sits here in the sequence (right after Product

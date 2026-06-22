@@ -562,6 +562,37 @@ input, textarea, select { font: inherit; }
 .hm-mid   { background: #fef3c7; color: #92400e; }
 .hm-high  { background: #d1fae5; color: #065f46; }
 
+/* ── Product Comparison table (Step 3) ──────────────────────────────────
+   Own class rather than reusing .comparison-table -- that one is
+   white-space: nowrap, which is wrong for a wrapping question-text column. */
+.cmp-product-table { width: 100%; border-collapse: collapse; }
+.cmp-product-table th, .cmp-product-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: .8125rem;
+  text-align: center;
+  vertical-align: top;
+}
+.cmp-product-table th {
+  background: var(--light-blue);
+  color: var(--navy);
+  font-weight: 700;
+  font-size: .6875rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  cursor: pointer;
+}
+.cmp-product-table th:hover { text-decoration: underline; }
+.cmp-product-table th.cmp-q-num-col, .cmp-product-table th.cmp-q-text-col { cursor: default; }
+.cmp-product-table th.cmp-q-text-col, .cmp-product-table td.cmp-q-text {
+  text-align: left;
+  white-space: normal;
+}
+.cmp-product-table td.cmp-q-num { color: var(--gray-500); font-size: .75rem; white-space: nowrap; }
+.cmp-product-table tr:last-child td { border-bottom: none; }
+.cmp-inapplicable { color: var(--gray-400); background: var(--gray-50); font-size: .75rem; font-style: italic; }
+.cmp-cell-empty { color: var(--gray-300); }
+
 /* ── Status/grade pills (How To legend; reusable wherever a status badge
    is needed) ─────────────────────────────────────────────────────────── */
 .status-pill {

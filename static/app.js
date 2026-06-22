@@ -25,6 +25,9 @@ const State = {
   statusFilter: 'all',   // answer-status filter shared across General/every Product tab
   radarSelected: [],     // partner ids picked for the Comparison radar chart
   radarChart: null,      // current Chart.js instance, destroyed/rebuilt on selection change
+  comparisonView: 'partners',       // 'partners' | 'products' sub-tab on the Comparison page
+  productCompareCount: 2,           // 2-4, how many product slots to show
+  productCompareSelected: ['', ''], // "partnerId:productId" per slot, '' = empty
 };
 
 // ── Brand colours ─────────────────────────────────────────────────────────
@@ -228,12 +231,19 @@ function heatmapCellHtml(grade) {
   return `<td class="hm-cell ${cls}">${esc(label)}</td>`;
 }
 
+// Cached across Partners/Products sub-tab switches so toggling back and
+// forth on the Comparison page doesn't re-fetch every partner each time —
+// only a fresh page visit (renderComparison from switchTab) re-fetches.
+let comparisonCache = null;
+
 async function renderComparison() {
   const body = document.getElementById('comparison-body');
   if (!body) return;
   const summary = State.partnersSummary;
   if (summary.length === 0) {
     body.innerHTML = `<div class="empty-state">No partners yet.</div>`;
+    comparisonCache = null;
+    renderComparisonSubTabs();
     return;
   }
   body.innerHTML = `<div class="loading-wrap"><div class="spinner"></div></div>`;
@@ -241,11 +251,50 @@ async function renderComparison() {
   const fullPartners = await Promise.all(summary.map(p => api('GET', `/api/partners/${p.id}`)));
   const groups = comparisonGroups();
   fullPartners.sort((a, b) => a.name.localeCompare(b.name));
+  comparisonCache = { fullPartners, groups };
 
+  renderComparisonSubTabs();
+  renderComparisonActiveView();
+}
+
+function renderComparisonSubTabs() {
+  const row = document.getElementById('comparison-subtab-row');
+  if (!row) return;
+  row.innerHTML = `
+    <button class="detail-subtab${State.comparisonView === 'partners' ? ' active' : ''}" data-comparison-view="partners">Partners</button>
+    <button class="detail-subtab${State.comparisonView === 'products' ? ' active' : ''}" data-comparison-view="products">Products</button>
+  `;
+  row.querySelectorAll('[data-comparison-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      State.comparisonView = btn.dataset.comparisonView;
+      renderComparisonSubTabs();
+      renderComparisonActiveView();
+    });
+  });
+}
+
+function renderComparisonActiveView() {
+  const partnersView = document.getElementById('cmp-view-partners');
+  const productsView = document.getElementById('cmp-view-products');
+  if (!partnersView || !productsView) return;
+  const showProducts = State.comparisonView === 'products';
+  partnersView.style.display = showProducts ? 'none' : '';
+  productsView.style.display = showProducts ? '' : 'none';
+  if (!comparisonCache) return;
+  if (showProducts) {
+    renderProductComparisonView(comparisonCache.fullPartners);
+  } else {
+    renderComparisonPartnersView(comparisonCache.fullPartners, comparisonCache.groups);
+  }
+}
+
+// Rows = domains, columns = partners (matches the row=category /
+// column=partner orientation of the old main-branch score-matrix sheet).
+function renderComparisonPartnersView(fullPartners, groups) {
+  const body = document.getElementById('comparison-body');
+  if (!body) return;
   const gradeFor = (partner, group) => (partner.domainGrades || []).find(x => x.domainId === group.id) || { grade: '' };
 
-  // Rows = domains, columns = partners (matches the row=category /
-  // column=partner orientation of the old main-branch score-matrix sheet).
   body.innerHTML = `
     <table class="comparison-table">
       <thead>
@@ -270,6 +319,197 @@ async function renderComparison() {
   });
 
   renderComparisonRadar(fullPartners, groups);
+}
+
+// ── Product Comparison (Step 3) ─────────────────────────────────────────────
+// Compares 2-4 specific products side by side, possibly across different
+// partners, rather than whole partners. Rows are every product-category
+// section (always, not just sections common to the picked products) —
+// sectionScopeMatches/cmpSectionHasAnswerData decide per-cell whether a
+// section is applicable to that particular product, greying out the cell
+// when it isn't, distinct from a real evaluator-marked NA answer.
+const PRODUCT_COMPARE_COUNTS = [2, 3, 4];
+
+function allProductsFlat(fullPartners) {
+  const out = [];
+  fullPartners.forEach(p => {
+    (p.products || []).forEach(prod => {
+      out.push({ partnerId: p.id, partnerName: p.name, productId: prod.id, productName: prod.name || 'Product' });
+    });
+  });
+  out.sort((a, b) => a.partnerName.localeCompare(b.partnerName) || a.productName.localeCompare(b.productName));
+  return out;
+}
+
+function findPartnerProduct(fullPartners, key) {
+  if (!key) return null;
+  const [partnerId, productId] = key.split(':');
+  const partner = fullPartners.find(p => p.id === partnerId);
+  const product = partner && (partner.products || []).find(pr => pr.id === productId);
+  return product ? { partner, product } : null;
+}
+
+function productOptionsHtml(flat, selectedKey) {
+  return `<option value="">Select a product…</option>` + flat.map(f => {
+    const key = `${f.partnerId}:${f.productId}`;
+    return `<option value="${key}"${key === selectedKey ? ' selected' : ''}>${esc(f.partnerName)} — ${esc(f.productName)}</option>`;
+  }).join('');
+}
+
+function productPickerHtml(fullPartners) {
+  const flat = allProductsFlat(fullPartners);
+  const selects = [];
+  for (let i = 0; i < State.productCompareCount; i++) {
+    selects.push(`
+      <select class="form-select" data-cmp-product-slot="${i}" style="width:260px;">
+        ${productOptionsHtml(flat, State.productCompareSelected[i] || '')}
+      </select>
+    `);
+  }
+  return `
+    <div class="toggle-pill-row" style="margin-bottom:14px;">
+      ${PRODUCT_COMPARE_COUNTS.map(c => `<span class="toggle-pill${State.productCompareCount === c ? ' on' : ''}" data-cmp-count="${c}">${c} products</span>`).join('')}
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">${selects.join('')}</div>
+  `;
+}
+
+function renderProductComparisonView(fullPartners) {
+  const pickerEl = document.getElementById('cmp-product-picker');
+  if (!pickerEl) return;
+  pickerEl.innerHTML = productPickerHtml(fullPartners);
+
+  pickerEl.querySelectorAll('[data-cmp-count]').forEach(el => {
+    el.addEventListener('click', () => {
+      const count = parseInt(el.dataset.cmpCount, 10);
+      State.productCompareCount = count;
+      const next = State.productCompareSelected.slice(0, count);
+      while (next.length < count) next.push('');
+      State.productCompareSelected = next;
+      renderProductComparisonView(fullPartners);
+    });
+  });
+
+  pickerEl.querySelectorAll('[data-cmp-product-slot]').forEach(el => {
+    el.addEventListener('change', () => {
+      const idx = parseInt(el.dataset.cmpProductSlot, 10);
+      State.productCompareSelected[idx] = el.value;
+      renderProductComparisonTable(fullPartners);
+    });
+  });
+
+  renderProductComparisonTable(fullPartners);
+}
+
+function renderProductComparisonTable(fullPartners) {
+  const tableEl = document.getElementById('cmp-product-table');
+  if (!tableEl) return;
+
+  const picked = State.productCompareSelected
+    .map(key => findPartnerProduct(fullPartners, key))
+    .filter(Boolean);
+
+  if (picked.length === 0) {
+    tableEl.innerHTML = `<div class="empty-state">Pick at least one product above to compare.</div>`;
+    return;
+  }
+
+  const sectionEntries = sectionsForCategory('product').map(section => ({ section }));
+  tableEl.innerHTML = domainGroupedSectionsHtml(
+    sectionEntries,
+    ({ section }) => cmpSectionCardHtml(section, picked)
+  );
+
+  tableEl.querySelectorAll('[data-section-toggle-header]').forEach(header => {
+    header.addEventListener('click', () => {
+      const card = header.closest('.q-section-card');
+      if (card) card.classList.toggle('collapsed');
+    });
+  });
+  tableEl.querySelectorAll('[data-cmp-open-product]').forEach(el => {
+    el.addEventListener('click', () => {
+      const [partnerId, productId] = el.dataset.cmpOpenProduct.split(':');
+      openDetailForProduct(partnerId, productId);
+    });
+  });
+}
+
+// Collapsed by default, unlike Partner Detail's section cards — this view
+// has every product section x every picked product at once, which is a lot
+// more rows than answering a single product's questions.
+function cmpSectionCardHtml(section, picked) {
+  const questions = questionsForSection(section.id);
+  const bodyHtml = questions.length === 0
+    ? `<div class="text-muted" style="font-size:.8125rem;">No questions defined for this section yet.</div>`
+    : `
+      <table class="cmp-product-table">
+        <thead>
+          <tr>
+            <th class="cmp-q-num-col">#</th>
+            <th class="cmp-q-text-col">Question</th>
+            ${picked.map(({ partner, product }) => `<th data-cmp-open-product="${partner.id}:${product.id}">${esc(partner.name)} — ${esc(product.name || 'Product')}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${questions.map(q => `
+            <tr>
+              <td class="cmp-q-num">${questionLabel(q)}</td>
+              <td class="cmp-q-text">${esc(q.text)}</td>
+              ${picked.map(({ product }) => cmpCellHtml(section, product, q)).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  return `
+    <div class="card q-section-card collapsed">
+      <div class="card-header" data-section-toggle-header>
+        <span class="card-title">${esc(section.label)} <span class="accordion-chevron">&#9662;</span></span>
+      </div>
+      <div class="card-body">${bodyHtml}</div>
+    </div>
+  `;
+}
+
+// Schema's answerStatuses keys use underscores (yet_to_start) but the
+// .status-pill CSS classes use hyphens (status-yet-to-start) -- these two
+// never had to agree before since the pill classes were only ever used in
+// the static How-To mockup, never driven from real data until this table.
+function statusPillClass(key) {
+  return 'status-' + (key || 'na').replace(/_/g, '-');
+}
+
+// Mirrors sectionHasAnswerData's logic exactly, but schema questions only
+// (questionsForSection, not questionsForSectionAll) -- drafts are
+// partner-local with ids generated independently per partner, so comparing
+// across partners by id would be wrong here, unlike on Partner Detail where
+// only one partner is ever in scope at a time.
+function cmpSectionHasAnswerData(section, product) {
+  return questionsForSection(section.id).some(q => {
+    const a = (product.answers || []).find(x => x.qId === q.id);
+    return !!(a && (a.status || (a.remarks && a.remarks.trim()) || (a.partnerResponse && a.partnerResponse.trim())));
+  });
+}
+
+function cmpCellHtml(section, product, q) {
+  if (!sectionScopeMatches(section, product) && !cmpSectionHasAnswerData(section, product)) {
+    return `<td class="cmp-inapplicable">N/A — not applicable to this product</td>`;
+  }
+  const ans = (product.answers || []).find(a => a.qId === q.id);
+  if (!ans || !ans.status) {
+    return `<td class="cmp-cell-empty">—</td>`;
+  }
+  const titleParts = [];
+  if (ans.partnerResponse && ans.partnerResponse.trim()) titleParts.push('Response: ' + ans.partnerResponse.trim());
+  if (ans.remarks && ans.remarks.trim()) titleParts.push('Remarks: ' + ans.remarks.trim());
+  const titleAttr = titleParts.length ? ` title="${esc(titleParts.join('\n'))}"` : '';
+  return `<td${titleAttr}><span class="status-pill ${statusPillClass(ans.status)}">${esc(answerStatusLabel(ans.status))}</span></td>`;
+}
+
+async function openDetailForProduct(partnerId, productId) {
+  await openDetailFor(partnerId);
+  State.activeDetailTab = 'product:' + productId;
+  refreshDetailTabsAndPanels();
 }
 
 // ── Comparison radar chart ──────────────────────────────────────────────────
