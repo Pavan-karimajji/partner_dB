@@ -6,11 +6,25 @@ rubric, plus free-form notes and a per-partner product catalog.
 
 ## Running it
 
+First time on a machine, install dependencies:
+
 ```
-python server.py
+installation.bat
 ```
 
-Opens `http://localhost:5000` automatically. Data is stored in
+Checks for Python (warns if older than 3.10, errors if missing entirely)
+and installs everything from `requirements.txt` — currently just Flask,
+which pulls in its own sub-dependencies (Werkzeug, Jinja2, etc.)
+automatically.
+
+Then, every time you want to run it:
+
+```
+start.bat
+```
+
+(or `python server.py` directly, e.g. on macOS/Linux). Opens
+`http://localhost:5000` automatically. Data is stored in
 `data/partners.json` (no database). `schema.json` defines the rubric
 (sections, questions, weights, dropdown options) — edit it to change the
 evaluation form without touching code.
