@@ -318,6 +318,23 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-import-questionnaire">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-import-title" style="max-width:680px;">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-import-title">Import Questionnaire</span>
+      <button class="modal-close" data-close-modal="modal-import-questionnaire">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="import-modal-body" style="max-height:60vh;overflow-y:auto;">
+      <p class="text-muted" style="margin-bottom:12px;">Pick the filled-in .xlsx returned by the partner.</p>
+      <input type="file" id="import-file-input" accept=".xlsx" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" data-close-modal="modal-import-questionnaire">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="btn-confirm-import" style="display:none;">Apply Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Toast container ──────────────────────────────────────────────────── -->
 <div class="toast-wrap" id="toast-wrap"></div>
 

@@ -887,7 +887,7 @@ of being built against plain `qId` and reworked later to add it.
 >   zero questions (the 6 placeholder sections noted earlier, if still
 >   empty) simply don't produce any `X.Y.Z` labels — nothing special
 >   needed for those.
-> - Consumed by Step 3 (Product Comparison row labels) and Step 5 (How
+> - Consumed by Step 3 (Product Comparison row labels) and Step 6 (How
 >   To, if a numbered reference turns out to help there) — built first
 >   specifically so those don't need to retrofit it.
 
@@ -1597,96 +1597,248 @@ or the other.
      `hardware-capability`) were removed; its `patents-innovation` entry
      was kept since that domain is unaffected by the split.
 
-**Step 5 — "How To" tab.** A how-to-use page should document the
+**Step 5 — Customer-facing Excel export/import. DONE (5.1-5.10).**
+Different problem from the partner-to-partner JSON
+idea under "Further ideas" below — that one assumes both sides have
+the tool; here the company being evaluated doesn't have it at all, so
+data has to leave the tool, get filled in externally, and come back.
+Moved ahead of the "How To" tab (now Step 6) so How To can document
+this feature too once it ships, instead of missing it. **Single-machine
+hosting assumption** — this app runs on one local machine, not a
+multi-server/multi-tenant deployment, so the design below deliberately
+skips distributed-systems concerns (auth, encryption-in-transit,
+multi-server locking). It does *not* skip same-machine concurrency
+(browser tab vs. disk) — that risk is real regardless of hosting.
+
+   Numbered 5.1-5.10 for reference, **in build order** — sequenced by
+   dependency so nothing gets built twice: decisions that shape the
+   file format come before the code that has to match that format;
+   foundational data fields (version/timestamp/log) come before the
+   endpoints that read or write them; export comes before import
+   (import has to parse what export produces); both endpoints exist
+   before the UI that calls them; verification is last.
+
+   **5.1 — Resolve the 3 open design decisions. DONE.**
+   1. **Status is customer-facing.** Exported as a second editable
+      column, via a locked dropdown sourced from `answerStatuses` —
+      same reasoning as the existing in-app status select, just on the
+      customer's side now.
+   2. **Per-product sections are scope-filtered at export time** —
+      mirrors exactly what's already visible on that product's own tab
+      today (`sectionScopeMatches(section, product)`, plus the existing
+      "sticky" rule that keeps a section if it already has saved answer
+      data even though its sensor/function got unchecked since). No
+      chicken-and-egg: the evaluator has already set up the product's
+      sensors/functions in-app before ever exporting for it, so there's
+      nothing to pre-guess.
+   3. **One combined multi-sheet workbook per export call** — a
+      "General" sheet plus one sheet per product, all in a single
+      `.xlsx`, mirroring the in-app General/Product-N tab structure.
+      Single endpoint, no `scope=` param. This reopens the cross-sheet
+      identity risk flagged earlier (same `qId` can legitimately appear
+      on two different product sheets if both products share a
+      checked sensor) — handled by stamping **every sheet** with its
+      own hidden `productId` (`null` for the General sheet), so import
+      matches by `(qId, sheet's productId)` for product rows, not `qId`
+      alone.
+
+   **5.2 — Schema version stamp.** `schema.json` gets a `schemaVersion`
+   integer, bumped by `save_schema()` on every write. Lets import
+   detect "the schema changed since this file was generated" with a
+   plain `!=` check — a monotonic counter, not a random key, because
+   the question that matters is *ordering* ("is this older than
+   current"), which a random id can't answer. Small, independent,
+   needed by 5.5 and 5.6.
+
+   **5.3 — Partner concurrency guard.** Every partner gets a
+   `lastModified` ISO timestamp, set by `api_update_partner`
+   (`PUT /api/partners/<id>`) on every save — touches the *existing*
+   save path, not new to import, since the concurrency risk it fixes
+   (stale browser tab) applies to normal editing too, import in 5.7
+   just makes it much more likely to actually happen. `saveDetail()`
+   sends the `lastModified` it loaded with; server rejects with 409 if
+   it doesn't match current (changed by an import, or another tab,
+   since this one loaded). Client shows "this partner changed since
+   you loaded it — reload before saving" rather than silently
+   overwriting. Independent of the Excel mechanics — could be built
+   any time before 5.7, placed here since it's foundational.
+
+   **5.4 — Export log scaffold.** New append-only local file,
+   `data/questionnaire_exports.json`: one entry per export —
+   `{exportId, partnerId, schemaVersion, exportedAt, sheets: [{productId
+   (null for General), qIds: [...]}]}` — one entry per whole-workbook
+   export, with a per-sheet `qIds` breakdown so the "blank on purpose
+   vs. didn't exist yet" question can still be answered per product.
+   `exportId` is a UUID (this is where a random key earns its keep —
+   uniquely naming *which* export instance a returned file is, for
+   traceability/debugging, not for drift detection). Small read/write
+   helper pair, mirrors `load_schema`/`save_schema`. Needed by 5.5.
+
+   **5.5 — Export endpoint.** `GET /api/partners/<id>/export-questionnaire`
+   — no `scope=` param, always builds the full combined workbook (5.1.3).
+   Real `.xlsx` via `openpyxl` (new dependency — changes the "flask
+   alone is enough" fact from earlier in this project). One sheet named
+   "General", plus one sheet per product (named after the product).
+   Each product sheet only includes scope-applicable sections (5.1.2).
+   Visible columns per sheet: dotted number, question text, Partner
+   Response (editable), Status (editable via locked dropdown sourced
+   from `answerStatuses`). Hidden per row: `qId` (locked). Hidden per
+   *sheet*: that sheet's own `productId` (`null` on General) — not just
+   one partner-wide stamp, since multiple product sheets exist in the
+   same file. Shared across the whole workbook: `partnerId`,
+   `schemaVersion`, `exportId`. Sheet protection locks everything except
+   the editable columns and explicitly disables row insert/delete (not
+   just cell editing — protection options default to allowing inserts
+   in some Excel versions). Appends one entry (with its per-sheet
+   breakdown) to the 5.4 log. Depends on 5.1, 5.2 (version to stamp),
+   5.4 (log to write).
+
+   **5.6 — Import preview endpoint.**
+   `POST /api/partners/<id>/import-questionnaire/preview` (file
+   upload) — parse every sheet in the workbook; validate the file's
+   `partnerId` matches the partner being imported into (reject outright
+   if not — wrong-target case); for each sheet, validate its
+   `productId` still refers to a real product on this partner (if that
+   product was deleted in the meantime, skip just that sheet, flagged,
+   not the whole import); compare `schemaVersion` (warn, don't block,
+   if it differs); re-derive each row's expected `qId`/text from the
+   *current* schema and flag any row that doesn't match (covers both
+   "structure was tampered with" and "this question's wording changed
+   since export"); trim whitespace before treating a cell as non-empty.
+   Matches product rows by `(qId, that sheet's productId)`, never `qId`
+   alone, since the same `qId` can legitimately appear on more than one
+   product's sheet. Returns a diff: N answers to update per
+   sheet/product, plus a list of flagged/skipped rows and why. Same
+   two-step shape as the existing remove-question flow (usage-check,
+   then delete). Depends on 5.5 (must parse exactly what it produces),
+   5.2.
+
+   **5.7 — Import commit endpoint.**
+   `POST /api/partners/<id>/import-questionnaire/commit` — only fires
+   on explicit confirmation of the 5.6 preview; writes only the
+   non-blank, validated cells (PATCH semantics — never blanks an
+   existing answer just because a returned cell is empty, so multiple
+   partial files for the same partner layer instead of clobbering each
+   other); bumps `lastModified` per 5.3 on write. Depends on 5.6, 5.3.
+
+   **5.8 — Export UI.** One "Export Questionnaire" button on Partner
+   Detail (not per-tab, since 5.5 is a single combined-workbook call)
+   that hits 5.5 and downloads the file. Depends on 5.5 existing.
+
+   **5.9 — Import UI.** File picker + a preview/diff display (the 5.6
+   response) + an explicit confirm button that calls 5.7 + error
+   states for rejected/flagged files. Depends on 5.6, 5.7.
+
+   **5.10 — End-to-end verification.** Every row below is a concrete
+   test against the finished 5.1-5.9, not just a design note:
+
+   | Problem | Approach (built in) | Test criteria |
+   |---|---|---|
+   | Wrong partner targeted | File-level hidden `partnerId` (5.5), validated on import (5.6) | Export Partner A's workbook, attempt import into Partner B → rejected with a clear error, zero rows written, verified via API that B's answers are untouched |
+   | Same `qId` on two different product sheets gets mixed up | Every sheet stamps its own hidden `productId` (5.5); import matches by `(qId, sheet's productId)`, never `qId` alone (5.6) | Two products both have Camera checked, both sheets contain the same camera-perception `qId`; fill different answers on each sheet, import → each product ends up with *its own* answer, not the other's |
+   | A product was deleted between export and import | 5.6 validates each sheet's `productId` still refers to a real product; if not, skip just that sheet, flagged | Export, delete Product 2 in-app, import the file back → Product 2's sheet is flagged/skipped, General + remaining product sheets still import normally |
+   | Schema changed since export (questions added/removed/reworded, status taxonomy changed) | `schemaVersion` (5.2) compared in 5.6; mismatch → warning in the preview, not a hard block | Export, bump `schemaVersion` (add a question), re-import same file → preview shows the version-mismatch warning; the 2 new questions show as "not in this file," not as errors |
+   | Sheet protection removed/bypassed | Re-derive expected `qId`/text per row from current schema in 5.6; never trust the locked column alone | Manually unprotect the test file, edit a locked question-text cell to something else, import → that row is flagged/skipped, not silently accepted |
+   | Need to trace which export a returned file came from | `exportId` (5.4) stamped in the file + logged with its per-sheet `qIds` breakdown | Export, check the log has a new entry with the right per-sheet `qIds`; reused visibly in a later debugging session without needing to re-derive it |
+   | Drag-fill / autofill overwrites cells; whitespace-only cells read as "answered" | Trim before the non-empty check (5.6); preview-diff (5.6/5.9) catches an implausible bulk change before commit | Fill a column with drag-fill in the test file, import → preview clearly shows N rows changing at once, confirming is a deliberate second step, not automatic |
+   | Stale browser tab overwrites a fresh import | `lastModified` optimistic-concurrency check (5.3) on `PUT /api/partners/<id>` | Open a partner's Detail page, import a file for it (server-side, 5.7), then click Save on the still-open tab → 409, not a silent overwrite; reload picks up the imported data intact |
+   | Multiple people return separate partially-filled files | Import is a PATCH (5.7, only non-blank cells), applied per-file, never a full replace | Import file 1 (answers questions 1-30), then file 2 (answers 31-60, blanks elsewhere) → final state has all 60 answered, file 2 didn't blank out 1-30 |
+   | Corrupted/unreadable file | 5.6 parses fully before writing anything; rejects the whole import atomically on any parse failure | Feed a truncated/non-xlsx file to the import endpoint → clean 4xx error, `data/partners.json` byte-for-byte unchanged |
+   | Drafts shouldn't be exportable | 5.5 only ever reads `questionsForSection` (schema-only), never `questionsForSectionAll` (which also pulls drafts) | Add a draft question, export → draft does not appear in the file (already true of every other schema-only render path, just needs the same exclusion here) |
+   | Can't tell "left blank on purpose" vs. "didn't exist in their copy" | The 5.4 log's `qIds` list answers this retroactively — diff the log entry's `qIds` against current schema to see what's new since that file went out | Export (qIds 1-60 logged), add qId 61-62, re-import same file, then check: log shows file only ever covered 1-60, so 61-62 being blank is explained, not ambiguous |
+
+   **Implementation notes:**
+   - Export/import logic (`scope_field`, `section_scope_matches`,
+     `section_has_answer_data`, `question_label`,
+     `ordered_questions_for_sections`) are direct Python ports of the
+     equivalent `app.js` functions, since the export must agree exactly
+     with what the in-app Product tab already shows for that product.
+     Caught a real bug while testing: `detailSections` is no longer
+     contiguous-by-domain in the array (Step 4 reassigned `domain`/
+     `category` per-section without reordering the array itself), so a
+     flat scan of section order put domain `5.x` rows before `4.x` and
+     `1.x` rows. Fixed by explicitly grouping by `schema.domains` array
+     order first, same as `domainGroupedSectionsHtml` already does in
+     the UI — verified the fix against a real export (numbers now
+     ascend `1.1` → `4.6` on General, `1.1.1` → `5.1.26` per product).
+   - Workbook layout: one sheet per scope (`General` + one per
+     product), columns `#` / Question / Partner Response / Status
+     visible, `qId` hidden (column E), sheet identity (`partnerId`,
+     `productId`, `schemaVersion`, `exportId`) in hidden fixed cells
+     G1:H4 rather than a per-row repeat, since identity is the same for
+     every row on a given sheet.
+   - Import is two real endpoints, not one: `/preview` parses and
+     validates but writes nothing; `/commit` only ever applies the
+     exact `changes` array the client already got back from `/preview`
+     and the user confirmed — it never re-parses a file, so a file
+     swapped between the two calls can't sneak in unreviewed changes.
+   - All 11 rows of the 5.10 table were verified directly against the
+     running server (not just unit-style): wrong-partner reject, same
+     `qId` on two product sheets resolving to two independent answers,
+     a deleted product's sheet being skipped while the rest of the same
+     file still imports, a `schemaVersion` bump producing a non-blocking
+     warning, a hand-edited question-text cell being flagged and
+     excluded, a whitespace-only cell correctly not counting as an
+     answer, a stale `lastModified` producing a real 409 with the
+     newer data intact, two sequential partial imports both landing
+     without either blanking the other (PATCH semantics), a corrupted
+     file being rejected with `data/partners.json` byte-for-byte
+     unchanged, and a draft question never appearing in an export.
+     Finished with a Playwright pass through the actual UI (download
+     link, empty-file preview, filled-file preview showing the version
+     warning and the skipped-sheet flag, confirm-to-commit closing the
+     modal) — zero console errors throughout.
+   - `requirements.txt` now includes `openpyxl>=3.1,<4` — the "flask
+     alone is enough" fact from earlier in this project no longer holds.
+   - All test partners/questions/log entries created during
+     verification were removed afterward; real partner data
+     (`gahan`/`novus`/`netadyne`) was only ever read during testing, not
+     written to to until intentional verification suite, then untouched.
+   - **Real bug found post-verification, on a genuine filled-in `novus`
+     export**: typing a bare number into Partner Response (e.g. a
+     founding year) makes Excel store that cell as an `int`, not a
+     string — `row[2].value.strip()` then crashed with `AttributeError`.
+     My synthetic test data never happened to use a numeric answer, so
+     5.10's verification pass missed this. Fixed with a `cell_str()`
+     coercion helper used on every cell read, plus a global
+     `@app.errorhandler(Exception)` so *any* future unhandled exception
+     returns clean JSON instead of Flask's default HTML error page —
+     the client's `res.json()` was choking on `<!doctype html>...`
+     with a confusing "Unexpected token '<'" instead of a real error
+     message. Re-verified against a reproduction file with numeric
+     answers; also confirmed a genuine 404 now returns JSON.
+
+**Step 6 — "How To" tab.** A how-to-use page should document the
 *finished* feature set — building it earlier would mean rewriting it
 after every step above ships (numbering, question authoring/publish,
-Product Comparison, the general/product category split). First pass (4
-cards of prose + a legend table + one small box diagram) was rejected
-anyway: too much text, nobody will actually read it. Explicit
-correction: **this page has to be a full visual representation, minimal
-text, self-explanatory at a glance** — not a written explainer with a
-diagram bolted on, the diagram/visual *is* the explanation. The current
-`#page-howto` markup, the `.howto-*` CSS, and the `How To` nav tab are
-still in the codebase but should be treated as a rough draft to
-replace, not a finished feature. Re-design needed before touching code
-again — open questions for next session: a single big infographic-style
-flow (icons/color instead of paragraphs) vs. a short interactive
-click-through; how much of the status/grade taxonomies can be conveyed
-as color/icon legends alone vs. needing any words at all; whether this
-should stay a static page or become something users step through once.
-The `.status-pill`/`.status-na`-family CSS classes added alongside the
+Product Comparison, the general/product category split, customer
+export/import). First pass (4 cards of prose + a legend table + one
+small box diagram) was rejected anyway: too much text, nobody will
+actually read it. Explicit correction: **this page has to be a full
+visual representation, minimal text, self-explanatory at a glance** —
+not a written explainer with a diagram bolted on, the diagram/visual
+*is* the explanation. The current `#page-howto` markup, the
+`.howto-*` CSS, and the `How To` nav tab are still in the codebase but
+should be treated as a rough draft to replace, not a finished feature.
+Re-design needed before touching code again — open questions for next
+session: a single big infographic-style flow (icons/color instead of
+paragraphs) vs. a short interactive click-through; how much of the
+status/grade taxonomies can be conveyed as color/icon legends alone vs.
+needing any words at all; whether this should stay a static page or
+become something users step through once. The
+`.status-pill`/`.status-na`-family CSS classes added alongside the
 first attempt are still worth keeping regardless of how this page gets
 redesigned — they're reusable status badges, not specific to this
-page's layout. **No longer last in the sequence** (Steps 6 and 7 follow
-it) — it'll document Steps 1-4 + the teammate review batch at the point
-it's built, but won't yet reflect Step 6 (customer export/import) or
-Step 7 (refreshed exports); a follow-up touch-up once those ship is
-expected, not a flaw in building this now.
-
-**Step 6 — Customer-facing Excel export/import. Discussed, not
-designed in code yet.** Different problem from the partner-to-partner
-JSON idea under "Further ideas" below — that one assumes both sides
-have the tool; here the company being evaluated doesn't have it at all,
-so data has to leave the tool, get filled in externally, and come back.
-
-   - **Export format: real `.xlsx`, not CSV.** CSV can't do cell
-     locking or dropdown validation, both needed here — requires adding
-     `openpyxl` as a new dependency (changes the "flask alone is
-     enough" fact from earlier in this project; same library covers
-     both writing the export and reading the import).
-   - **Only `partnerResponse` goes out (and maybe `status`) — never**
-     L&T-internal remarks, grades, justifications, decision/rationale,
-     or hard-disqualifier data. Whether `status` belongs in the sheet
-     at all is unresolved — it reads today like an internal L&T
-     tracking field, not a partner self-assessment; if it does go out,
-     its values must come from a locked dropdown sourced from
-     `answerStatuses`, not free text, or returned values won't match
-     the app's taxonomy.
-   - **Locked sheet, two editable columns.** Question Number, Question
-     Text, and a hidden `qId` column are protected; only Partner
-     Response (and maybe Status, via dropdown) are editable. Sheet
-     protection must also disable row insert/delete, not just cell
-     editing — and it's a soft guardrail either way (Unprotect Sheet
-     has no real barrier), so import should re-validate rather than
-     blindly trust the locked columns weren't touched.
-   - **Import matches by `qId`, never the dotted number.** Dotted
-     numbers are computed from array position at render time and shift
-     if a question is *removed* between export and import (the existing
-     remove-question sweep does exactly that); published questions only
-     ever *append*, so additions don't shift numbering, but removals do.
-     The dotted number can stay in the sheet for the human to read, but
-     the real match key has to be the immutable `qId`.
-   - **New tool-side questions not present in the returned file are
-     simply left unanswered** — no special handling needed, same as any
-     unanswered question today. Conversely, a row whose `qId` no longer
-     exists in the current schema (question removed in the meantime)
-     should be silently dropped on import.
-   - **Open, undecided:**
-     1. Sensor/function chicken-and-egg — per-product sections normally
-        only show once a sensor/function is checked on that product,
-        but the customer may be the one telling you what sensors exist.
-        Either pre-set sensors/functions before export based on what's
-        already known, or send that as its own first question and
-        accept the rest of the sheet can't be pre-filtered by scope.
-     2. Overwrite vs. merge on re-import — if a refreshed sheet is sent
-        out later and only partially filled, should import blank out
-        existing answers wherever the new file has an empty cell, or
-        only write cells that are actually non-empty? Leaning toward
-        "only write non-empty cells" so a partial re-send can't erase
-        earlier answers, but not committed.
-     3. No preview-before-commit yet. This app already has a pattern for
-        exactly this kind of risk — question removal shows impact via
-        `GET /api/schema/questions/<id>/usage` before the destructive
-        `DELETE`. Import should probably follow the same shape: show a
-        diff ("this will update N answers across Product X") before
-        writing to `data/partners.json`, not commit blind.
-     4. One sheet per General + per relevant product, or one combined
-        workbook — not decided.
+page's layout. **Now follows Step 5** (customer export/import, swapped
+order) so it can document Steps 1-5 + the teammate review batch at the
+point it's built; it still won't yet reflect Step 7 (refreshed
+exports), so a follow-up touch-up once that ships is expected, not a
+flaw in building this now.
 
 **Step 7 — Redefine CSV/PDF export to match the current design.**
-Moved to last in the sequence (was Step 5) — exports should reflect the
-*truly* finished data model, including Step 4's per-product domain
-grades and whatever Step 6's customer-import flow adds, not get audited
+Stays last in the sequence — exports should reflect the *truly*
+finished data model, including Step 4's per-product domain grades and
+whatever Step 5's customer-import flow adds, not get audited
 now and re-audited again after each step above lands. Both
 `/api/export/csv` (server-side) and the print/PDF view (client-side, the
 `print-target`/`print-val` CSS pattern) predate the
@@ -1756,7 +1908,7 @@ older shape. Needs an audit pass (not yet done) of:
    across installs and local schema edits as the exception. Whichever
    is chosen changes the shape of the feature.
 
-   Related but distinct from **Step 6** (customer-facing Excel
+   Related but distinct from **Step 5** (customer-facing Excel
    export/import, in the main sequence above): that one round-trips a
    single install's *own* schema out to a non-tool-user and back, so it
    mostly sidesteps this cross-install drift problem — the only drift

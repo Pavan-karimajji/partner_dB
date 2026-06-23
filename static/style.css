@@ -754,7 +754,8 @@ input, textarea, select { font: inherit; }
   .topnav, .save-bar, .toast-wrap, .modal-overlay { display: none !important; }
   .btn-secondary[onclick], .btn-primary { display: none !important; }
   .page-header .btn, #detail-partner-select, .topnav-actions { display: none !important; }
-  #btn-edit-meta, #btn-detail-edit, #btn-remove-partner { display: none !important; }
+  #btn-edit-meta, #btn-detail-edit, #btn-remove-partner,
+  #btn-export-questionnaire, #btn-import-questionnaire { display: none !important; }
   [data-accordion] .accordion-chevron { display: none !important; }
   [data-detail-tab] { display: none !important; }
   select, .q-score-select, .q-remarks-input, .p-response-area,

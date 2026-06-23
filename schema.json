@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 5,
   "businessModels": [
     "Component Supplier",
     "Software Stack Provider",

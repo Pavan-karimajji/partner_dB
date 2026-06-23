@@ -729,8 +729,10 @@ function renderDetailContent(p) {
         <div class="card">
           <div class="card-header">
             <span class="card-title" id="detail-name-display">${esc(p.name)}</span>
-            <div style="display:flex;gap:6px;">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;">
               <button class="btn btn-secondary btn-sm" id="btn-edit-meta" ${editAttr()}>Edit Info</button>
+              <a class="btn btn-secondary btn-sm" id="btn-export-questionnaire" href="/api/partners/${p.id}/export-questionnaire" download>Export Questionnaire</a>
+              <button class="btn btn-secondary btn-sm" id="btn-import-questionnaire" type="button">Import Questionnaire</button>
               <button class="btn btn-danger btn-sm" id="btn-remove-partner" ${editAttr()}>Remove</button>
             </div>
           </div>
@@ -886,11 +888,110 @@ function renderDetailContent(p) {
     removePartner(p);
   });
 
+  // Import questionnaire -- not gated by editAttr()/detailEditMode like
+  // most controls, since it's its own explicit confirm flow (preview then
+  // commit), not a quick field edit.
+  document.getElementById('btn-import-questionnaire').addEventListener('click', () => {
+    openImportQuestionnaireModal(p);
+  });
+
   // Read-only banner's inline Edit shortcut -- reuses the same toggle the
   // header's #btn-detail-edit button already runs, just one click closer
   // when you've scrolled past the header.
   const bannerEditBtn = document.getElementById('btn-detail-edit-banner');
   if (bannerEditBtn) bannerEditBtn.addEventListener('click', () => document.getElementById('btn-detail-edit').click());
+}
+
+// ── Import Questionnaire ─────────────────────────────────────────────────
+// Two-step like the existing remove-question flow: /preview parses and
+// validates the file but writes nothing; /commit only ever applies the
+// exact `changes` list the user already saw and confirmed here, never
+// re-reading the file -- so a file swapped between the two calls can't
+// sneak in unreviewed changes (plan.md Step 5.6/5.7).
+let importPreviewChanges = null;
+
+function openImportQuestionnaireModal(p) {
+  importPreviewChanges = null;
+  const body = document.getElementById('import-modal-body');
+  body.innerHTML = `
+    <p class="text-muted" style="margin-bottom:12px;">Pick the filled-in .xlsx returned by the partner.</p>
+    <input type="file" id="import-file-input" accept=".xlsx" />
+  `;
+  document.getElementById('btn-confirm-import').style.display = 'none';
+  openModal('modal-import-questionnaire');
+
+  document.getElementById('import-file-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    body.innerHTML = '<div class="loading-wrap"><div class="spinner"></div></div>';
+    document.getElementById('btn-confirm-import').style.display = 'none';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch(`/api/partners/${p.id}/import-questionnaire/preview`, { method: 'POST', body: formData });
+      const result = await res.json();
+      if (!res.ok) {
+        body.innerHTML = `<div class="text-red">${esc(result.error || 'Import preview failed.')}</div>`;
+        return;
+      }
+      renderImportPreview(p, result, body);
+    } catch (err) {
+      body.innerHTML = `<div class="text-red">Import preview failed: ${esc(err.message)}</div>`;
+    }
+  });
+}
+
+function renderImportPreview(p, result, body) {
+  importPreviewChanges = result.changes;
+  const byScope = {};
+  result.changes.forEach(c => {
+    const key = c.scope === 'general' ? 'General' : (((p.products || []).find(pr => pr.id === c.productId) || {}).name || 'Product');
+    byScope[key] = (byScope[key] || 0) + 1;
+  });
+  const breakdown = Object.entries(byScope).map(([k, n]) => `<li>${esc(k)}: ${n} answer(s)</li>`).join('');
+
+  const versionWarning = result.schemaVersionMismatch
+    ? `<div class="toast error" style="position:static;margin-bottom:12px;">Schema changed since this file was exported (version ${esc(String(result.schemaVersionAtExport))} → ${esc(String(result.currentSchemaVersion))}). Newer questions won't be in this file — that's expected, not an error.</div>`
+    : '';
+
+  const flaggedHtml = result.flagged.length === 0 ? '' : `
+    <div style="margin-top:14px;">
+      <div class="form-label">Flagged / skipped (${result.flagged.length})</div>
+      <ul class="text-muted" style="font-size:.8125rem;">
+        ${result.flagged.map(f => `<li>${esc(f.sheet)}${f.qId ? ' · qId ' + f.qId : ''}: ${esc(f.reason)}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+
+  body.innerHTML = `
+    ${versionWarning}
+    <div><strong>${result.changes.length}</strong> answer(s) will be updated:</div>
+    <ul>${breakdown}</ul>
+    ${flaggedHtml}
+    ${result.changes.length === 0 ? '<div class="text-muted" style="margin-top:10px;">Nothing to import from this file.</div>' : ''}
+  `;
+  document.getElementById('btn-confirm-import').style.display = result.changes.length > 0 ? '' : 'none';
+}
+
+async function commitImportQuestionnaire(p) {
+  if (!importPreviewChanges || importPreviewChanges.length === 0) return;
+  const btn = document.getElementById('btn-confirm-import');
+  btn.disabled = true;
+  try {
+    const result = await api('POST', `/api/partners/${p.id}/import-questionnaire/commit`, { changes: importPreviewChanges });
+    closeModal('modal-import-questionnaire');
+    toast(`Imported ${result.updated} answer(s)`);
+    // Reload so the newly-imported answers show immediately, same as any
+    // other change made outside the currently-open in-memory copy.
+    if (State.detailPartner && State.detailPartner.id === p.id) {
+      await loadDetailPartner(p.id);
+    }
+  } catch (err) {
+    toast('Import failed: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function removePartner(p) {
@@ -1285,7 +1386,7 @@ function draftActionsRowHtml(q) {
         </select>
       </label>
       <button class="btn btn-secondary btn-sm" type="button" data-publish-draft-question="${q.id}" ${editAttr()}>Publish</button>
-      <button class="btn btn-ghost btn-sm" type="button" data-remove-draft-question="${q.id}" ${editAttr()}>Discard draft</button>
+      <button class="btn btn-secondary btn-sm" type="button" data-remove-draft-question="${q.id}" ${editAttr()}>Discard draft</button>
     </div>
   `;
 }
@@ -2286,7 +2387,10 @@ async function saveDetail() {
   if (btnSave) { btnSave.style.display = ''; btnSave.textContent = 'Saving…'; btnSave.disabled = true; }
 
   try {
-    await api('PUT', `/api/partners/${State.detailPartner.id}`, State.detailPartner);
+    const result = await api('PUT', `/api/partners/${State.detailPartner.id}`, State.detailPartner);
+    // Sync the new lastModified back so the next save (without an
+    // intervening reload) doesn't immediately conflict with itself.
+    State.detailPartner.lastModified = result.lastModified;
     toast('Saved');
     await refreshPartnersSummary();
     const opt = document.querySelector(`#detail-partner-select option[value="${State.detailPartner.id}"]`);
@@ -2299,7 +2403,14 @@ async function saveDetail() {
   } catch (e) {
     // Restore dirty so the user knows the save failed and can retry
     markDirty();
-    toast('Save failed: ' + e.message, true);
+    // 409 means another tab or a questionnaire import changed this
+    // partner since it was loaded -- distinct message, since "retry" (the
+    // generic save-failed path) would just 409 again.
+    if (e.message.startsWith('409:')) {
+      toast('This partner changed since you loaded it (e.g. a questionnaire import). Reload before saving.', true);
+    } else {
+      toast('Save failed: ' + e.message, true);
+    }
   } finally {
     if (btnSave) { btnSave.textContent = 'Save'; btnSave.disabled = false; }
   }
@@ -2499,6 +2610,13 @@ async function boot() {
   // Add partner button
   document.getElementById('btn-add-partner').addEventListener('click', () => {
     openModal('modal-add-partner');
+  });
+
+  // Import questionnaire confirm -- always commits for whichever partner
+  // is currently loaded on Partner Detail, since that's the only way this
+  // modal ever gets opened.
+  document.getElementById('btn-confirm-import').addEventListener('click', () => {
+    if (State.detailPartner) commitImportQuestionnaire(State.detailPartner);
   });
 
   // Detail partner select — guard unsaved changes before switching partner
