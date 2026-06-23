@@ -12,29 +12,9 @@
         "date": "2026-06-17",
         "rationale": "Strong company track record and production readiness. Cybersecurity posture needs improvement before SOP. Functional safety documentation gaps to be resolved.",
         "reviewer": "ADAS Architecture Team",
-        "status": ""
+        "status": "Rejected"
       },
       "domainGrades": [
-        {
-          "domainId": "company-background",
-          "grade": "developing",
-          "justification": ""
-        },
-        {
-          "domainId": "perception-function",
-          "grade": "good",
-          "justification": ""
-        },
-        {
-          "domainId": "regulation-compliance",
-          "grade": "outstanding",
-          "justification": ""
-        },
-        {
-          "domainId": "hardware-capability",
-          "grade": "developing",
-          "justification": ""
-        },
         {
           "domainId": "patents-innovation",
           "grade": "na",
@@ -312,6 +292,95 @@
       ],
       "sectionGrades": [],
       "shortName": "novus",
+      "stage": "Under Evaluation"
+    },
+    {
+      "addedDate": "2026-06-23",
+      "businessModel": [],
+      "decision": {
+        "date": "",
+        "rationale": "",
+        "reviewer": "",
+        "status": ""
+      },
+      "domainGrades": [],
+      "draftQuestions": [
+        {
+          "id": -1,
+          "sectionId": "prod-camperc-pipeline",
+          "text": "",
+          "priority": "medium"
+        }
+      ],
+      "evaluationDate": "",
+      "evaluator": "",
+      "generalAnswers": [],
+      "hardDisqualifiers": [],
+      "id": "cc5a5249-3880-4014-bf3c-3285fd8ffd5f",
+      "name": "netadyne",
+      "notes": "",
+      "patents": [],
+      "productVersion": "",
+      "products": [
+        {
+          "id": "473f17cd-94b1-4f2d-b072-50752fbb56df",
+          "name": "MFC",
+          "sensors": {
+            "radar": false,
+            "camera": true,
+            "fusion": false,
+            "lidar": false,
+            "uss": false,
+            "soc": true
+          },
+          "functions": {
+            "AEB": true,
+            "ACC": false,
+            "LDW": false,
+            "LCA": false,
+            "LKA": false,
+            "MOIS": false,
+            "BSD": false,
+            "RCTA": false,
+            "DMS": false,
+            "FUNC": false
+          },
+          "socs": {
+            "ti_sitara": true,
+            "ti_tda4vl": false,
+            "ti_tda4vm": false,
+            "nxp_s32v234": false,
+            "nxp_s32g": false,
+            "renesas_v3m": false,
+            "renesas_v3h": false,
+            "qcom_sa6155p": false,
+            "qcom_sa8155p": false,
+            "ambarella_cv2": false,
+            "ambarella_cv22": false
+          },
+          "sensorNotes": {
+            "radar": "",
+            "camera": "",
+            "fusion": "",
+            "lidar": "",
+            "uss": "",
+            "soc": ""
+          },
+          "notes": "",
+          "isHero": true,
+          "sectionGrades": [],
+          "answers": [
+            {
+              "qId": 135,
+              "status": "na",
+              "partnerResponse": "",
+              "remarks": ""
+            }
+          ]
+        }
+      ],
+      "sectionGrades": [],
+      "shortName": "N",
       "stage": "Under Evaluation"
     }
   ]

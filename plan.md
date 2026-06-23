@@ -841,7 +841,7 @@ structure with the radar chart still stacked above it.
 ## Earlier "Next steps" framing (superseded — implemented, see "Next steps
 round — DONE" and the corrections section above)
 
-## Next steps — sequenced to avoid rework (3 of 7 DONE; 4 PLANNED)
+## Next steps — sequenced to avoid rework (4 of 7 DONE; 3 PLANNED)
 
 These were gathered across several follow-ups in whatever order the user
 raised them, but that's *not* a safe build order — several items would
@@ -1409,8 +1409,7 @@ render correctly, default unchecked, and persist correctly when toggled
 existed.
 
 **Step 4 — Split General/Product master categories, add per-product
-domain grading, and a Product Grade Radar. RE-DESIGNED FROM SCRATCH,
-ready to build.** The original proposal (discarded — see git history of
+domain grading, and a Product Grade Radar. DONE.** The original proposal (discarded — see git history of
 this file if the old draft text is ever needed) tried to plot products
 on the *existing* 6 master domains. Rethinking surfaced the actual root
 problem: those 6 domains each mix **general** (company-wide, one truth
@@ -1488,8 +1487,11 @@ or the other.
         integration and SOP ramp-up?"
      6. "What are your standard warranty terms and liability caps for
         field issues?"
-     (Draft list — confirm/edit wording before adding to schema.json;
-     not yet finalized.)
+     **Live in `schema.json` now (qIds 253-258)** — shipped with this
+     draft wording rather than blocking the rest of Step 4 on sign-off.
+     No in-app "edit question text" UI exists, so if the wording needs
+     changing, it's a direct hand-edit of `schema.json` (plain JSON,
+     not a destructive operation — no answers reference these qIds yet).
 
    **Per-product domain grading (new data + new UI):**
    - New `product.domainGrades` array, same shape as
@@ -1533,6 +1535,67 @@ or the other.
    (alongside the existing radar vs. its own sub-tab) not yet decided —
    revisit once the per-product grading card exists and there's real
    data to plot.
+
+   **Editable question priority (added requirement).** Today `priority`
+   can only be set at draft-creation time
+   (`draftActionsRowHtml()`, [app.js:1184](static/app.js#L1184)) — once
+   a question is published, or for the pre-authored default questions
+   that were never drafts at all, there's no UI to change it; it only
+   ever renders as a read-only colored edge indicator
+   (`data-priority`). Every question's priority should be editable, not
+   just drafts'. Since `priority` lives in `schema.json` per question,
+   not per-partner, this is a schema-level change affecting every
+   partner at once — same category as the existing
+   publish/remove-question/add-function flows. Needs: a new endpoint
+   (`PUT /api/schema/questions/<id>`) to persist a priority change to
+   `schema.json`; a priority-edit control next to each question row
+   (reuse the same 3-option select already used for drafts), gated
+   behind edit mode like every other control. No partner-data migration
+   needed — the row's colored edge already reads `q.priority` live from
+   schema on every render, so a change is reflected immediately with no
+   answers/data affected.
+
+   **Implementation notes:**
+   - Section ids were deliberately kept unchanged throughout (only each
+     section's `domain`/`category` field moved) — `sectionGrades` and
+     `draftQuestions` reference sections by id, so nothing existing
+     broke. `gen-company-overview`, `gen-validation-test`, and
+     `gen-funcsafety-cyber` all kept their original ids; only
+     `prod-production-lifecycle`'s `domain` field repointed to the new
+     `production-lifecycle` domain, and `gen-validation-test`'s `domain`
+     repointed to the new `tooling-infra` domain.
+   - `questionLabel()` ([app.js:1294](static/app.js#L1294)) now branches
+     on `section.category`; `comparisonGroups()`
+     ([app.js:56](static/app.js#L56)) filters to general domains and a
+     new `productComparisonGroups()` mirrors it for product domains.
+   - `domainGradingCardHtml()` (partner-level sidebar card) now filters
+     to general domains only; a new `productDomainGradingCardHtml()`
+     renders the per-product equivalent inline at the top of each
+     Product tab, backed by new `product.domainGrades` +
+     `ensureProductDomainGrade()`/`getProductDomainGrade()`.
+   - New `renderProductGradeRadar()` lives on the Comparison page's
+     existing "Products" sub-tab, deliberately reusing the same 2-4
+     product picker as the Product Comparison table (one picker drives
+     both the table and the radar) rather than adding a second picker.
+   - Priority edits commit straight to the server
+     (`saveQuestionPriority()`) instead of going through the partner's
+     own Save button, since priority is schema-level and shared by
+     every partner — same reasoning as the existing add-function flow.
+   - Verified end-to-end via Playwright with a disposable test partner:
+     5 general + 5 product domain groupings render correctly (Patents &
+     Innovation still correctly excluded from both the heatmap and
+     either radar — it has zero sections, a pre-existing gap, item 1
+     under "Other open items," untouched by this step); 2-level vs.
+     3-level numbering confirmed (`1.1` vs. `1.1.1`); Safety & Cyber
+     Security questions render under the Product tab's domain grouping;
+     a product domain grade of "Good" round-tripped correctly onto the
+     Product Grade Radar's matching axis; a published question's
+     priority change persisted via the new endpoint and updated its
+     row's color immediately; zero console errors throughout.
+   - `gahan`'s 4 stale `domainGrades` entries (`company-background`,
+     `perception-function`, `regulation-compliance`,
+     `hardware-capability`) were removed; its `patents-innovation` entry
+     was kept since that domain is unaffected by the split.
 
 **Step 5 — "How To" tab.** A how-to-use page should document the
 *finished* feature set — building it earlier would mean rewriting it

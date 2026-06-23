@@ -389,6 +389,17 @@ input, textarea, select { font: inherit; }
 }
 .q-remove-btn:hover { color: var(--red); }
 .q-text { color: var(--gray-700); line-height: 1.4; }
+.q-priority-inline-select {
+  display: block;
+  width: auto;
+  margin-top: 4px;
+  font-size: .6875rem;
+  padding: 1px 4px;
+  color: var(--gray-500);
+  border: 1px solid var(--gray-200);
+  border-radius: 4px;
+  background: var(--gray-50);
+}
 .draft-badge {
   display: inline-block;
   font-size: .625rem;
@@ -748,7 +759,7 @@ input, textarea, select { font: inherit; }
   [data-detail-tab] { display: none !important; }
   select, .q-score-select, .q-remarks-input, .p-response-area,
   .p-judgement-select, .p-judgement-label, .form-textarea,
-  .draft-row-actions, .q-section-footer, .q-remove-btn { display: none !important; }
+  .draft-row-actions, .q-section-footer, .q-remove-btn, .q-priority-inline-select { display: none !important; }
 
   /* Print always shows the true data at full opacity, regardless of
      whether the page happened to be in read-only mode on screen */

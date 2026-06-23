@@ -116,6 +116,28 @@ def api_publish_question():
     return jsonify(new_question), 201
 
 
+# Edits an existing question's priority -- the only field this exposes for
+# now (text edits would need an "edit question" UI that doesn't exist yet;
+# removing a question already has its own publish->usage->delete flow
+# above). Schema-level, so it takes effect for every partner immediately,
+# same as publish/remove/add-function.
+@app.route("/api/schema/questions/<int:q_id>", methods=["PUT"])
+def api_update_question(q_id):
+    body = request.get_json(force=True)
+    priority = body.get("priority")
+    if priority not in ("high", "medium", "low"):
+        return jsonify({"error": "priority must be one of high/medium/low"}), 400
+
+    schema = load_schema()
+    question = next((q for q in schema.get("detailQuestions", []) if q["id"] == q_id), None)
+    if not question:
+        abort(404)
+
+    question["priority"] = priority
+    save_schema(schema)
+    return jsonify(question)
+
+
 def _answer_has_data(a):
     return bool(a.get("status") or (a.get("remarks") or "").strip()
                 or (a.get("partnerResponse") or "").strip())

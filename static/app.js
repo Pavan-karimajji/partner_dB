@@ -30,6 +30,7 @@ const State = {
   comparisonView: 'partners',       // 'partners' | 'products' sub-tab on the Comparison page
   productCompareCount: 2,           // 2-4, how many product slots to show
   productCompareSelected: ['', ''], // "partnerId:productId" per slot, '' = empty
+  productRadarChart: null,          // current Chart.js instance for the Product Grade Radar
 };
 
 // ── Brand colours ─────────────────────────────────────────────────────────
@@ -49,19 +50,34 @@ const STAGES = ['Under Evaluation', 'Eval Complete', 'Shortlisted', 'Decision'];
 // Groups the 34 detailSections into the 6 management-facing domains defined
 // in schema.json (schema.domains + each detailSection's domain field) for
 // the Comparison heatmap columns — one column per domain rather than one
-// per section, since 34 columns would be unreadable. Domains with zero
-// sections (currently "Patents & Innovation", which rolls up from
-// partner.patents[] instead) are skipped — that needs different rollup
-// logic and isn't in the heatmap yet.
+// per section, since 34 columns would be unreadable. General-only:
+// partner.domainGrades is now purely a general-category judgment (see
+// plan.md Step 4 — product categories are graded per-product instead),
+// so the partner-level heatmap/radar should only ever plot the 5 general
+// domains. Domains with zero sections (currently "Patents & Innovation",
+// which rolls up from partner.patents[] instead) are skipped — that needs
+// different rollup logic and isn't in the heatmap yet.
 function comparisonGroups() {
   const schema = State.schema;
   return (schema.domains || [])
+    .filter(d => d.category === 'general')
     .map(d => ({
       id: d.id,
       label: d.label,
       sectionIds: (schema.detailSections || []).filter(s => s.domain === d.id).map(s => s.id),
     }))
     .filter(g => g.sectionIds.length > 0);
+}
+
+// Product-side counterpart of comparisonGroups() -- the 5 product
+// categories, used by the Product Grade Radar (sourced from
+// product.domainGrades instead of partner.domainGrades). Not filtered by
+// sectionIds.length since every product domain already has sections.
+function productComparisonGroups() {
+  const schema = State.schema;
+  return (schema.domains || [])
+    .filter(d => d.category === 'product')
+    .map(d => ({ id: d.id, label: d.label }));
 }
 
 // Partner Detail is read-only until State.detailEditMode is true (see the
@@ -419,6 +435,8 @@ function renderProductComparisonTable(fullPartners) {
     .map(key => findPartnerProduct(fullPartners, key))
     .filter(Boolean);
 
+  renderProductGradeRadar(picked);
+
   if (picked.length === 0) {
     tableEl.innerHTML = `<div class="empty-state">Pick at least one product above to compare.</div>`;
     return;
@@ -595,6 +613,56 @@ function renderComparisonRadar(partners, groups) {
   if (selected.length === 0) return;
 
   State.radarChart = new Chart(canvas.getContext('2d'), {
+    type: 'radar',
+    data: { labels: groups.map(g => g.label), datasets },
+    options: {
+      scales: {
+        r: {
+          min: 0,
+          max: 3,
+          ticks: {
+            stepSize: 1,
+            callback: v => ({ 0: 'NA', 1: 'Developing', 2: 'Good', 3: 'Outstanding' }[v] ?? v),
+          },
+        },
+      },
+      plugins: { legend: { position: 'bottom' } },
+    },
+  });
+}
+
+// Product-level counterpart of renderComparisonRadar — 5 axes (the product
+// master categories) instead of the partner's general ones, sourced from
+// each product's own domainGrades. Reuses the same 2-4 product picker as
+// the Product Comparison table on this sub-tab (State.productCompareSelected)
+// rather than a separate picker, so both views always show the same
+// products at once. `picked` is the same {partner, product}[] array
+// renderProductComparisonTable already computed for the table.
+function renderProductGradeRadar(picked) {
+  const canvas = document.getElementById('product-radar-chart');
+  if (!canvas) return;
+
+  if (State.productRadarChart) {
+    State.productRadarChart.destroy();
+    State.productRadarChart = null;
+  }
+  if (picked.length === 0) return;
+
+  const groups = productComparisonGroups();
+  const datasets = picked.map(({ partner, product }, i) => {
+    const color = COLORS.chartPalette[i % COLORS.chartPalette.length];
+    const data = groups.map(g => gradeToScore(getProductDomainGrade(product, g.id).grade));
+    return {
+      label: `${partner.name} — ${product.name || 'Product'}`,
+      data,
+      borderColor: color,
+      backgroundColor: color + '33',
+      pointBackgroundColor: color,
+      borderWidth: 2,
+    };
+  });
+
+  State.productRadarChart = new Chart(canvas.getContext('2d'), {
     type: 'radar',
     data: { labels: groups.map(g => g.label), datasets },
     options: {
@@ -911,6 +979,14 @@ function handleDetailChange(e) {
     return;
   }
 
+  // Published question priority — schema-level, not partner data, so this
+  // saves to the server immediately instead of waiting for the partner's
+  // own Save button (same reasoning as add-function below).
+  if (el.dataset.questionPriority) {
+    saveQuestionPriority(parseInt(el.dataset.questionPriority, 10), el.value, el);
+    return;
+  }
+
   // Section grade (general or product section) — key is "general:<sectionId>"
   // or "product:<prodId>:<sectionId>"; sectionId never contains ':'.
   if (el.dataset.sectionGrade) {
@@ -951,6 +1027,25 @@ function handleDetailChange(e) {
   if (el.dataset.domainGradeJustification) {
     markDirty();
     ensureDomainGrade(el.dataset.domainGradeJustification).justification = el.value;
+    return;
+  }
+
+  // Product domain grade ("<productId>:<domainId>")
+  if (el.dataset.productDomainGrade) {
+    markDirty();
+    const [prodId, domainId] = el.dataset.productDomainGrade.split(':');
+    const g = ensureProductDomainGrade(prodId, domainId);
+    if (g) g.grade = el.value;
+    if (pv && pv.classList.contains('print-val')) pv.textContent = gradeStatusLabel(el.value);
+    return;
+  }
+
+  // Product domain grade justification
+  if (el.dataset.productDomainGradeJustification) {
+    markDirty();
+    const [prodId, domainId] = el.dataset.productDomainGradeJustification.split(':');
+    const g = ensureProductDomainGrade(prodId, domainId);
+    if (g) g.justification = el.value;
     return;
   }
 
@@ -1149,7 +1244,11 @@ function answerRowHtml(q, ans, key) {
     : `<span class="q-num">${questionLabel(q)}<button class="q-remove-btn" type="button" data-remove-question="${q.id}" title="Remove this question" ${editAttr()}>✕</button></span>`;
   const textCell = isDraft
     ? `<textarea class="q-remarks-input q-draft-text" rows="2" placeholder="Type the new question…" data-draft-text="${q.id}" ${editAttr()}>${esc(q.text)}</textarea><span class="print-val">${esc(q.text)}</span>`
-    : `<div class="q-text">${esc(q.text)}</div>`;
+    : `<div class="q-text">${esc(q.text)}
+        <select class="q-priority-inline-select" data-question-priority="${q.id}" title="Priority" ${editAttr()}>
+          ${PRIORITY_TABS.map(p => `<option value="${p.key}"${(q.priority || 'medium') === p.key ? ' selected' : ''}>${p.label}</option>`).join('')}
+        </select>
+      </div>`;
   return `
     <div class="ans-row${isDraft ? ' ans-row-draft' : ''}" data-row-status="${esc(ans.status || '')}" data-priority="${esc(q.priority || 'medium')}">
       ${numCell}
@@ -1295,12 +1394,23 @@ function questionLabel(q) {
   const schema = State.schema;
   const section = (schema.detailSections || []).find(s => s.id === q.sectionId);
   if (!section) return String(q.id);
-  const domainNum = (schema.domains || []).findIndex(d => d.id === section.domain) + 1;
+  const questionNum = questionsForSection(q.sectionId).findIndex(qq => qq.id === q.id) + 1;
+  // General categories are exactly one section each (no sub-category layer),
+  // so the number is category.question -- counting only general domains.
+  // Product categories keep the original category.subcategory.question
+  // shape since they genuinely have multiple sub-sections.
+  if (section.category === 'general') {
+    const catNum = (schema.domains || []).filter(d => d.category === 'general')
+      .findIndex(d => d.id === section.domain) + 1;
+    if (catNum <= 0 || questionNum <= 0) return String(q.id);
+    return `${catNum}.${questionNum}`;
+  }
+  const catNum = (schema.domains || []).filter(d => d.category === 'product')
+    .findIndex(d => d.id === section.domain) + 1;
   const sectionNum = (schema.detailSections || []).filter(s => s.domain === section.domain)
     .findIndex(s => s.id === section.id) + 1;
-  const questionNum = questionsForSection(q.sectionId).findIndex(qq => qq.id === q.id) + 1;
-  if (domainNum <= 0 || sectionNum <= 0 || questionNum <= 0) return String(q.id);
-  return `${domainNum}.${sectionNum}.${questionNum}`;
+  if (catNum <= 0 || sectionNum <= 0 || questionNum <= 0) return String(q.id);
+  return `${catNum}.${sectionNum}.${questionNum}`;
 }
 
 // Maps a scope type to the product field it reads/writes.
@@ -1400,15 +1510,18 @@ function domainGroupedSectionsHtml(sectionEntries, renderSectionFn) {
     `).join('');
 }
 
-// Sidebar card for grading the 6 master domains — rendered once per partner,
-// independent of which sub-tab (General/Product N/Patents/Notes) is active.
+// Sidebar card for grading the 5 general master categories — rendered once
+// per partner, independent of which sub-tab (General/Product N/Patents/Notes)
+// is active. Product categories are graded per-product instead (see the
+// inline grading card on each Product tab), since partner.domainGrades is
+// now purely a general-level judgment (plan.md Step 4).
 function domainGradingCardHtml(p) {
   const schema = State.schema;
   return `
     <div class="card" id="domain-grading-card">
       <div class="card-header"><span class="card-title">Master Category Grading</span></div>
       <div class="card-body">
-        ${(schema.domains || []).map(d => {
+        ${(schema.domains || []).filter(d => d.category === 'general').map(d => {
           const dg = getDomainGrade(d.id);
           return `
             <div class="domain-grade-sidebar-row">
@@ -1419,6 +1532,35 @@ function domainGradingCardHtml(p) {
               </select>
               <span class="print-val">${esc(gradeStatusLabel(dg.grade))}</span>
               <textarea class="form-textarea" rows="2" placeholder="Justification…" data-domain-grade-justification="${d.id}" ${editAttr()}>${esc(dg.justification || '')}</textarea>
+              <div class="print-val">${esc(dg.justification || '')}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Inline grading card at the top of each Product tab, for the 5 product
+// master categories (see plan.md Step 4) — same control shape as the
+// partner-level domainGradingCardHtml sidebar card above, but scoped to
+// one product's domainGrades instead of the partner's.
+function productDomainGradingCardHtml(prod, schema) {
+  return `
+    <div class="card" id="product-domain-grading-card-${prod.id}">
+      <div class="card-header"><span class="card-title">Product Category Grading</span></div>
+      <div class="card-body">
+        ${(schema.domains || []).filter(d => d.category === 'product').map(d => {
+          const dg = getProductDomainGrade(prod, d.id);
+          return `
+            <div class="domain-grade-sidebar-row">
+              <div class="domain-grade-sidebar-label">${esc(d.label)}</div>
+              <select class="form-select" data-product-domain-grade="${prod.id}:${d.id}" ${editAttr()}>
+                <option value="">— select —</option>
+                ${schema.gradeStatuses.map(g => `<option value="${g.key}"${dg.grade === g.key ? ' selected' : ''}>${esc(g.label)}</option>`).join('')}
+              </select>
+              <span class="print-val">${esc(gradeStatusLabel(dg.grade))}</span>
+              <textarea class="form-textarea" rows="2" placeholder="Justification…" data-product-domain-grade-justification="${prod.id}:${d.id}" ${editAttr()}>${esc(dg.justification || '')}</textarea>
               <div class="print-val">${esc(dg.justification || '')}</div>
             </div>
           `;
@@ -1539,6 +1681,7 @@ function productTabHtml(prod) {
   const sections = sectionsForProduct(prod);
   return `
     ${productCardHtml(prod, schema)}
+    ${productDomainGradingCardHtml(prod, schema)}
     ${detailFilterRowHtml()}
     ${domainGroupedSectionsHtml(
       sections.map(({ section, active }) => ({ section, active })),
@@ -1730,8 +1873,36 @@ function ensureProductSectionGrade(productId, sectionId) {
   if (!g) { g = { sectionId, grade: '', justification: '' }; list.push(g); }
   return g;
 }
+// Schema-level edit (every partner shares the same question), so it commits
+// to the server immediately rather than through the partner's Save button —
+// same reasoning as the add-function flow. Reverts the select on failure.
+async function saveQuestionPriority(qId, priority, selectEl) {
+  const q = (State.schema.detailQuestions || []).find(qq => qq.id === qId);
+  const prevPriority = q ? q.priority : 'medium';
+  try {
+    await api('PUT', `/api/schema/questions/${qId}`, { priority });
+    if (q) q.priority = priority;
+    const row = selectEl.closest('.ans-row');
+    if (row) row.dataset.priority = priority;
+  } catch (err) {
+    if (selectEl) selectEl.value = prevPriority;
+    toast('Priority update failed: ' + err.message, true);
+  }
+}
+
 function ensureDomainGrade(domainId) {
   const list = State.detailPartner.domainGrades || (State.detailPartner.domainGrades = []);
+  let g = list.find(x => x.domainId === domainId);
+  if (!g) { g = { domainId, grade: '', justification: '' }; list.push(g); }
+  return g;
+}
+function getProductDomainGrade(prod, domainId) {
+  return (prod.domainGrades || []).find(x => x.domainId === domainId) || { grade: '', justification: '' };
+}
+function ensureProductDomainGrade(productId, domainId) {
+  const prod = findProduct(productId);
+  if (!prod) return null;
+  const list = prod.domainGrades || (prod.domainGrades = []);
   let g = list.find(x => x.domainId === domainId);
   if (!g) { g = { domainId, grade: '', justification: '' }; list.push(g); }
   return g;

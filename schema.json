@@ -234,12 +234,12 @@
       "id": "gen-validation-test",
       "category": "general",
       "label": "Validation & Test Infrastructure",
-      "domain": "perception-function",
+      "domain": "tooling-infra",
       "scope": null
     },
     {
       "id": "gen-funcsafety-cyber",
-      "category": "general",
+      "category": "product",
       "label": "Functional Safety & Cybersecurity",
       "domain": "safety-cyber",
       "scope": null
@@ -524,7 +524,7 @@
       "id": "prod-production-lifecycle",
       "category": "product",
       "label": "Production Readiness & Lifecycle",
-      "domain": "company-background",
+      "domain": "production-lifecycle",
       "scope": null
     },
     {
@@ -573,6 +573,20 @@
           "FUNC"
         ]
       }
+    },
+    {
+      "id": "gen-quality-process",
+      "category": "general",
+      "label": "Quality & Process Maturity",
+      "domain": "quality-process",
+      "scope": null
+    },
+    {
+      "id": "gen-commercial-engagement",
+      "category": "general",
+      "label": "Commercial & Engagement Model",
+      "domain": "commercial-engagement",
+      "scope": null
     }
   ],
   "detailQuestions": [
@@ -581,7 +595,7 @@
       "sectionId": "gen-company-overview",
       "text": "Provide your company founding year and automotive industry history.",
       "sourceRef": "TECH#1",
-      "priority": "high"
+      "priority": "medium"
     },
     {
       "id": 2,
@@ -634,7 +648,7 @@
     },
     {
       "id": 9,
-      "sectionId": "gen-company-overview",
+      "sectionId": "gen-quality-process",
       "text": "Field failure rate / warranty data",
       "sourceRef": "TECH#9",
       "priority": "low"
@@ -648,14 +662,14 @@
     },
     {
       "id": 11,
-      "sectionId": "gen-company-overview",
+      "sectionId": "gen-quality-process",
       "text": "What is your current ASPICE level? Has it been third-party audited?",
       "sourceRef": "TECH#11",
       "priority": "medium"
     },
     {
       "id": 12,
-      "sectionId": "gen-company-overview",
+      "sectionId": "gen-quality-process",
       "text": "Do you hold IATF 16949 certification for production parts?",
       "sourceRef": "TECH#12",
       "priority": "low"
@@ -2339,32 +2353,100 @@
       "text": "What challenging perception problems has your stack solved that are typically unsolved at your price/TOPS point?",
       "sourceRef": "PERC-S3#18",
       "priority": "medium"
+    },
+    {
+      "id": 253,
+      "sectionId": "gen-commercial-engagement",
+      "text": "What is your pricing/licensing model — per-unit royalty, one-time license fee, NRE + royalty, or a hybrid?",
+      "sourceRef": null,
+      "priority": "medium"
+    },
+    {
+      "id": 254,
+      "sectionId": "gen-commercial-engagement",
+      "text": "Who retains IP ownership of the delivered software/hardware — full transfer, license-only, or source-code escrow?",
+      "sourceRef": null,
+      "priority": "medium"
+    },
+    {
+      "id": 255,
+      "sectionId": "gen-commercial-engagement",
+      "text": "What is your support & maintenance commitment post-SOP — SLA terms, bug-fix turnaround, and version support lifecycle?",
+      "sourceRef": null,
+      "priority": "medium"
+    },
+    {
+      "id": 256,
+      "sectionId": "gen-commercial-engagement",
+      "text": "Do you offer multi-source rights, or is the engagement exclusive? Are there minimum volume commitments?",
+      "sourceRef": null,
+      "priority": "medium"
+    },
+    {
+      "id": 257,
+      "sectionId": "gen-commercial-engagement",
+      "text": "What dedicated engineering support do you provide during integration and SOP ramp-up?",
+      "sourceRef": null,
+      "priority": "medium"
+    },
+    {
+      "id": 258,
+      "sectionId": "gen-commercial-engagement",
+      "text": "What are your standard warranty terms and liability caps for field issues?",
+      "sourceRef": null,
+      "priority": "medium"
     }
   ],
   "domains": [
     {
       "id": "company-background",
-      "label": "Company Background"
+      "label": "Company Overview",
+      "category": "general"
     },
     {
-      "id": "perception-function",
-      "label": "Perception Stack & Function Maturity"
+      "id": "tooling-infra",
+      "label": "Tooling & Infra",
+      "category": "general"
     },
     {
-      "id": "regulation-compliance",
-      "label": "Regulation & Compliance"
+      "id": "quality-process",
+      "label": "Quality & Process Maturity",
+      "category": "general"
     },
     {
-      "id": "safety-cyber",
-      "label": "Safety & Cyber Security"
-    },
-    {
-      "id": "hardware-capability",
-      "label": "Hardware Capability"
+      "id": "commercial-engagement",
+      "label": "Commercial & Engagement Model",
+      "category": "general"
     },
     {
       "id": "patents-innovation",
-      "label": "Patents & Innovation"
+      "label": "Patents & Innovation",
+      "category": "general"
+    },
+    {
+      "id": "production-lifecycle",
+      "label": "Production & Lifecycle",
+      "category": "product"
+    },
+    {
+      "id": "perception-function",
+      "label": "Perception & Function Maturity",
+      "category": "product"
+    },
+    {
+      "id": "regulation-compliance",
+      "label": "Regulation & Compliance",
+      "category": "product"
+    },
+    {
+      "id": "hardware-capability",
+      "label": "Hardware Capability",
+      "category": "product"
+    },
+    {
+      "id": "safety-cyber",
+      "label": "Safety & Cyber Security",
+      "category": "product"
     }
   ]
 }
