@@ -639,11 +639,21 @@ def api_import_questionnaire_preview(partner_id):
     product_ids = {p["id"] for p in partner.get("products", [])}
 
     # Hard reject before anything else is computed -- every sheet's
-    # partnerId must agree with the partner being imported into.
+    # partnerId must agree with the partner being imported into. A file
+    # with no partnerId on *any* sheet isn't a mismatch, it's not a
+    # questionnaire from this tool at all (found via testing: a random
+    # unrelated .xlsx was silently accepted as "0 changes," which looks
+    # exactly like a customer who genuinely left everything blank --
+    # misleading, since those are very different situations).
+    any_partner_id = False
     for name in wb.sheetnames:
         meta = _read_metadata(wb[name])
-        if meta["partnerId"] and meta["partnerId"] != partner_id:
-            return jsonify({"error": "This file was exported for a different partner."}), 400
+        if meta["partnerId"]:
+            any_partner_id = True
+            if meta["partnerId"] != partner_id:
+                return jsonify({"error": "This file was exported for a different partner."}), 400
+    if not any_partner_id:
+        return jsonify({"error": "This doesn't look like a questionnaire exported from this tool."}), 400
 
     changes = []
     flagged = []

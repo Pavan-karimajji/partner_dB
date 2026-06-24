@@ -1808,6 +1808,111 @@ multi-server locking). It does *not* skip same-machine concurrency
      message. Re-verified against a reproduction file with numeric
      answers; also confirmed a genuine 404 now returns JSON.
 
+   **Manual test plan — to execute later, evaluate correctness and
+   performance.** Everything above was verified once during build
+   (mostly via direct API calls + one Playwright UI pass, plus two real
+   bugs the user found by hand: numeric cells, invisible Discard
+   button). This list is for a deeper second pass — real Excel, real
+   file transfer, real usage patterns — not a repeat of the same
+   checks. Two categories: how an ordinary evaluator would actually use
+   this without thinking about edge cases, and the deeper system-level
+   cases a technical review would look for.
+
+   **Executed 2026-06-24** (everything an API/script/Playwright could
+   drive). Used disposable `STEP5_QA*` partners, all removed afterward;
+   `gahan`/`novus`/`netadyne` untouched except read-only checks.
+
+   *A. Everyday usage (layman's pass — no malice, no edge-case
+   awareness, just using the feature naturally):*
+   - [ ] **Needs you, not automatable**: open a real export in **Desktop
+     Excel** — confirm it looks like a normal sheet, the Status
+     dropdown actually renders as a dropdown, nothing's cut off.
+   - [ ] **Needs you**: fill some answers, save, close Excel, reopen the
+     next day, fill more, save again — confirm the close/reopen cycle
+     doesn't disturb the hidden metadata or protection.
+   - [ ] **Needs you**: a real email round-trip (attach, send, download,
+     then import) — I can't send/receive real email from here.
+   - [ ] **Needs you — flagged as the most likely real risk spot**: fill
+     the file in **Google Sheets** instead of Excel, re-download as
+     `.xlsx`, then import. Google Sheets doesn't always preserve
+     Excel-specific sheet protection/data-validation faithfully on
+     re-export — this is the one item most worth actually doing by hand.
+   - [x] Leave the file untouched, import → `{"changes": [], "flagged":
+     []}`. Clean "nothing to import," not an error. **Pass.**
+   - [x] Import the exact same filled file twice → second import
+     re-applied the same value, no duplication (`generalAnswers` still
+     has exactly one entry for that `qId`). **Pass.**
+   - [x] `.xls`, `.csv`, and a totally unrelated real `.xlsx` (no
+     exported metadata at all) — first two correctly rejected
+     ("Could not read this file"), but **the unrelated `.xlsx` was
+     silently accepted as "0 changes, nothing to import"** — looked
+     identical to a customer who genuinely left everything blank, which
+     is misleading (you'd think the import worked; really you uploaded
+     the wrong file). **Bug found and fixed**: reject outright now if
+     *no* sheet in the file has a `partnerId` at all, distinct from "has
+     one but it doesn't match" — `server.py`'s
+     `api_import_questionnaire_preview`. Re-verified: now returns
+     "This doesn't look like a questionnaire exported from this tool."
+   - [x] Free text in the Status cell ("maybe in progress??") — Partner
+     Response still applied, status flagged and ignored, exactly as
+     designed. **Pass.**
+   - [x] A 4400-character answer (trimmed to 4399 after stripping a
+     trailing space — correct) and a second answer mixing accents,
+     Chinese, emoji, and Arabic RTL text — both round-tripped through
+     export → fill → import → commit → storage byte-for-byte correctly.
+     **Pass.**
+   - [x] Stale-tab message, mechanism confirmed: editing the same
+     partner from a second "tab" (simulated via a second PUT) then
+     saving the first produces `409 {"error": "This partner changed
+     since you loaded it. Reload before saving."}` — the toast shown to
+     the user adds "(e.g. a questionnaire import)". Wording itself is a
+     judgment call for you, not something I can pass/fail.
+   - [ ] **Needs you**: whether double-clicking Export and getting a
+     browser-suffixed second file is obvious enough — pure browser
+     download-manager behavior, nothing server-side to test.
+
+   *B. System-level (deeper than the original 5.10 pass):*
+   - [x] Sheet renamed by "customer" (`QA Product One` → `Camera Module
+     (renamed by customer)`) — matched correctly by hidden `productId`
+     regardless of the new tab name. **Pass.**
+   - [x] Sheet deleted entirely instead of left blank — behaved exactly
+     like nothing being filled in, no error. **Pass.**
+   - [x] Two products with the identical name `"QA Product One"` —
+     openpyxl auto-renamed the second sheet to `QA Product One1` on
+     export (no crash, no collision). Filled both sheets with different
+     answers and re-imported: each correctly resolved to its own
+     `productId` (`qaP1` vs `qaP3`) despite the confusing-looking shared
+     name. **Pass, with a minor cosmetic note**: the auto-suffixed sheet
+     name could look odd to a real customer if two products are
+     genuinely named the same — not a data risk, just a naming wrinkle,
+     not fixed (no action needed unless it comes up in practice).
+   - [x] All products deleted, then re-imported the original
+     multi-product file — all 3 product sheets flagged
+     `"skippedWholeSheet": true`, General still processed. **Pass.**
+   - [x] Brand-new partner, zero products, zero answers — exports a
+     General-only workbook, imports cleanly with 0 changes. **Pass.**
+   - [x] Bumped a real question's priority (`high`) between export and
+     import — zero effect on the import diff, confirming priority isn't
+     part of answer-matching. Reverted back to its committed value
+     (`medium`) afterward since that was a test edit, not a real change.
+     **Pass.**
+   - [x] Fired two `/commit` calls in parallel (background shell jobs,
+     near-simultaneous) targeting different `qId`s — both landed, no
+     lost update, confirming the Flask dev server's default
+     single-threaded request handling (`threaded=True` was never passed
+     to `app.run()`) serializes these safely. **Pass.**
+   - [x] Scale check: 10 products, every sensor/function checked
+     (worst-case section coverage) → 11 sheets, 2202 total data rows,
+     176 KB file. **Export: 2.27s. Import preview (unfilled): 0.91s.
+     Import preview (all 2202 rows filled): 1.09s. Commit (2202
+     answers): 0.35s.** All comfortably fast for local single-user use;
+     no slowdown found worth optimizing yet.
+   - [x] `questionnaire_exports.json` after this test session's 10
+     exports: 86 KB, ~5,200 logged `qId` references. Confirms it's an
+     unbounded append-only log as expected — fine for normal usage
+     (occasional real exports), would only matter after a very large
+     number of exports. No rotation/pruning added; not needed yet.
+
 **Step 6 — "How To" tab.** A how-to-use page should document the
 *finished* feature set — building it earlier would mean rewriting it
 after every step above ships (numbering, question authoring/publish,
