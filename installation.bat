@@ -35,10 +35,26 @@ if %PYMAJOR% LSS 3 (
     )
 )
 
+:: Create the virtual environment if it doesn't already exist
+if not exist "%~dp0.venv\Scripts\python.exe" (
+    echo.
+    echo  Creating virtual environment in .venv...
+    python -m venv "%~dp0.venv"
+    if errorlevel 1 (
+        echo.
+        echo  ERROR: Failed to create virtual environment.
+        pause
+        exit /b 1
+    )
+) else (
+    echo.
+    echo  Virtual environment already exists in .venv
+)
+
 echo.
 echo  Installing dependencies from requirements.txt...
 echo.
-python -m pip install -r "%~dp0requirements.txt"
+"%~dp0.venv\Scripts\python.exe" -m pip install -r "%~dp0requirements.txt"
 if errorlevel 1 (
     echo.
     echo  ERROR: Dependency installation failed. See the output above.
